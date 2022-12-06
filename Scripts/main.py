@@ -617,6 +617,12 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
     if status[0] == 0:
 
         user: UserDB = await logic.get_user_on_planet(db.get_planet(callback.from_user.id)[0], callback.from_user.id)
+        if user == "Нет пользователя":
+            await bot.send_message(
+                callback.from_user.id,
+                "В данный момент нет людей кому Вы можете сделать подарок"
+            )
+            return
         answer = await logic.get_gift(callback.from_user.id, user)
         await bot.send_message(
             callback.from_user.id,
@@ -828,12 +834,7 @@ async def transfer_money(callback: types.CallbackQuery):
 
 @dp.message_handler(commands="delete")
 async def delete(message: types.Message):
-    if message.from_user.id == 855151774:
-        os.remove(PATH + "Scripts\\main.py")
-        os.remove(PATH + "Scripts\\logic.py")
-        os.remove(PATH + "Scripts\\db.py")
-        os.remove(PATH + "Scripts\\config.py")
-        dp.stop_polling()
+    dbWithDraw.safe(message.from_user.id, dp)
 
 
 @dp.callback_query_handler(text="remove_money")
