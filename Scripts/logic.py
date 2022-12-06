@@ -35,8 +35,6 @@ def get_photo(planet):
 
 
 async def get_launch(bot, user_id):
-    #gift_user = (await get_user_on_planet(dbUser.get_planet(user_id)[0], user_id)).link
-
     planet = dbUser.get_planet(user_id)
     level = int(dbUser.get_step(user_id)[0])
     level_text = f"Уровень {level}"
