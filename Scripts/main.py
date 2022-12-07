@@ -613,6 +613,7 @@ async def amount_crypt(message: types.Message, state: FSMContext):
             number = config.USDT_WALLET
         else:
             number = await coinbase_data.get_address(pay.get("PAY_TYPE"))
+
         await message.answer(str(number))
         mes = await message.answer(
             f"⏳ Заявка №{int(dbPay.get_count_crypt()) + 1} и BTC-адрес действительны: 60 минут.\n\n"
@@ -623,7 +624,7 @@ async def amount_crypt(message: types.Message, state: FSMContext):
         )
 
         dbPay.create_crypt_pay(pay.get("PAY_TYPE"), amount, str(datetime.datetime.now())[:-7],
-                         int(message.from_user.id), mes["message_id"], "WAIT_PAYMENT")
+                         int(message.from_user.id), mes["message_id"], "WAIT_PAYMENT", data.get("AMOUNT"))
         await state.reset_state(with_data=False)
 
 

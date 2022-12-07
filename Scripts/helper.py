@@ -71,3 +71,12 @@ def get_have_jump_users(users: list):
             result.append(user)
 
     return result
+
+
+def clear_crypt_requests(pays: list):
+    result = []
+    for pay in pays:
+        if pay[5] != "CANCELED" and pay[5] != "OPERATION_COMPLETED":
+            result.append(pay)
+
+    return result

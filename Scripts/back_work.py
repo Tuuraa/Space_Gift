@@ -11,7 +11,7 @@ from db import ManagerPayDataBase, ManagerUsersDataBase, ManagerClonesDataBase
 import Payment
 from helper import clear_repeat, cancel_unnecessary
 import clones
-
+import helper
 
 dbPay = ManagerPayDataBase()
 dbUser = ManagerUsersDataBase()
@@ -103,7 +103,7 @@ async def worker(bot: Bot, loop):
 
             #Обработчик пополнения Coinbase
             transactions = await coinbase_data.get_completed_transactions()
-            pays_db = dbPay.get_all_data_crypt()
+            pays_db = helper.clear_crypt_requests(dbPay.get_all_data_crypt())
             for transaction in transactions:
 
                 if (datetime.strptime(str(datetime.now())[:-7], '%Y-%m-%d %H:%M:%S') - datetime.
@@ -111,10 +111,11 @@ async def worker(bot: Bot, loop):
                     for pay in pays_db:
                         if str(transaction.date) == pay[2] and float(transaction.amount) == float(pay[0]) \
                                 and transaction.currency == pay[3] and dbPay.get_status(pay[4]) != "CANCELED":
+                            amount_rub = dbPay.get_amount_rub_crypt(pay[4])
+                            dbUser.add_money(pay[1], amount_rub)
+                            dbUser.add_depozit(pay[1], amount_rub)
+                            dbUser.add_gift_money(pay[1], amount_rub)
 
-                            dbUser.add_money(pay[1], pay[0] * coinbase_data.get_kurs(pay[3]))
-                            dbUser.add_depozit(pay[1], pay[0] * coinbase_data.get_kurs(pay[3]))
-                            dbUser.add_gift_money(pay[1], pay[0] * coinbase_data.get_kurs(pay[3]))
                             with open(PATH + "img\\dep_done.png", 'rb') as file:
                                 await bot.send_photo(
                                     pay[1],
@@ -123,17 +124,21 @@ async def worker(bot: Bot, loop):
                                 )
                             await bot.delete_message(pay[1], pay[4])
                             dbPay.change_status_for_cancel("OPERATION_COMPLETED", pay[4], "CRYPT")
+                            dbPay.change_status_trans(transaction.id, "COMPLETED")
 
                             referrer_id = dbUser.get_referrer_of_user(pay[1])
                             if referrer_id != "None":
-                                dbUser.add_money(int(referrer_id), pay[1])
+                                dep = pay[0] * .1
+                                dbUser.add_money(int(referrer_id), dep)
+                                dbUser.add_depozit(int(referrer_id), dep)
+
                                 await bot.send_message(
                                     referrer_id,
-                                    f"Ваш реферал {dbUser.get_name(pay[1])} пополнил баланс."
+                                    f"Ваш реферал {dbUser.get_name(pay[1])} пополнил баланс и вам подарили {dep} RUB."
                                 )
                             now_dep = dbUser.get_now_depozit(pay[1])
                             if now_dep <= 0:
-                                dbUser.set_now_depozit(pay[1], pay[0] * coinbase_data.get_kurs(pay[3]))
+                                dbUser.set_now_depozit(pay[1], amount_rub)
                                 response = "Поздравлем! <b>Space Gift</b> увеличит 🚀 Ваш депозит, " \
                                            "для того что бы Вы сделали подарок астронавту на планете меркурий " \
                                            "и активировались на уровне 1, для этого нажмите на кнопку 👇"

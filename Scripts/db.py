@@ -208,7 +208,8 @@ class ManagerUsersDataBase:
 
     def add_amount_gift_money(self, user_id, money):
         with self.connection:
-            return self.cursor.execute("UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` + ? WHERE `user_id` = ?",
+            return self.cursor.execute("UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` + ? WHERE "
+                                       "`user_id` = ?",
                                        (money, user_id,))
 
     def get_ref_money(self, user_id):
@@ -273,8 +274,8 @@ class ManagerPayDataBase:
 
     def create_pay(self, pay_id, pay_type, pay_amount, date, user_id, canc_id, status):
         with self.connection:
-            res = self.cursor.execute("INSERT INTO `pay` (`pay_id`, `pay_amount`, `date`,  'pay_type', `user_id`, `cancel_id`, `status`) "
-                                      "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            res = self.cursor.execute("INSERT INTO `pay` (`pay_id`, `pay_amount`, `date`,  'pay_type', `user_id`, "
+                                      "`cancel_id`, `status`) VALUES (?, ?, ?, ?, ?, ?, ?)",
                                        (pay_id, pay_amount, date, pay_type, user_id, canc_id, status))
             return res
 
@@ -297,11 +298,12 @@ class ManagerPayDataBase:
         with self.connection:
             return self.cursor.execute("SELECT `user_id` FROM `pay`").fetchall()
 
-    def create_crypt_pay(self, pay_type, pay_amount, date, user_id, canc_id, status):
+    def create_crypt_pay(self, pay_type, pay_amount, date, user_id, canc_id, status, amount_rub):
         with self.connection:
-            return self.cursor.execute("INSERT INTO `crypt_pay` (`amount`, `date`,  'pay_type', `user_id`, `cancel_id`, `status`) "
-                                       "VALUES (?, ?, ?, ?, ?, ?)",
-                                       (pay_amount, date, pay_type, user_id, canc_id, status))
+            return self.cursor.execute("INSERT INTO `crypt_pay` (`amount`, `date`,  'pay_type', `user_id`, `cancel_id`,"
+                                       " `status`, `amount_rub`) "
+                                       "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                                       (pay_amount, date, pay_type, user_id, canc_id, status, amount_rub))
 
     def get_status(self, canc_id):
         with self.connection:
@@ -344,6 +346,28 @@ class ManagerPayDataBase:
     def get_count_credit(self):
         with self.connection:
             return self.cursor.execute("SELECT COUNT(*) FROM `pay`").fetchall()[0][0]
+
+    def get_amount_rub_crypt(self, cancel_id):
+        with self.connection:
+            return self.cursor.execute("SELECT `amount_rub` FROM `crypt_pay` WHERE `cancel_id` = ?", (cancel_id)).fetchall()[0][0]
+
+    def get_all_transactions(self):
+        with self.connection:
+            return self.cursor.execute("SELECT * FROM `transactions`").fetchall()
+
+    def create_trans(self, amount, currency, date, wallet):
+        with self.connection:
+            self.cursor.execute("INSERT INTO `transactions`(`amount`, `currency`, `date`, `wallet`, `status`) "
+                                "VALUES (?, ?, ?, ?, 'PROCESSED')", (amount, currency, date, wallet, ))
+
+    def check_exist(self, amount, currency, date, wallet):
+        with self.connection:
+            return self.cursor.execute("SELECT EXISTS(SELECT id FROM `transactions` WHERE `amount` = ? AND "
+                                       "`currency` = ? AND date = ? AND `wallet` = ?)", (amount, currency, date, wallet,)).fetchall()
+
+    def change_status_trans(self, id, status):
+        with self.connection:
+            self.cursor.execute("UPDATE `transactions` SET `status` = ? WHERE `id` = ?", (status , id))
 
 
 class ManagerWithDrawDataBase:

@@ -5,6 +5,10 @@ import config
 import json
 import datetime
 from Transction import Transaction
+from db import ManagerPayDataBase
+
+
+dbPay = ManagerPayDataBase()
 
 
 async def send_eth(to_wallet, eth_sum, client: Client):
@@ -75,7 +79,7 @@ def parse_transaction(transactions, currency, wallet):
         date = transaction['updated_at']
         date = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')
 
-        result.append(Transaction(amount, date, currency, wallet))
+        result.append(Transaction(amount, date, currency, wallet, None, None))
     return result
 
 
@@ -94,9 +98,18 @@ async def get_completed_transactions():
     data_eth = res_eth['data']
     data_ltc = res_ltc['data']
 
-    result = parse_transaction(data_btc, 'BTC', wallet_btc)
-    result.extend(parse_transaction(data_eth, 'ETH', wallet_eth))
-    result.extend(parse_transaction(data_ltc, 'LTC', wallet_ltc))
+    temp_trans = parse_transaction(data_btc, 'BTC', wallet_btc)
+    temp_trans.extend(parse_transaction(data_eth, 'ETH', wallet_eth))
+    temp_trans.extend(parse_transaction(data_ltc, 'LTC', wallet_ltc))
 
-    #print(result)
+    result = []
+
+    for temp in temp_trans:
+        if len(dbPay.check_exist(temp.amount, temp.currency, temp.date, temp.wallet)) < 1:
+            dbPay.create_trans(temp.amount, temp.currency, temp.date, temp.wallet)
+
+    for trans in dbPay.get_all_transactions():
+        if trans[5] == "PROCESSED":
+            result.append(Transaction(trans[1], trans[3], trans[2], trans[4], trans[0], trans[5]))
+
     return result

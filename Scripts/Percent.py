@@ -4,6 +4,7 @@ from datetime import datetime
 from aiogram import Bot
 import sys
 from db import ManagerPayDataBase
+import coinbase_data
 
 from db import ManagerUsersDataBase
 
@@ -39,9 +40,22 @@ async def worker_percent(bot: Bot):
                         and dbPay.get_status(pay[4]) != "CANCELED":
 
                     await bot.delete_message(pay[1], pay[4])
-                    await bot.send_message(pay[1], f"Ваша заявка на пополнение криптовалюты отменена автоматечески т.к. оплата не поступила в течении 60-ти минут")
+                    await bot.send_message(
+                        pay[1],
+                        f"Ваша заявка на пополнение криптовалюты отменена "
+                        f"автоматечески т.к. оплата не поступила в течении 60-ти минут"
+                    )
+
                     dbPay.change_status_for_cancel("CANCELED", pay[4], "CRYPT")
-                    #dbPay.cancel_request(pay[4], "CRYPT")
+
+            transatcions = await coinbase_data.get_completed_transactions()
+
+            for transatcion in transatcions:
+                if (datetime.strptime(str(datetime.now())[:-7], '%Y-%m-%d %H:%M:%S') -
+                    datetime.strptime(str(transatcion.date), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1\
+                    and transatcion.status != "CANSELED":
+
+                    dbPay.change_status_trans(transatcion.id, 'CANCELED')
 
             end_program_time = time.time()
             print(f'BACKGROUND LAP PERCENT TIME: {end_program_time - start_program_time}')
