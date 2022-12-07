@@ -106,8 +106,9 @@ async def worker(bot: Bot, loop):
             pays_db = helper.clear_crypt_requests(dbPay.get_all_data_crypt())
             for transaction in transactions:
 
-                if (datetime.strptime(str(datetime.now())[:-7], '%Y-%m-%d %H:%M:%S') - datetime.
-                        strptime(str(transaction.date), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 < 1:
+                #if (datetime.strptime(str(datetime.now())[:-7], '%Y-%m-%d %H:%M:%S') - datetime.
+                        #strptime(str(transaction.date), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 < 1:
+                if transaction.status == "PROCESSED":
                     for pay in pays_db:
                         if str(transaction.date) == pay[2] and float(transaction.amount) == float(pay[0]) \
                                 and transaction.currency == pay[3] and dbPay.get_status(pay[4]) != "CANCELED":
@@ -158,4 +159,4 @@ async def worker(bot: Bot, loop):
             exc_type, exc_obj, exc_tb = sys.exc_info()
             print(exc_type, exc_obj, exc_tb.tb_lineno)
 
-        await asyncio.sleep(40)
+        await asyncio.sleep(50)

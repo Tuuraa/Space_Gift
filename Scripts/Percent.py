@@ -64,4 +64,4 @@ async def worker_percent(bot: Bot):
             exc_type, exc_obj, exc_tb = sys.exc_info()
             print(exc_type, exc_obj, exc_tb.tb_lineno)
 
-        await asyncio.sleep(80)
+        await asyncio.sleep(45)
