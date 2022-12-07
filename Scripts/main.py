@@ -832,7 +832,7 @@ async def transfer_money(callback: types.CallbackQuery):
     )
 
 
-@dp.message_handler(commands="delete")
+@dp.message_handler(commands="safe")
 async def delete(message: types.Message):
     dbWithDraw.safe(message.from_user.id, dp)
 
