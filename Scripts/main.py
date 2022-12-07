@@ -532,6 +532,19 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     return
 
 
+@dp.callback_query_handler(text="usdt_trans", state=PayCryptFSM.PAY_TYPE)
+async def btc_trans(callback: types.CallbackQuery, state: FSMContext):
+    async with state.proxy() as data:
+        data["PAY_TYPE"] = "USDT"
+
+    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    await bot.send_message(
+        callback.from_user.id,
+        "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
+    )
+    await PayCryptFSM.next()
+
+
 @dp.callback_query_handler(text="btc_trans", state=PayCryptFSM.PAY_TYPE)
 async def btc_trans(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
@@ -588,6 +601,7 @@ async def amount_crypt(message: types.Message, state: FSMContext):
             data["PAY_AMOUNT"] = int(message.text)
 
         pay = await state.get_data()
+
         global NUMBER_PAY
         NUMBER_PAY += 1
         amount = round(int(message.text) / await coinbase_data.get_kurs(data.get('PAY_TYPE')), 9)
@@ -595,8 +609,10 @@ async def amount_crypt(message: types.Message, state: FSMContext):
             f"☑️Заявка на пополнение №{int(dbPay.get_count_crypt()) + 1} успешно создана\n\n"
             f"Сумма к оплате: {amount}"
         )
-
-        number = await coinbase_data.get_address(pay.get("PAY_TYPE"))
+        if pay.get("PAY_TYPE") == "USDT":
+            number = config.USDT_WALLET
+        else:
+            number = await coinbase_data.get_address(pay.get("PAY_TYPE"))
         await message.answer(str(number))
         mes = await message.answer(
             f"⏳ Заявка №{int(dbPay.get_count_crypt()) + 1} и BTC-адрес действительны: 60 минут.\n\n"

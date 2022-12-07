@@ -90,8 +90,9 @@ def get_gift():
 
 def get_crypt_types():
     return types.InlineKeyboardMarkup().add(types.InlineKeyboardButton("BTC", callback_data="btc_trans"),
-                                            types.InlineKeyboardButton("LTC", callback_data="ltc_trans"),
-                                            types.InlineKeyboardButton("ETH", callback_data="eth_trans"))
+                                            types.InlineKeyboardButton("LTC", callback_data="ltc_trans")).add(
+                                            types.InlineKeyboardButton("ETH", callback_data="eth_trans"),
+                                            types.InlineKeyboardButton("USDT", callback_data="usdt_trans"))
 
 
 async def banks_payment():

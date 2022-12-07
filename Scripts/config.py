@@ -17,4 +17,6 @@ LTC_ID = "13f5ab19-298a-50f5-8ab3-eb09e627ef0f"
 BTC_ID = "4ae8ef02-dbf7-54ff-9a39-1910050239c2"
 ETH_ID = "514a23b2-8168-5368-9246-d6bd3657b16c"
 
+USDT_WALLET = "TUvRE33RfcpRZmgvcCa5zxGBSqWRKTa7Y9"
+
 PATH = "C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot\\"
