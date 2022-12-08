@@ -232,3 +232,4 @@ async def get_amount_gift_money(user_id):
             money += sums[planet]
         return money
     return 0
+

