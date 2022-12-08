@@ -616,8 +616,8 @@ async def amount_crypt(message: types.Message, state: FSMContext):
 
         await message.answer(str(number))
         mes = await message.answer(
-            f"⏳ Заявка №{int(dbPay.get_count_crypt()) + 1} и BTC-адрес действительны: 60 минут.\n\n"
-            f"После успешной отправки {amount} {data.get('PAY_TYPE')} на указанный BTC-адрес выше, "
+            f"⏳ Заявка №{int(dbPay.get_count_crypt()) + 1} и {data.get('PAY_TYPE')}-адрес действительны: 60 минут.\n\n"
+            f"После успешной отправки {amount} {data.get('PAY_TYPE')} на указанный {data.get('PAY_TYPE')}-адрес выше, "
             f"отправьте скриншот об оплате @smfadmin и администратор подтвердит зачисление.\n\n"
             "Или же Вы можете отменить данную заявку нажав на кнопку «❌ Отменить заявку»",
             reply_markup=inline_keybords.cancel_pay()
