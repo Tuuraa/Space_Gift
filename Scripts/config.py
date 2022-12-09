@@ -1,5 +1,5 @@
 api_bot = "5415272844:AAGmMlHCIHbgNDBpJoTvYNmgLsLr72gDaGw"
-api_pay = "pl1pWwoe.a1yNDFbHwBylZ3w3LEsTijcfn4VS4yDa"
+api_pay = "R3Gf306o.4ejEw1KpiEG8NpJKKITcCMZbklgaIKKU"
 
 name_bot = "yougift_donation_bot"
 
