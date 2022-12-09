@@ -574,8 +574,8 @@ class ManagerWithDrawDataBase:
     async def create_request(self, card, data, type, amount, user_id, date, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
-            await cursor.execute("INSERT INTO `withdraw` (`card`, `data`, `type`, `amount`, `user_id`, `date`) VALUES (%s, %s, %s, %s, "
-                                       "%s, %s)", (card, data, type, amount, user_id, date, ))
+            await cursor.execute("INSERT INTO `withdraw` (`card`, `data`, `type`, `amount`, `user_id`, `date`, `status`) VALUES (%s, %s, %s, %s, "
+                                       "%s, %s, 'В ожидании')", (card, data, type, amount, user_id, date, ))
             await connection.commit()
 
     async def delete_request(self, user_id, loop):
