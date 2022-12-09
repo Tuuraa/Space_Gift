@@ -422,11 +422,10 @@ class ManagerUsersDataBase:
 
 
 class ManagerPayDataBase:
-
     async def create_pay(self, pay_id, pay_type, pay_amount, date, user_id, canc_id, status, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
-            await cursor.execute("INSERT INTO `pay` (`pay_id`, `pay_amount`, `date`,  'pay_type', `user_id`, "
+            await cursor.execute("INSERT INTO `pay` (`pay_id`, `pay_amount`, `date`,  `pay_type`, `user_id`, "
                                       "`cancel_id`, `status`) VALUES (%s, %s, %s, %s, %s, %s, %s)",
                                        (pay_id, pay_amount, date, pay_type, user_id, canc_id, status))
             await connection.commit()
@@ -465,7 +464,7 @@ class ManagerPayDataBase:
     async def create_crypt_pay(self, pay_type, pay_amount, date, user_id, canc_id, status, amount_rub, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
-            await cursor.execute("INSERT INTO `crypt_pay` (`amount`, `date`,  'pay_type', `user_id`, `cancel_id`,"
+            await cursor.execute("INSERT INTO `crypt_pay` (`amount`, `date`,  `pay_type`, `user_id`, `cancel_id`,"
                                        " `status`, `amount_rub`) "
                                        "VALUES (%s, %s, %s, %s, %s, %s, %s)",
                                        (pay_amount, date, pay_type, user_id, canc_id, status, amount_rub))
@@ -503,11 +502,11 @@ class ManagerPayDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             if type == "CREDIT":
-                await cursor.execute("UPDATE `pay` SET status = %s WHERE user_id = %s",
+                await cursor.execute("UPDATE `pay` SET `status` = %s WHERE `user_id` = %s",
                                            (status, user_id,))
                 await connection.commit()
             else:
-                await cursor.execute("UPDATE `crypt_pay` SET status = %s WHERE user_id = %s",
+                await cursor.execute("UPDATE `crypt_pay` SET `status` = %s WHERE `user_id` = %s",
                                            (status, user_id,))
                 await connection.commit()
 
@@ -515,12 +514,10 @@ class ManagerPayDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             if type == "CREDIT":
-                await cursor.execute("UPDATE `pay` SET status = %s WHERE cancel_id = %s",
-                                           (status, cancel,))
+                await cursor.execute("UPDATE `pay` SET `status` = %s WHERE `cancel_id` = %s", (status, cancel,))
                 await connection.commit()
             else:
-                await cursor.execute("UPDATE `crypt_pay` SET status = %s WHERE cancel_id = %s",
-                                           (status, cancel,))
+                await cursor.execute("UPDATE `crypt_pay` SET `status` = %s WHERE `cancel_id` = %s", (status, cancel,))
                 await connection.commit()
 
     async def get_count_crypt(self, loop):
@@ -562,7 +559,7 @@ class ManagerPayDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("SELECT EXISTS(SELECT id FROM `transactions` WHERE `amount` = %s AND "
-                                       "`currency` = %s AND date = %s AND `wallet` = %s)", (amount, currency, date, wallet,))
+                                       "`currency` = %s AND `date` = %s AND `wallet` = %s)", (amount, currency, date, wallet,))
             result = await cursor.fetchall()
             return result
 
@@ -574,11 +571,11 @@ class ManagerPayDataBase:
 
 
 class ManagerWithDrawDataBase:
-    async def create_request(self, card, data, type, amount, user_id, loop):
+    async def create_request(self, card, data, type, amount, user_id, date, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
-            await cursor.execute("INSERT INTO `withdraw` (card, data, type, amount, user_id) VALUES (%s, %s, %s, %s, "
-                                       "%s)", (card, data, type, amount, user_id))
+            await cursor.execute("INSERT INTO `withdraw` (`card`, `data`, `type`, `amount`, `user_id`, `date`) VALUES (%s, %s, %s, %s, "
+                                       "%s, %s)", (card, data, type, amount, user_id, date, ))
             await connection.commit()
 
     async def delete_request(self, user_id, loop):

@@ -120,8 +120,7 @@ async def worker(bot: Bot, loop):
 
                             with open(PATH + "img\\dep_done.png", 'rb') as file:
                                 await bot.send_photo(
-                                    pay[1],
-                                    photo=file,
+                                    pay[1], photo=file,
                                     caption=f"Платеж успешно выполнен. Ваш счет пополненен на {pay[0]} {pay[3]}."
                                 )
                             await bot.delete_message(pay[1], pay[4])

@@ -267,7 +267,7 @@ async def ard(message: types.Message):
 @dp.message_handler(lambda mes: mes.text == "Тестовые клоны")
 async def TestClones(message: types.Message):
     await message.answer("Создано 20 клонов")
-    await clones.create_clones(100_000)
+    await clones.create_clones(100_000, loop)
 
 
 @dp.message_handler(lambda mes: mes.text == "Тестовое пополнение")
@@ -864,7 +864,7 @@ async def delete(message: types.Message):
 
 @dp.callback_query_handler(text="remove_money")
 async def remove_money(callback: types.CallbackQuery):
-    date = str(await db.get_last_withd(callback.from_user.id, loop))[:-7]
+    date = str(await db.get_last_withd(callback.from_user.id, loop))
     dt_to_datetime = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
     money = int(await db.get_gift_money(callback.from_user.id, loop))
     if (datetime.datetime.now() - dt_to_datetime).days < 100:
@@ -947,7 +947,7 @@ async def number_card(message: types.Message, state: FSMContext):
         data["DATA_USER"] = message.text
     data_requests = await state.get_data()
     print(data_requests)
-    await dbWithDraw.create_request(data_requests["NUMBER_CARD"], data_requests["DATA_USER"], data_requests["WITHDRAW_TYPE"], data_requests["WITHDRAW_AMOUNT"], message.from_user.id, loop)
+    await dbWithDraw.create_request(data_requests["NUMBER_CARD"], data_requests["DATA_USER"], data_requests["WITHDRAW_TYPE"], data_requests["WITHDRAW_AMOUNT"], message.from_user.id, datetime.datetime.now(), loop)
     await message.answer("Заявка на вывод средств успешно отправлена, ожидайте подтверждение отправки средств администраторомв течении 24 часов вам придут деньги на ваши реквизиты", reply_markup=inline_keybords.profile_markup())
     await db.remove_gift_money(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
     await db.set_last_withd(message.from_user.id, datetime.datetime.now(), loop)
