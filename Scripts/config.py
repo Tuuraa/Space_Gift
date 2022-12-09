@@ -20,3 +20,8 @@ ETH_ID = "514a23b2-8168-5368-9246-d6bd3657b16c"
 USDT_WALLET = "TUvRE33RfcpRZmgvcCa5zxGBSqWRKTa7Y9"
 
 PATH = "C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot\\"
+
+HOST = "localhost"
+USERS = "root"
+PASSWORD = "5377"
+DB_NAME = "yougiftdb"

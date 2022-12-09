@@ -169,27 +169,14 @@ def get_gift_ok_inline():
     return types.InlineKeyboardMarkup().add(types.InlineKeyboardButton("Вперед", callback_data="ok_gift"))
 
 
-def get_full_users(db: ManagerUsersDataBase):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-
-    users = db.get_full_users_name()
-    for item in range(0, len(users), 2):
-        if item + 2 <= len(users):
-            markup.row(types.KeyboardButton(users[item][0]), users[item+1][0])
-        else:
-            markup.add(types.KeyboardButton(users[item][0]))
-    markup.add(types.KeyboardButton("Назад"))
-    return markup
-
-
 def cancel_trans_money():
     return types.ReplyKeyboardMarkup(resize_keyboard=True).add("Отменить")
 
 
-def laucnh_inline(db, user_id):
+async def laucnh_inline(db: ManagerUsersDataBase, user_id, loop):
 
     mark = types.InlineKeyboardMarkup()
-    status = db.get_status(user_id)
+    status = await db.get_status(user_id, loop)
 
     if status[0] == 0:  #🎁 Сделать подарок
         return mark.add(types.InlineKeyboardButton("🎁 Сделать подарок", callback_data="get_gift"))

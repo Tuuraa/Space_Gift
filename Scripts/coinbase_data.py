@@ -83,7 +83,7 @@ def parse_transaction(transactions, currency, wallet):
     return result
 
 
-async def get_completed_transactions():
+async def get_completed_transactions(loop):
     client = Client(config.API_COINBASE_PAY, config.API_COINBASE_SECRET)
 
     res_btc = json.loads(str(client.get_transactions(config.BTC_ID)))
@@ -105,10 +105,10 @@ async def get_completed_transactions():
     result = []
 
     for temp in temp_trans:
-        if len(dbPay.check_exist(temp.amount, temp.currency, temp.date, temp.wallet)) < 1:
-            dbPay.create_trans(temp.amount, temp.currency, temp.date, temp.wallet)
+        if len(await dbPay.check_exist(temp.amount, temp.currency, temp.date, temp.wallet, loop)) < 1:
+            await dbPay.create_trans(temp.amount, temp.currency, temp.date, temp.wallet, loop)
 
-    for trans in dbPay.get_all_transactions():
+    for trans in await dbPay.get_all_transactions(loop):
         if trans[5] == "PROCESSED":
             result.append(Transaction(trans[1], trans[3], trans[2], trans[4], trans[0], trans[5]))
 

@@ -13,44 +13,44 @@ dbUser = db.ManagerUsersDataBase()
 dbClones = db.ManagerClonesDataBase()
 
 
-async def worker_clones(bot):
+async def worker_clones(bot, loop):
     while True:
         try:
             start_program_time = time.time()
-            await clones.update_active_user()
-            users = helper.get_users((dbUser.get_users_on_planet(0)))
+            await clones.update_active_user(loop)
+            users = helper.get_users((await dbUser.get_users_on_planet(0, loop)))
             status_active_users = helper.get_active_status_users(users, 0)
             active_user: UserDB = await clones.get_active_user(status_active_users)
 
             try:
-                while int(dbUser.get_step(active_user.user_id)) < 5:
-                    if int(dbUser.get_planet(active_user.user_id)[0]) == 0:
-                        if dbClones.get_count_clones() > 0:
-                            if int(dbUser.get_step(active_user.user_id)) == 4:
+                while int(await dbUser.get_step(active_user.user_id, loop)) < 5:
+                    if int((await dbUser.get_planet(active_user.user_id, loop))[0]) == 0:
+                        if await dbClones.get_count_clones(loop) > 0:
+                            if int(await dbUser.get_step(active_user.user_id, loop)) == 4:
                                 await bot.send_message(
                                     active_user.user_id,
                                     "🎆 Поздравляем 🎆 вам сделал подарок <b>клон системы и продвинул вас на новую планету 🪐."
                                 )
-                                await logic.gift(bot, active_user)
-                                dbUser.reset_step(active_user.user_id)
-                                dbUser.change_status(active_user.user_id, 0)
-                                dbUser.update_planet(active_user.user_id)
-                                dbUser.reset_active(active_user.user_id)
+                                await logic.gift(bot, active_user, loop)
+                                await dbUser.reset_step(active_user.user_id, loop)
+                                await dbUser.change_status(active_user.user_id, 0, loop)
+                                await dbUser.update_planet(active_user.user_id, loop)
+                                await dbUser.reset_active(active_user.user_id, loop)
                             else:
                                 await bot.send_message(
                                     active_user.user_id,
                                     "Поздравляем! 🎉 Вам сделал подарок 🎁 <b>клон системы</b> и продвинул вас на новый уровень 🚀."
                                 )
-                                clones_act = dbClones.get_all()
-                                dbUser.update_step(active_user.user_id)
+                                clones_act = await dbClones.get_all(loop)
+                                await dbUser.update_step(active_user.user_id, loop)
                                 ind = clones_act[0][0]
-                                dbClones.reset_clone(ind)
-                                await logic.get_launch(bot, active_user.user_id)
+                                await dbClones.reset_clone(ind, loop)
+                                await logic.get_launch(bot, active_user.user_id, loop)
                         else:
                             break
                     else:
                         break
-                    await clones.update_active_user()
+                    await clones.update_active_user(loop)
 
             except Exception:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -58,8 +58,8 @@ async def worker_clones(bot):
                     pass
 
                 elif exc_obj.match == 'bot was blocked by the user':
-                    dbUser.change_status(active_user.user_id, 0)
-                    dbUser.reset_active(active_user.user_id)
+                    await dbUser.change_status(active_user.user_id, 0, loop)
+                    await dbUser.reset_active(active_user.user_id, loop)
                     print(f"The user {active_user.link} has been reset. Reason: canceled the bot")
 
             end_program_time = time.time()
