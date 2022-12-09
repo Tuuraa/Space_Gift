@@ -1,10 +1,8 @@
-import os
-import sqlite3
 import aiomysql
-import pymysql.cursors
 from pymysql import connect
 from datetime import datetime
-from config import PATH, HOST, USERS, DB_NAME, PASSWORD
+from config import Config
+from config import HOST, USERS, DB_NAME, PASSWORD
 
 
 async def async_connect_to_mysql(loop):
@@ -18,6 +16,33 @@ async def async_connect_to_mysql(loop):
     cursor = await connection.cursor()
 
     return connection, cursor
+
+
+def create_sync_con():
+    con = connect(host=HOST, user=USERS, db=DB_NAME, password=PASSWORD)
+    cur = con.cursor()
+
+    return con, cur
+
+
+def get_tokens(title):
+    connection, cursor = create_sync_con()
+    cursor.execute("select `title` from `tokens` where `api` = %s ", (title))
+    result = cursor.fetchall()[0][0]
+    return result
+
+
+class ConfigDBManager:
+    @staticmethod
+    def get():
+        connection, cursor = create_sync_con()
+        data = ['bot_api', 'api_pay', 'api_coinbase_pay', 'api_coinbase_secret', 'ltc_id', 'btc_id', 'eth_id', 'usdt_wallet']
+        result = []
+        for item in data:
+            cursor.execute("select `title` from `tokens` where `api` = %s", (item, ))
+            result.append(cursor.fetchone()[0])
+
+        return Config(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7])
 
 
 class ManagerUsersDataBase:

@@ -3,7 +3,6 @@ from aiogram import Bot
 import sys
 import coinbase_data
 import inline_keybords
-from datetime import datetime
 import time
 from config import PATH
 
