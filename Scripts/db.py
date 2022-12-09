@@ -571,11 +571,20 @@ class ManagerPayDataBase:
 
 
 class ManagerWithDrawDataBase:
-    async def create_request(self, card, data, type, amount, user_id, date, loop):
+    async def create_request_crypt(self, card, data, type, amount, amount_crypt, amount_commission, user_id, date, type_crypt, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
-            await cursor.execute("INSERT INTO `withdraw` (`card`, `data`, `type`, `amount`, `user_id`, `date`, `status`) VALUES (%s, %s, %s, %s, "
-                                       "%s, %s, 'В ожидании')", (card, data, type, amount, user_id, date, ))
+            await cursor.execute("INSERT INTO `withdraw` (`card`, `data`, `type`, `amount`, `amount_crypt`, "
+                                 "`amount_commission`,`user_id`, `date`, `status`, `type_crypt`) VALUES (%s, %s, %s, %s, "
+                                       "%s, %s,  %s, %s, %s, %s)", (card, data, type, amount, amount_crypt,
+                                                                    amount_commission, user_id, date, 'В ожидании', type_crypt, ))
+            await connection.commit()
+
+    async def create_request_bank(self, card, data, type, amount, amount_commission, user_id, date, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("INSERT INTO `withdraw` (`card`, `data`, `type`, `amount`, `amount_commission`, `user_id`, `date`, `status`) VALUES (%s, %s, %s, %s, "
+                                       "%s, %s, %s, %s)", (card, data, type, amount, amount_commission, user_id, date, 'В ожидании'))
             await connection.commit()
 
     async def delete_request(self, user_id, loop):

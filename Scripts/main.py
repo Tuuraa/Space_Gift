@@ -920,7 +920,36 @@ async def withdraw_payrement_bank(callback: types.CallbackQuery, state: FSMConte
 
     await bot.delete_message(callback.from_user.id, callback.message.message_id)
     await bot.send_message(callback.from_user.id, "Введите номер карты, на которую хотите перевести деньги")
-    await WithdrawMoneyFSM.next()
+    await WithdrawMoneyFSM.NUMBER_CARD.set()
+
+
+@dp.callback_query_handler(text="withdraw_payrement_crypt", state=WithdrawMoneyFSM.WITHDRAW_TYPE)
+async def withdraw_payrement_crypt(callback: types.CallbackQuery, state: FSMContext):
+    async with state.proxy() as data:
+        data["WITHDRAW_TYPE"] = "crypt"
+
+    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    await bot.send_message(callback.from_user.id, "🏦 Введите криптовалюту, на которую будет осуществляться вывод (BTC, USDT, ETH, LTC)")
+    await WithdrawMoneyFSM.TYPE_CRYPT.set()
+
+
+@dp.message_handler(state=WithdrawMoneyFSM.TYPE_CRYPT)
+async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
+    if message.text not in ['BTC', 'USDT', 'ETH', 'LTC', 'btc', 'usdt', 'eth', 'ltc']:
+        await message.answer("Введите правильную криптовалюту")
+        return
+    async with state.proxy() as data:
+        data["TYPE_CRYPT"] = message.text
+    await message.answer(f"Введите адрес {message.text.upper()}, на который будет осуществляться вывод")
+    await WithdrawMoneyFSM.CRYPT_CARD.set()
+
+
+@dp.message_handler(state=WithdrawMoneyFSM.CRYPT_CARD)
+async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data["CRYPT_CARD"] = message.text
+    await message.answer(f"Отлично. Теперь введите Ф.И.О")
+    await WithdrawMoneyFSM.DATA_USER.set()
 
 
 @dp.message_handler(state=WithdrawMoneyFSM.NUMBER_CARD)
@@ -934,7 +963,7 @@ async def number_card(message: types.Message, state: FSMContext):
         data["NUMBER_CARD"] = message.text
     await message.answer("Отлично. Теперь введите Ф.И.О")
 
-    await WithdrawMoneyFSM.next()
+    await WithdrawMoneyFSM.DATA_USER.set()
 
 
 @dp.message_handler(state=WithdrawMoneyFSM.DATA_USER)
@@ -947,8 +976,42 @@ async def number_card(message: types.Message, state: FSMContext):
         data["DATA_USER"] = message.text
     data_requests = await state.get_data()
     print(data_requests)
-    await dbWithDraw.create_request(data_requests["NUMBER_CARD"], data_requests["DATA_USER"], data_requests["WITHDRAW_TYPE"], data_requests["WITHDRAW_AMOUNT"], message.from_user.id, datetime.datetime.now(), loop)
-    await message.answer("Заявка на вывод средств успешно отправлена, ожидайте подтверждение отправки средств администраторомв течении 24 часов вам придут деньги на ваши реквизиты", reply_markup=inline_keybords.profile_markup())
+    amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * config.COMMISSION
+
+    if data.get("WITHDRAW_TYPE") == 'crypt':
+        amount_crypt = int(data.get("WITHDRAW_AMOUNT"))
+        curs = float(await coinbase_data.get_kurs(str(data.get("TYPE_CRYPT")).upper()))
+        res = round(amount_crypt / curs, 9)
+        await dbWithDraw.create_request_crypt(
+                data_requests["CRYPT_CARD"],
+                data_requests["DATA_USER"],
+                data_requests["WITHDRAW_TYPE"],
+                data_requests["WITHDRAW_AMOUNT"],
+                res,
+                amount_com,
+                message.from_user.id,
+                datetime.datetime.now(),
+                data.get("TYPE_CRYPT"),
+                loop
+            )
+    else:
+        await dbWithDraw.create_request_bank(
+            data_requests["NUMBER_CARD"],
+            data_requests["DATA_USER"],
+            data_requests["WITHDRAW_TYPE"],
+            data_requests["WITHDRAW_AMOUNT"],
+            amount_com,
+            message.from_user.id,
+            datetime.datetime.now(),
+            loop
+        )
+    await message.answer(
+        "Заявка на вывод средств успешно отправлена, ожидайте подтверждение "
+        "отправки средств администраторомв течении 24 часов вам придут деньги на "
+        "ваши реквизиты",
+        reply_markup=inline_keybords.profile_markup()
+    )
+
     await db.remove_gift_money(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
     await db.set_last_withd(message.from_user.id, datetime.datetime.now(), loop)
     await state.reset_state(with_data=False)

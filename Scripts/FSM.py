@@ -18,7 +18,9 @@ class CalculatorFSM(StatesGroup):
 class WithdrawMoneyFSM(StatesGroup):
     WITHDRAW_AMOUNT = State()
     WITHDRAW_TYPE = State()
+    TYPE_CRYPT = State()
     NUMBER_CARD = State()
+    CRYPT_CARD = State()
     DATA_USER = State()
 
 

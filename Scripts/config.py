@@ -25,3 +25,5 @@ HOST = "localhost"
 USERS = "root"
 PASSWORD = "5377"
 DB_NAME = "yougiftdb"
+
+COMMISSION = 0.3
