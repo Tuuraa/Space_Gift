@@ -5,7 +5,7 @@ import config
 import json
 import datetime
 from Transction import Transaction
-from db import ManagerPayDataBase
+from db import ManagerPayDataBase, ConfigDBManager
 
 
 dbPay = ManagerPayDataBase()
@@ -30,30 +30,34 @@ async def get_kurs(type):
 
 
 async def get_ballance_btc():
+    config = ConfigDBManager.get()
     client = Client(config.API_COINBASE_PAY, config.API_COINBASE_SECRET)
     resp = client.get_account(config.BTC_ID)
     return resp
 
 
 async def get_ballance_eth():
+    config = ConfigDBManager.get()
     client = Client(config.API_COINBASE_PAY, config.API_COINBASE_SECRET)
     resp = client.get_account(config.ETH_ID)
     return resp
 
 
 async def get_ballance_ltc():
+    config = ConfigDBManager.get()
     client = Client(config.API_COINBASE_PAY, config.API_COINBASE_SECRET)
     resp = client.get_account(config.LTC_ID)
     return resp
 
 
 async def get_transaction():
+    config = ConfigDBManager.get()
     client = Client(config.API_COINBASE_PAY, config.API_COINBASE_SECRET)
     print(client.get_transactions(config.ETH_ID))
 
 
 async def get_address(currency):
-
+    config = ConfigDBManager.get()
     client = Client(config.API_COINBASE_PAY, config.API_COINBASE_SECRET)
     account_id = None
 
@@ -84,6 +88,7 @@ def parse_transaction(transactions, currency, wallet):
 
 
 async def get_completed_transactions(loop):
+    config = ConfigDBManager.get()
     client = Client(config.API_COINBASE_PAY, config.API_COINBASE_SECRET)
 
     res_btc = json.loads(str(client.get_transactions(config.BTC_ID)))

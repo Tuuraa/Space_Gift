@@ -11,7 +11,7 @@ import datetime
 import PayManager
 import config
 from FSM import PayFSM, CalculatorFSM, WithdrawMoneyFSM, ChangeCryptTypeFSN, AnswerAfterGiftFSM, SendGiftFSM, PayCryptFSM
-from db import ManagerUsersDataBase, ManagerPayDataBase, ManagerWithDrawDataBase
+from db import ManagerUsersDataBase, ManagerPayDataBase, ManagerWithDrawDataBase, ConfigDBManager
 import coinbase_data
 from User import User, UserDB
 from back_work import worker
@@ -25,8 +25,9 @@ import clones
 
 PATH = config.PATH
 
+configCl = ConfigDBManager.get()
 
-API_TOKEN = config.api_bot  # Считывание токена
+API_TOKEN = configCl.api_bot  # Считывание токена
 NAME_BOT = config.name_bot  # Считывание имени бота
 NUMBER_PAY = config.NUMBER_PAY
 
@@ -138,6 +139,7 @@ async def yes_ans(callback: types.CallbackQuery):
         await db.update_count_ref(login_user.referrer_id, loop)
         await db.add_money(login_user.referrer_id, 5000, loop)
         await db.add_ref_money(login_user.referrer_id, 5000, loop)
+        await db.insert_ref_money(5000, login_user.referrer_id, callback.from_user.id, datetime.datetime.now(), loop)
 
     await bot.delete_message(callback.from_user.id, callback.message. message_id)
     with open(PATH + "img\\login_done.png", 'rb') as file:
@@ -611,7 +613,7 @@ async def amount_crypt(message: types.Message, state: FSMContext):
             f"Сумма к оплате: {amount}"
         )
         if pay.get("PAY_TYPE") == "USDT":
-            number = config.USDT_WALLET
+            number = configCl.USDT_WALLET
         else:
             number = await coinbase_data.get_address(pay.get("PAY_TYPE"))
 

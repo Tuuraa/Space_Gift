@@ -1,15 +1,15 @@
 import json
 import aiohttp
 import config
-
+from db import ConfigDBManager
 
 domain = config.domain_pay
-hermes_api_key = config.api_pay
 
 
 async def client_payment_types():
+    config = ConfigDBManager.get()
     headers = {
-        'Authorization': f'Api-Key {hermes_api_key}'
+        'Authorization': f'Api-Key {config.api_pay}'
     }
 
     api_url = f"https://{domain}/api_v1/client_payment_types/"
@@ -20,8 +20,9 @@ async def client_payment_types():
 
 
 async def create_order(payment_type, rub_sum):
+    config = ConfigDBManager.get()
     headers = {
-        'Authorization': f'Api-Key {hermes_api_key}'
+        'Authorization': f'Api-Key {config.api_pay}'
     }
 
     params = {
@@ -40,8 +41,9 @@ async def create_order(payment_type, rub_sum):
 
 
 async def get_order(ids):
+    config = ConfigDBManager.get()
     headers = {
-        'Authorization': f'Api-Key {hermes_api_key}'
+        'Authorization': f'Api-Key {config.api_pay}'
     }
 
     params = {
@@ -56,8 +58,9 @@ async def get_order(ids):
 
 
 async def status_requets(ids):
+    config = ConfigDBManager.get()
     headers = {
-        'Authorization': f'Api-Key {hermes_api_key}'
+        'Authorization': f'Api-Key {config.api_pay}'
     }
 
     params = {
@@ -74,8 +77,9 @@ async def status_requets(ids):
 
 
 async def order_is_not_None(ids):
+    config = ConfigDBManager.get()
     headers = {
-        'Authorization': f'Api-Key {hermes_api_key}'
+        'Authorization': f'Api-Key {config.api_pay}'
     }
 
     params = {
@@ -95,8 +99,9 @@ async def order_is_not_None(ids):
 
 
 async def ballance():
+    config = ConfigDBManager.get()
     headers = {
-        'Authorization': f'Api-Key {hermes_api_key}'
+        'Authorization': f'Api-Key {config.api_pay}'
     }
 
     api_url = f"https://{domain}/api_v1/ballance/"
