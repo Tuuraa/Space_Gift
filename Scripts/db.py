@@ -445,6 +445,12 @@ class ManagerUsersDataBase:
             await cursor.execute("UPDATE `users` SET `last_withd` = %s WHERE `user_id` = %s", (date, user_id, ))
             await connection.commit()
 
+    async def insert_ref_money(self, money, ref_id, user_id, date, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("insert into ref_money (user_id, ref_id, money, date) values (%s, %s, %s, %s)", (user_id, ref_id, money, date, ))
+            await connection.commit()
+
 
 class ManagerPayDataBase:
     async def create_pay(self, pay_id, pay_type, pay_amount, date, user_id, canc_id, status, loop):

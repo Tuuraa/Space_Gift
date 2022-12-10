@@ -4,11 +4,9 @@ class Config:
         self.api_pay = api_pay
         self.API_COINBASE_PAY = api_coinbase_pay
         self.API_COINBASE_SECRET = api_coinbase_secret
-
         self.LTC_ID = ltc_id
         self.BTC_ID = btc_id
         self.ETH_ID = eth_id
-
         self.USDT_WALLET = usdt_wallet
 
 

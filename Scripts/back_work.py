@@ -11,6 +11,7 @@ import Payment
 from helper import clear_repeat, cancel_unnecessary
 import clones
 import helper
+from datetime import datetime
 
 dbPay = ManagerPayDataBase()
 dbUser = ManagerUsersDataBase()
@@ -58,6 +59,7 @@ async def worker(bot: Bot, loop):
                                 referrer_id = await dbUser.get_referrer_of_user(user[0], loop)
                                 if referrer_id != "None":
                                     dep = pay[1] * .1
+                                    await dbUser.insert_ref_money(dep, referrer_id, user[0], datetime.now(), loop)
                                     await dbUser.add_money(int(referrer_id), dep, loop)
                                     await dbUser.add_depozit(int(referrer_id), dep, loop)
                                     await bot.send_message(
@@ -129,6 +131,7 @@ async def worker(bot: Bot, loop):
                             referrer_id = await dbUser.get_referrer_of_user(pay[1], loop)
                             if referrer_id != "None":
                                 dep = pay[0] * .1
+                                await dbUser.insert_ref_money(dep, referrer_id, pay[1], datetime.now(), loop)
                                 await dbUser.add_money(int(referrer_id), dep, loop)
                                 await dbUser.add_depozit(int(referrer_id), dep, loop)
 

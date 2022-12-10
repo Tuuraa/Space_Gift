@@ -139,6 +139,7 @@ async def yes_ans(callback: types.CallbackQuery):
         await db.update_count_ref(login_user.referrer_id, loop)
         await db.add_money(login_user.referrer_id, 5000, loop)
         await db.add_ref_money(login_user.referrer_id, 5000, loop)
+        await db.insert_ref_money(5000, login_user.referrer_id, callback.from_user.id, datetime.datetime.now(), loop)
 
     await bot.delete_message(callback.from_user.id, callback.message. message_id)
     with open(PATH + "img\\login_done.png", 'rb') as file:
