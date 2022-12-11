@@ -28,7 +28,7 @@ async def create_order(payment_type, rub_sum):
     params = {
         'payment_type': payment_type,
         'rub_sum': rub_sum,
-        'cryptocurrency': config.TYPE_CRIPT,
+        'cryptocurrency': c.TYPE_CRIPT,
         'cryptocurrency_wallet': "MSmBXKzawd7tEr6LjQEvWpZixBKuGCB2CB",
     }
 

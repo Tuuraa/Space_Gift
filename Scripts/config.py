@@ -1,5 +1,5 @@
 class Config:
-    def __init__(self, api_bot, api_pay, api_coinbase_pay, api_coinbase_secret, ltc_id, btc_id, eth_id, usdt_wallet):
+    def __init__(self, api_bot, api_pay, api_coinbase_pay, api_coinbase_secret, ltc_id, btc_id, eth_id, usdt_wallet, type_crypt):
         self.api_bot = api_bot
         self.api_pay = api_pay
         self.API_COINBASE_PAY = api_coinbase_pay
@@ -8,6 +8,7 @@ class Config:
         self.BTC_ID = btc_id
         self.ETH_ID = eth_id
         self.USDT_WALLET = usdt_wallet
+        self.TYPE_CRIPT = type_crypt
 
 
 name_bot = "yougift_donation_bot"
@@ -16,8 +17,6 @@ domain_pay = "orionbtc.xyz"
 
 NUMBER_PAY = 0
 ADMINS = [855151774]
-
-TYPE_CRIPT = "LTC"
 
 PATH = "/opt/Space_Gift"
 
