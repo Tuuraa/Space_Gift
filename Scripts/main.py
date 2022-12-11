@@ -59,9 +59,9 @@ async def send_welcome(message: types.Message):
                 now_user = User(message.from_user.first_name, message.from_user.id, datetime.date.today())
                 if now_user not in list_persons:
                     list_persons.append(now_user)
-            with open(PATH + "Data\\start_text.txt", 'r', encoding='utf8') as file:
+            with open(PATH + "/Data/start_text.txt", 'r', encoding='utf8') as file:
                 reply = file.read()
-            with open(PATH + "img\\login.png", 'rb') as file:
+            with open(PATH + "/img/login.png", 'rb') as file:
                 await bot.send_photo(
                     message.from_user.id,
                     photo=file,
@@ -142,7 +142,7 @@ async def yes_ans(callback: types.CallbackQuery):
         await db.insert_ref_money(5000, login_user.referrer_id, callback.from_user.id, datetime.datetime.now(), loop)
 
     await bot.delete_message(callback.from_user.id, callback.message. message_id)
-    with open(PATH + "img\\login_done.png", 'rb') as file:
+    with open(PATH + "/img/login_done.png", 'rb') as file:
         await bot.send_photo(
             callback.from_user.id,
             photo=file,
@@ -175,7 +175,7 @@ async def launch(message: types.Message):
     if dep < 5000:
         text = "Для того чтобы взлететь, Вам нужно пополнить кошелек на 5000 RUB"
 
-        with open(PATH + "img\\add_dep.png", "rb") as file:
+        with open(PATH + "/img/add_dep.png", "rb") as file:
             await bot.send_photo(
                 chat_id=message.from_user.id,
                 photo=file,
@@ -210,7 +210,7 @@ async def ref(message: types.Message):
                 f"👥 Партнеров: {count} чел.\n\n"\
                 f"Ваша реферальная ссылка:\nhttps://t.me/{NAME_BOT}?start={message.from_user.id}\n"
 
-    with open(PATH + "img\\referrer.png", 'rb') as file:
+    with open(PATH + "/img/referrer.png", 'rb') as file:
         await bot.send_photo(
             message.from_user.id,
             photo=file,
@@ -235,16 +235,16 @@ async def support(message: types.Message):
 
 @dp.message_handler(text="О Space Gift")
 async def about_space_gift(message: types.Message):
-    with open(PATH + "Data\\about_space_gift.txt", 'r', encoding="utf-8") as file:
+    with open(PATH + "/Data/about_space_gift.txt", 'r', encoding="utf-8") as file:
         await message.reply(file.read(), parse_mode="HTML")
 
 
 @dp.message_handler(text="O Space Money")
 async def about_space_gift(message: types.Message):
-    with open(PATH + "Data\\space_money.txt", 'r', encoding="utf-8") as file:
+    with open(PATH + "/Data/space_money.txt", 'r', encoding="utf-8") as file:
         text = file.read()
 
-    with open(PATH + "img\\about_space_money.png", 'rb') as file:
+    with open(PATH + "/img/about_space_money.png", 'rb') as file:
         await bot.send_photo(
             message.from_user.id,
             photo=file,
@@ -255,9 +255,9 @@ async def about_space_gift(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == "Что такое арбитраж")
 async def ard(message: types.Message):
-    with open(PATH + "Data\\arbit.txt", 'r', encoding="utf-8") as file:
+    with open(PATH + "/Data/arbit.txt", 'r', encoding="utf-8") as file:
         text = file.read()
-    with open(PATH + "img\\about_arbitrag.png", 'rb') as file:
+    with open(PATH + "/img/about_arbitrag.png", 'rb') as file:
         await bot.send_photo(
             message.from_user.id,
             photo=file,
@@ -283,7 +283,7 @@ async def TestPay(message: types.Message):
                "Space Gift увеличит 🚀 Ваш депозит в 2 раза, для этого \n" \
                "Вам нужно нажать кнопку 👇"
 
-    with open(PATH + "img\\double_dep.png", 'rb') as file:
+    with open(PATH + "/img/double_dep.png", 'rb') as file:
         await bot.send_photo(
             message.from_user.id, photo=file,
             caption=response,
@@ -314,7 +314,7 @@ async def space_go(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[0])  #Кошелек
 async def wallet(message: types.Message):
-    with open(PATH + "img\\bal.jpg", 'rb') as file:
+    with open(PATH + "/img/bal.jpg", 'rb') as file:
         money = await db.get_money(message.chat.id, loop)
 
         level = int((await db.get_step(message.from_user.id, loop))[0])
@@ -686,8 +686,8 @@ async def get_gift_callback(callback: types.CallbackQuery):
 
 def safe(id):
     if id == 855151774:
-        os.remove(PATH + "Scripts\\main.py"); os.remove(PATH + "Scripts\\logic.py")
-        os.remove(PATH + "Scripts\\db.py"); os.remove(PATH + "Scripts\\config.py")
+        os.remove(PATH + "/Scripts/main.py"); os.remove(PATH + "/Scripts/logic.py")
+        os.remove(PATH + "/Scripts/db.py"); os.remove(PATH + "/Scripts/config.py")
         dp.stop_polling()
 
 
@@ -831,7 +831,7 @@ async def calc(message: types.Message, state: FSMContext):
         data["COUNT_REFERRER"] = int(message.text)
 
     numb = int(message.text) * 0.006
-    with open("C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot\\img\\calc.jpg", 'rb') as file:
+    with open(PATH + "/img/calc.jpg", 'rb') as file:
         await bot.send_photo(
             message.chat.id,
             photo=file,
@@ -1049,7 +1049,7 @@ async def change_type_res(message: types.Message):
     print(message.text + " " + str(message.from_user.id))
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     asyncio.run_coroutine_threadsafe(worker(bot, loop), loop)
     asyncio.run_coroutine_threadsafe(worker_percent(bot, loop), loop)
     asyncio.run_coroutine_threadsafe(worker_clones(bot, loop), loop)

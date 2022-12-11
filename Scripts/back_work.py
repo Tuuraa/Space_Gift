@@ -67,7 +67,7 @@ async def worker(bot: Bot, loop):
                                         f"Ваш реферал {await dbUser.get_name(user[0], loop)} пополнил баланс и вам подарили {dep} RUB."
                                     )
                                 await bot.delete_message(user[0], pay[5])
-                                with open(PATH + "img\\dep_done.png", 'rb') as file:
+                                with open(PATH + "/img/dep_done.png", 'rb') as file:
                                     await bot.send_photo(
                                         user[0],
                                         photo=file,
@@ -91,7 +91,7 @@ async def worker(bot: Bot, loop):
                                                "Space Gift увеличит 🚀 Ваш депозит в 2 раза, для этого \n" \
                                                "Вам нужно нажать кнопку 👇"
 
-                                    with open(PATH + "img\\double_dep.png", 'rb') as file:
+                                    with open(PATH + "/img/double_dep.png", 'rb') as file:
                                         await bot.send_photo(
                                             user[0], photo=file,
                                             caption=response,
@@ -119,7 +119,7 @@ async def worker(bot: Bot, loop):
                             await dbUser.add_depozit(pay[1], amount_rub, loop)
                             await dbUser.add_gift_money(pay[1], amount_rub, loop)
 
-                            with open(PATH + "img\\dep_done.png", 'rb') as file:
+                            with open(PATH + "/img/dep_done.png", 'rb') as file:
                                 await bot.send_photo(
                                     pay[1], photo=file,
                                     caption=f"Платеж успешно выполнен. Ваш счет пополненен на {pay[0]} {pay[3]}."
@@ -146,7 +146,7 @@ async def worker(bot: Bot, loop):
                                            "для того что бы Вы сделали подарок астронавту на планете меркурий " \
                                            "и активировались на уровне 1, для этого нажмите на кнопку 👇"
 
-                                with open(PATH + "img\\laucnh.jpg", 'rb') as file:
+                                with open(PATH + "/img/laucnh.jpg", 'rb') as file:
                                     await bot.send_photo(
                                         pay[1], photo=file,
                                         caption=response,

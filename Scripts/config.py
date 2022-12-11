@@ -19,11 +19,11 @@ ADMINS = [855151774]
 
 TYPE_CRIPT = "LTC"
 
-PATH = "C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot\\"
+PATH = "/opt/Space_Gift"
 
 HOST = "localhost"
 USERS = "root"
-PASSWORD = "5377"
+PASSWORD = "6CHWb6QmNUy9bLuX"
 DB_NAME = "yougiftdb"
 
 COMMISSION = 0.3
