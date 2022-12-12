@@ -92,8 +92,9 @@ async def get_launch(bot, user_id, loop):
         f"🚀 Статус: {level_text} {text_status} {more_text}\n {active_text}"
 
     if status[0] == 0:
-        text += "\n❗ Для того чтобы Вам активироваться на уровне 1 " \
-                f"на планете {planets[int(planet[0])]} нужно сделать подарок в размере {sums[text_planet[0]]} RUB астронавту ❗"
+        text = "✅ Для того что бы активизироваться в системе, и встать в «очередь» на " \
+               f"подарки на планете {planets[int(planet[0])]}, Вам нужно сделать 🎁 подарок " \
+               f"в размере {sums[text_planet[0]]} RUB астронавту."
 
     with open(path, "rb") as file:
         await bot.send_photo(
@@ -147,7 +148,7 @@ async def gift(bot, user: UserDB, loop):
     planet = await dbUser.get_planet(user.user_id, loop)
     path = first_path
 
-    astr = get_user_on_planet(user.planet + 1)
+    astr = await get_user_on_planet(user.planet + 1, user.user_id, loop)
     text_planet = get_photo(planet[0])
     sum_add = money_add[text_planet[0]]
     sum_gift = sums[text_planet[0]]
