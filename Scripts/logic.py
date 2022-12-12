@@ -166,7 +166,7 @@ async def gift(bot, user: UserDB, loop):
         )
     await bot.send_message(
         user.user_id,
-        f"👩‍🚀 На ваш счет начисленно +{sum_gift} RUB, из них вы можете вывести {out_money[text_planet[0]]} RUB."
+        f"👩‍🚀 На ваш счет начисленно +{sum_add} RUB, из них вы можете вывести {out_money[text_planet[0]]} RUB."
     )
     await bot.send_message(
         user.user_id,
