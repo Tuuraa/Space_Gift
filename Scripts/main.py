@@ -372,7 +372,7 @@ async def inform_pers_ok(callback: types.CallbackQuery):
 
 
 @dp.callback_query_handler(text="inform_pers")
-async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: UserDB):
+async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: UserDB, answer):
     data = await state.get_data()
     if len(data) == 0:
         await bot.send_message(callback.from_user.id, "Вы не сделали никому подарок, чтобы  его сделать нажмите на 🎁 Сделать подарок")
@@ -403,6 +403,7 @@ async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: Us
                         await db.reset_step(user.user_id, loop)
                         await db.change_status(user.user_id, 0, loop)
                         await db.update_planet(user.user_id, loop)
+                        await db.remove_depozit(user.money, answer)
                         await logic.check_active(int(user.planet) + 1, user.user_id, loop)
 
                     else:
@@ -662,7 +663,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
 
             await db.change_status(callback.from_user.id, 1, loop)
             await logic.get_launch(bot, callback.from_user.id, loop)
-            await inform_pers(callback, state, user)
+            await inform_pers(callback, state, user, answer[2])
     else:
         await bot.send_message(
             callback.from_user.id,
