@@ -25,5 +25,5 @@ USERS = "root"
 PASSWORD = "6CHWb6QmNUy9bLuX"
 DB_NAME = "yougiftdb"
 
-COMMISSION = 0.3
+COMMISSION = 0.2
 
