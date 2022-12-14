@@ -7,7 +7,7 @@ from config import PATH
 dbUser = db.ManagerUsersDataBase()
 dbPay = db.ManagerPayDataBase()
 
-first_path = PATH + "img\\"
+first_path = PATH + "/img/"
 
 planets = ["Меркурий", "Венера", "Земля", "Марс", "Юпитер", "Сатурн"]
 money_add = [20_000, 60_000, 200_000, 800_000, 3_200_000, 9_000_000]
@@ -54,10 +54,10 @@ async def get_launch(bot, user_id, loop):
         active_text = f"\nЧтобы попасть в очередь вам нужно пригласить {count_ref[int(planet[0])] - int(await dbUser.get_count_ref(user_id, loop))} чел.\n"
 
     if level == 1 and status[0] == 0:
-        path = first_path + f"{text_planet[1]}\\В ожидании ({text_planet[1].lower()}).png"
+        path = first_path + f"{text_planet[1]}/В ожидании ({text_planet[1].lower()}).png"
         level_text = "В ожидании"
     elif active == 0 and status[0] == 1 and await dbUser.get_count_ref(user_id, loop) >= count_ref[int(planet[0])]:
-        path = first_path + f"{text_planet[1]}\\В очереди ({text_planet[1].lower()}).png"
+        path = first_path + f"{text_planet[1]}/В очереди ({text_planet[1].lower()}).png"
         level_text = "В очереди"
         ud = (await dbUser.get_planet(user_id, loop))[0]
         number = await get_queue(ud, user_id, loop)
@@ -72,10 +72,10 @@ async def get_launch(bot, user_id, loop):
                      f"НЕ ЖДИ. ДЕЙСТВУЙ 💪 ✅"
 
     elif active == 0 and status[0] == 1 and await dbUser.get_count_ref(user_id, loop) < count_ref[int(planet[0])]:
-        path = first_path + f"{text_planet[1]}\\{text_planet[1]} очередь.png"
+        path = first_path + f"{text_planet[1]}/{text_planet[1]} очередь.png"
         level_text = "В ожидание"
     else:
-        path += first_path + f"{text_planet[1]}\\Шаг {int(level)} ({text_planet[1].lower()}).png"
+        path += first_path + f"{text_planet[1]}/Шаг {int(level)} ({text_planet[1].lower()}).png"
         more_text += "\n\nПоздравляем 🎉 На этом уровне новый участник подарит Вам + 5000₽ к Вашему депозиту! \n" \
                         f"До планеты Меркурий осталось {4 - int(await dbUser.get_step(user_id, loop))} подарка 🎁"
 
@@ -150,7 +150,7 @@ async def gift(bot, user: UserDB, loop):
     text_planet = get_photo(planet[0])
     sum_add = money_add[text_planet[0]]
     sum_gift = sums[text_planet[0]]
-    path += f"{text_planet[1]}\\Поздравляем. {text_planet[1]}.png"
+    path += f"{text_planet[1]}/Поздравляем. {text_planet[1]}.png"
 
     await dbUser.add_money(user.user_id, (sum_add - out_money[text_planet[0]]) + sum_gift, loop)
     await dbUser.add_gift_money(user.user_id, out_money[text_planet[0]], loop)

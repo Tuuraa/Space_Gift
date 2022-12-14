@@ -59,9 +59,9 @@ def active_users(users: list):
     return result
 
 
-def create_new_block(users, user_id, db: ManagerUsersDataBase):
+def create_new_block(users, user_id, db: ManagerUsersDataBase, loop):
     for user in users:
-        db.new_block_user(user.user_id, user_id)
+        db.new_block_user(user.user_id, user_id, loop)
 
 
 def get_have_jump_users(users: list):

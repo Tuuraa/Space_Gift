@@ -591,7 +591,7 @@ class ManagerPayDataBase:
         async with connection.cursor() as cursor:
             await cursor.execute("SELECT EXISTS(SELECT id FROM `transactions` WHERE `amount` = %s AND "
                                        "`currency` = %s AND `date` = %s AND `wallet` = %s)", (amount, currency, date, wallet,))
-            result = await cursor.fetchall()
+            result = await cursor.fetchone()
             return result
 
     async def change_status_trans(self, id, status, loop):

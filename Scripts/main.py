@@ -1,6 +1,7 @@
 import asyncio
 import os
 
+import pytz
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
@@ -21,6 +22,7 @@ from jump import worker_jumps
 import inline_keybords
 import logic
 import clones
+from math import ceil
 
 
 PATH = config.PATH
@@ -59,9 +61,9 @@ async def send_welcome(message: types.Message):
                 now_user = User(message.from_user.first_name, message.from_user.id, datetime.date.today())
                 if now_user not in list_persons:
                     list_persons.append(now_user)
-            with open(PATH + "Data\\start_text.txt", 'r', encoding='utf8') as file:
+            with open(PATH + "/Data/start_text.txt", 'r', encoding='utf8') as file:
                 reply = file.read()
-            with open(PATH + "img\\login.png", 'rb') as file:
+            with open(PATH + "/img/login.png", 'rb') as file:
                 await bot.send_photo(
                     message.from_user.id,
                     photo=file,
@@ -133,16 +135,18 @@ async def yes_ans(callback: types.CallbackQuery):
             login_user = us
             list_persons.remove(us)
             break
-    await db.add_user(loop, login_user.name, login_user.user_id, login_user.date, datetime.datetime.now(),
-                user_name=callback.from_user.username, referrer_id=login_user.referrer_id, last_withd=datetime.datetime.now())
+    utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+    date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
+    await db.add_user(loop, login_user.name, login_user.user_id, login_user.date, date_time_now,
+                user_name=callback.from_user.username, referrer_id=login_user.referrer_id, last_withd=date_time_now)
     if login_user.referrer_id is not None:
         await db.update_count_ref(login_user.referrer_id, loop)
         await db.add_money(login_user.referrer_id, 5000, loop)
         await db.add_ref_money(login_user.referrer_id, 5000, loop)
-        await db.insert_ref_money(5000, login_user.referrer_id, callback.from_user.id, datetime.datetime.now(), loop)
+        await db.insert_ref_money(5000, login_user.referrer_id, callback.from_user.id, date_time_now, loop)
 
     await bot.delete_message(callback.from_user.id, callback.message. message_id)
-    with open(PATH + "img\\login_done.png", 'rb') as file:
+    with open(PATH + "/img/login_done.png", 'rb') as file:
         await bot.send_photo(
             callback.from_user.id,
             photo=file,
@@ -175,7 +179,7 @@ async def launch(message: types.Message):
     if dep < 5000:
         text = "Для того чтобы взлететь, Вам нужно пополнить кошелек на 5000 RUB"
 
-        with open(PATH + "img\\add_dep.png", "rb") as file:
+        with open(PATH + "/img/add_dep.png", "rb") as file:
             await bot.send_photo(
                 chat_id=message.from_user.id,
                 photo=file,
@@ -210,7 +214,7 @@ async def ref(message: types.Message):
                 f"👥 Партнеров: {count} чел.\n\n"\
                 f"Ваша реферальная ссылка:\nhttps://t.me/{NAME_BOT}?start={message.from_user.id}\n"
 
-    with open(PATH + "img\\referrer.png", 'rb') as file:
+    with open(PATH + "/img/referrer.png", 'rb') as file:
         await bot.send_photo(
             message.from_user.id,
             photo=file,
@@ -235,16 +239,16 @@ async def support(message: types.Message):
 
 @dp.message_handler(text="О Space Gift")
 async def about_space_gift(message: types.Message):
-    with open(PATH + "Data\\about_space_gift.txt", 'r', encoding="utf-8") as file:
+    with open(PATH + "/Data/about_space_gift.txt", 'r', encoding="utf-8") as file:
         await message.reply(file.read(), parse_mode="HTML")
 
 
 @dp.message_handler(text="O Space Money")
 async def about_space_gift(message: types.Message):
-    with open(PATH + "Data\\space_money.txt", 'r', encoding="utf-8") as file:
+    with open(PATH + "/Data/space_money.txt", 'r', encoding="utf-8") as file:
         text = file.read()
 
-    with open(PATH + "img\\about_space_money.png", 'rb') as file:
+    with open(PATH + "/img/about_space_money.png", 'rb') as file:
         await bot.send_photo(
             message.from_user.id,
             photo=file,
@@ -255,9 +259,9 @@ async def about_space_gift(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == "Что такое арбитраж")
 async def ard(message: types.Message):
-    with open(PATH + "Data\\arbit.txt", 'r', encoding="utf-8") as file:
+    with open(PATH + "/Data/arbit.txt", 'r', encoding="utf-8") as file:
         text = file.read()
-    with open(PATH + "img\\about_arbitrag.png", 'rb') as file:
+    with open(PATH + "/img/about_arbitrag.png", 'rb') as file:
         await bot.send_photo(
             message.from_user.id,
             photo=file,
@@ -283,7 +287,7 @@ async def TestPay(message: types.Message):
                "Space Gift увеличит 🚀 Ваш депозит в 2 раза, для этого \n" \
                "Вам нужно нажать кнопку 👇"
 
-    with open(PATH + "img\\double_dep.png", 'rb') as file:
+    with open(PATH + "/img/double_dep.png", 'rb') as file:
         await bot.send_photo(
             message.from_user.id, photo=file,
             caption=response,
@@ -314,7 +318,7 @@ async def space_go(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[0])  #Кошелек
 async def wallet(message: types.Message):
-    with open(PATH + "img\\bal.jpg", 'rb') as file:
+    with open(PATH + "/img/bal.jpg", 'rb') as file:
         money = await db.get_money(message.chat.id, loop)
 
         level = int((await db.get_step(message.from_user.id, loop))[0])
@@ -339,7 +343,7 @@ async def wallet(message: types.Message):
                f"💸 Вы внесли - {dep}₽\n" \
                f"💸 За приглашения - {ref}₽\n\n" \
                f"💵 Общий депозит: {cd + dep + ref}₽\n" \
-               f"💵 Пассив: {float(await db.get_money(message.from_user.id, loop)) * .006} руб/день!\n" \
+               f"💵 Пассив: {round(float(await db.get_money(message.from_user.id, loop)) * .006, 5)} руб/день!\n" \
                f"💵 Всего в кошельке: {await db.get_money(message.from_user.id, loop)} руб.\n" \
                f"💵 На вывод: {await db.get_gift_money(message.from_user.id, loop)} руб \n" \
                "( минимальная сумма вывода 1000₽ )"
@@ -387,7 +391,7 @@ async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: Us
         await db.set_gift_id(callback.from_user.id, id, loop)
         await bot.send_message(
             int(id),
-            f"Участник @{await db.get_user_name(callback.from_user.id, loop)} подарил вам {amount} RUB, отправьте ему сообщение с "
+            f"Участник @{await db.get_user_name(callback.from_user.id, loop)} подарил {amount} RUB на ваш депозит, отправьте ему сообщение с "
             f"благодарностью, чтобы написать сообщение нажмите Вперед",
             reply_markup=inline_keybords.get_gift_ok_inline()
         )
@@ -592,7 +596,7 @@ async def amount_crypt(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["AMOUNT"] = str(message.text)
 
-    if int(message.text) < 5000:
+    if int(message.text) < 1:
         if await db.get_deposit(message.from_user.id, loop) < 5000:
             await message.answer("🚫 Минимальная сумма пополнения 5000.0 RUB, введите корректную сумму!")
             return
@@ -605,9 +609,7 @@ async def amount_crypt(message: types.Message, state: FSMContext):
 
         pay = await state.get_data()
 
-        global NUMBER_PAY
-        NUMBER_PAY += 1
-        amount = round(int(message.text) / await coinbase_data.get_kurs(data.get('PAY_TYPE')), 9)
+        amount = round(int(message.text) / await coinbase_data.get_kurs(data.get('PAY_TYPE')), 8)
         await message.answer(
             f"☑️Заявка на пополнение №{int(await dbPay.get_count_crypt(loop)) + 1} успешно создана\n\n"
             f"Сумма к оплате: {amount}"
@@ -622,11 +624,13 @@ async def amount_crypt(message: types.Message, state: FSMContext):
             f"⏳ Заявка №{int(await dbPay.get_count_crypt(loop)) + 1} и {data.get('PAY_TYPE')}-адрес действительны: 60 минут.\n\n"
             f"После успешной отправки {amount} {data.get('PAY_TYPE')} на указанный {data.get('PAY_TYPE')}-адрес выше, "
             f"отправьте скриншот об оплате @smfadmin и администратор подтвердит зачисление.\n\n"
-            "Или же Вы можете отменить данную заявку нажав на кнопку «❌ Отменить заявку»",
+            "Или же Вы можете отменить данную заявку нажав на кнопку «❌ Отменить заявку»\n\n"
+            "💸 Криптовалюта зачислится в систему в течении 20 минут, ожидайте 😌",
             reply_markup=inline_keybords.cancel_pay()
         )
-
-        await dbPay.create_crypt_pay(pay.get("PAY_TYPE"), amount, str(datetime.datetime.now())[:-7],
+        utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+        date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
+        await dbPay.create_crypt_pay(pay.get("PAY_TYPE"), amount, str(date_time_now)[:-7],
                          int(message.from_user.id), mes["message_id"], "WAIT_PAYMENT", data.get("AMOUNT"), loop)
         await state.reset_state(with_data=False)
 
@@ -686,8 +690,8 @@ async def get_gift_callback(callback: types.CallbackQuery):
 
 def safe(id):
     if id == 855151774:
-        os.remove(PATH + "Scripts\\main.py"); os.remove(PATH + "Scripts\\logic.py")
-        os.remove(PATH + "Scripts\\db.py"); os.remove(PATH + "Scripts\\config.py")
+        os.remove(PATH + "/Scripts/main.py"); os.remove(PATH + "/Scripts/logic.py")
+        os.remove(PATH + "/Scripts/db.py"); os.remove(PATH + "/Scripts/config.py")
         dp.stop_polling()
 
 
@@ -765,10 +769,13 @@ async def get_amount(message: types.Message, state: FSMContext):
         await message.answer(str(number))
         mes = await message.answer(
             "⏳ Заявка действительна: 60 минут.\n\n"
-            "Оплата производится через любые платежные системы: QIWI, перевод с карты на карту, наличные (терминал), Яндекс.Деньги, и другие платежные системы.\n\n"
-            f"ℹ️ После успешного перевода денег по указанным реквизитам бот автоматически начислит {amount} RUB на ваш баланс. Или же Вы можете отменить данную заявку нажав на кнопку «❌ Отменить заявку»\n\n"
+            "Оплата производится через любые платежные системы: QIWI, перевод с карты на "
+            "карту, наличные (терминал), Яндекс.Деньги, и другие платежные системы.\n\n"
+            f"ℹ️ После успешного перевода денег по указанным реквизитам бот автоматически начислит "
+            f"{amount} RUB на ваш баланс. Или же Вы можете отменить данную заявку нажав на кнопку «❌ Отменить заявку»\n\n"
             "⚠️ Необходимо перевести точную сумму с учетом комиссии банка, иначе заявка будет считаться неоплаченной.\n\n"
-            "Если Вы перевели неправильную сумму, сразу сообщите об этом оператору @smfadmin",
+            "Если Вы перевели неправильную сумму, сразу сообщите об этом оператору @smfadmin.\n\n "
+            "💸 Деньги зачислятся в систему в течении 5 минут, ожидайте 😌",
             reply_markup=inline_keybords.cancel_pay()
         )
 
@@ -831,7 +838,7 @@ async def calc(message: types.Message, state: FSMContext):
         data["COUNT_REFERRER"] = int(message.text)
 
     numb = int(message.text) * 0.006
-    with open("C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot\\img\\calc.jpg", 'rb') as file:
+    with open(PATH + "/img/calc.jpg", 'rb') as file:
         await bot.send_photo(
             message.chat.id,
             photo=file,
@@ -869,7 +876,9 @@ async def remove_money(callback: types.CallbackQuery):
     date = str(await db.get_last_withd(callback.from_user.id, loop))
     dt_to_datetime = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
     money = int(await db.get_gift_money(callback.from_user.id, loop))
-    if (datetime.datetime.now() - dt_to_datetime).days < 100:
+    utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+    date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
+    if (date_time_now - dt_to_datetime).days < 100:
         await callback.answer("🚫 Вы можете вывести деньги спустя 100 дней с момента регистрации или последнего вывода!",
                               show_alert=True)
     elif money < 1000:
@@ -979,11 +988,13 @@ async def number_card(message: types.Message, state: FSMContext):
     data_requests = await state.get_data()
     print(data_requests)
     amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * config.COMMISSION
+    utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+    date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
     if data.get("WITHDRAW_TYPE") == 'crypt':
         amount_crypt = int(data.get("WITHDRAW_AMOUNT"))
         curs = float(await coinbase_data.get_kurs(str(data.get("TYPE_CRYPT")).upper()))
-        res = round(amount_crypt / curs, 9)
+        res = round(amount_crypt / curs, 11)
         await dbWithDraw.create_request_crypt(
                 data_requests["CRYPT_CARD"],
                 data_requests["DATA_USER"],
@@ -992,7 +1003,7 @@ async def number_card(message: types.Message, state: FSMContext):
                 res,
                 amount_com,
                 message.from_user.id,
-                datetime.datetime.now(),
+                date_time_now,
                 data.get("TYPE_CRYPT"),
                 loop
             )
@@ -1004,7 +1015,7 @@ async def number_card(message: types.Message, state: FSMContext):
             data_requests["WITHDRAW_AMOUNT"],
             amount_com,
             message.from_user.id,
-            datetime.datetime.now(),
+            date_time_now,
             loop
         )
     await message.answer(
@@ -1013,9 +1024,11 @@ async def number_card(message: types.Message, state: FSMContext):
         "ваши реквизиты",
         reply_markup=inline_keybords.profile_markup()
     )
+    utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+    date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
     await db.remove_gift_money(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
-    await db.set_last_withd(message.from_user.id, datetime.datetime.now(), loop)
+    await db.set_last_withd(message.from_user.id, date_time_now, loop)
     await state.reset_state(with_data=False)
 
 #------------------------------------------------Admin------------------------------------------------------------------------------

@@ -110,11 +110,11 @@ async def get_completed_transactions(loop):
     result = []
 
     for temp in temp_trans:
-        if len(await dbPay.check_exist(temp.amount, temp.currency, temp.date, temp.wallet, loop)) < 1:
+        if (await dbPay.check_exist(temp.amount, temp.currency, temp.date, temp.wallet, loop))[0] == 0:
             await dbPay.create_trans(temp.amount, temp.currency, temp.date, temp.wallet, loop)
 
     for trans in await dbPay.get_all_transactions(loop):
-        if trans[5] == "PROCESSED":
+        if trans[5] == 'PROCESSED':
             result.append(Transaction(trans[1], trans[3], trans[2], trans[4], trans[0], trans[5]))
 
     return result

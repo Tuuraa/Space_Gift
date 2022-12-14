@@ -69,4 +69,4 @@ async def worker_clones(bot, loop):
             exc_type, exc_obj, exc_tb = sys.exc_info()
             print(exc_type, exc_obj, exc_tb.tb_lineno)
 
-        await asyncio.sleep(60)
+        await asyncio.sleep(30)

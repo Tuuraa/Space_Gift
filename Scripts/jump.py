@@ -13,11 +13,13 @@ async def worker_jumps(bot, loop):
         for planet_number in range(0, 5):
             users = helper.get_users(await dbUser.get_users_on_planet(planet_number, loop))
             jump_users = helper.get_have_jump_users(users)
+
             for user in jump_users:
-                ref_users = helper.get_users(await dbUser.get_referrer_of_user(user.user_id, loop)) # Количество рефералов у user
+                ref_users = helper.get_users(await dbUser.get_referrer_of_user(user.user_id, loop)) #Количество рефералов у user
                 len_ref_users = len(ref_users)
-                count_ref = 0  # Количество рефералов у реферала нашего user
-                for ref_user in ref_users: # Прoходимся по рефералам нашего реферала user
+                count_ref = 0  #Количество рефералов у реферала нашего user
+
+                for ref_user in ref_users: #Прoходимся по рефералам нашего реферала user
                     if await dbUser.ref_count(ref_user.user_id, loop) >= 5:
                         count_ref += 1
 
@@ -36,4 +38,4 @@ async def worker_jumps(bot, loop):
                             "Вы закончили игру"
                         )
 
-        await asyncio.sleep(3600)
+        await asyncio.sleep(60)
