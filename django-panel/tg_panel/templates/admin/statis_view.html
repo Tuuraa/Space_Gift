@@ -1,0 +1,139 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+{% block content %}
+<form action="" method="GET">
+    <script>
+        function delete_standart_pick() {
+            const url = new URL(document.location);
+            const searchParams = url.searchParams;
+            searchParams.delete("standart_period");
+            window.history.pushState({}, '', url.toString());
+        }
+    </script>
+    {% csrf_token %}
+    <div style="text-align: center; margin: 30px; ">
+        <h1>Статистика пользователя: {{user.name}}</h1>
+        <div style="float: center;">
+            <h2>Дата и время начала {{ period_picker.start_date }} {{ period_picker.start_time }}</h2>
+        </div>
+        <div style="float: center;">
+            <h2>Дата и время окончания {{ period_picker.end_date }} {{ period_picker.end_time }}</h2>
+        </div>
+    </div>
+
+    <hr align="center" size="2" color="#ffffff" />
+    <hr align="center" size="2" color="#ffffff" />
+
+    <div align="center">
+        <button type="submit" class="button" title="День" name="standart_period" value="day">День</button>
+        <button type="submit" class="button" title="Неделя" name="standart_period" value="week">Неделя</button>
+        <button type="submit" class="button" title="Месяц" name="standart_period" value="month">Месяц</button>
+    </div>
+    <br>
+
+</form>
+<div class="results">
+    <table id="result_list" style="width: 100%;">
+        <thead>
+            <tr>
+                <th scope="col" class="action-checkbox-column">
+                    <div class="text">Общая статистика</div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col" class="column-name">
+                    <div class="text"></div>
+                    <div class="clear"></div>
+                </th>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th class="field-name">Пополнил</th>
+                <td class="field-get_widhdraws">{{ total_pay }}</td>
+            </tr>
+            <tr>
+                <th class="field-name">Вывел</th>
+                <td class="field-get_widhdraws">{{ total_withdraw }}</td>
+            </tr>
+            <tr>
+                <th class="field-name">Заработал с рефералки</th>
+                <td class="field-get_widhdraws">{{ total_ref }}</td>
+            </tr>
+            <tr>
+                <th class="field-name">Заработал с процентов</th>
+                <td class="field-get_widhdraws">{{ total_procent }}</td>
+            </tr>
+        </tbody>
+        <thead>
+            <tr>
+                <th scope="col" class="action-checkbox-column">
+                    <div class="text">Статистика BTC</div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col" class="column-name">
+                    <div class="text"></div>
+                    <div class="clear"></div>
+                </th>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th class="field-name">Пополнил BTC</th>
+                <td class="field-get_widhdraws">{{ total_pay_btc }}</td>
+            </tr>
+            <tr>
+                <th class="field-name">Вывел BTC</th>
+                <td class="field-get_widhdraws">{{ total_withdraw_btc }}</td>
+            </tr>
+        </tbody>
+        <thead>
+            <tr>
+                <th scope="col" class="action-checkbox-column">
+                    <div class="text">Статистика LTC</div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col" class="column-name">
+                    <div class="text"></div>
+                    <div class="clear"></div>
+                </th>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th class="field-name">Пополнил LTC</th>
+                <td class="field-get_widhdraws">{{ total_pay_ltc }}</td>
+            </tr>
+            <tr>
+                <th class="field-name">Вывел LTC</th>
+                <td class="field-get_widhdraws">{{ total_withdraw_ltc }}</td>
+            </tr>
+        </tbody>
+        <thead>
+            <tr>
+                <th scope="col" class="action-checkbox-column">
+                    <div class="text">Статистика ETH</div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col" class="column-name">
+                    <div class="text"></div>
+                    <div class="clear"></div>
+                </th>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th class="field-name">Пополнил ETH</th>
+                <td class="field-get_widhdraws">{{ total_pay_eth }}</td>
+            </tr>
+            <tr>
+                <th class="field-name">Вывел ETH</th>
+                <td class="field-get_widhdraws">{{ total_withdraw_eth }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -36,13 +36,13 @@ class ConfigDBManager:
     @staticmethod
     def get():
         connection, cursor = create_sync_con()
-        data = ['bot_api', 'api_pay', 'api_coinbase_pay', 'api_coinbase_secret', 'ltc_id', 'btc_id', 'eth_id', 'usdt_wallet']
+        data = ['bot_api', 'api_pay', 'api_coinbase_pay', 'api_coinbase_secret', 'ltc_id', 'btc_id', 'eth_id', 'usdt_wallet', 'type_crypt']
         result = []
         for item in data:
             cursor.execute("select `title` from `tokens` where `api` = %s", (item, ))
             result.append(cursor.fetchone()[0])
 
-        return Config(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7])
+        return Config(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8])
 
 
 class ManagerUsersDataBase:
@@ -449,6 +449,12 @@ class ManagerUsersDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("insert into ref_money (user_id, ref_id, money, date) values (%s, %s, %s, %s)", (user_id, ref_id, money, date, ))
+            await connection.commit()
+
+    async def remove_depozit(self, money, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor as cursor:
+            await cursor.execute("UPDATE `users` SET depozit = depozit - %? WHERE `user_id` = %s", (money, user_id))
             await connection.commit()
 
 

@@ -92,8 +92,9 @@ async def get_launch(bot, user_id, loop):
         f"🚀 Статус: {level_text} {text_status} {more_text}\n {active_text}"
 
     if status[0] == 0:
-        text += "\n❗ Для того чтобы Вам активироваться на уровне 1 " \
-                f"на планете {planets[int(planet[0])]} нужно сделать подарок в размере {sums[text_planet[0]]} RUB астронавту ❗"
+        text = "✅ Для того что бы активизироваться в системе, и встать в «очередь» на " \
+               f"подарки на планете {planets[int(planet[0])]}, Вам нужно сделать 🎁 подарок " \
+               f"в размере {sums[text_planet[0]]} RUB астронавту."
 
     with open(path, "rb") as file:
         await bot.send_photo(
@@ -147,6 +148,7 @@ async def gift(bot, user: UserDB, loop):
     planet = await dbUser.get_planet(user.user_id, loop)
     path = first_path
 
+    astr = await get_user_on_planet(user.planet + 1, user.user_id, loop)
     text_planet = get_photo(planet[0])
     sum_add = money_add[text_planet[0]]
     sum_gift = sums[text_planet[0]]
@@ -158,28 +160,18 @@ async def gift(bot, user: UserDB, loop):
     await dbUser.set_now_depozit(user.user_id, (sum_add - out_money[text_planet[0]]), loop)
     await dbUser.change_first_dep(user.user_id, 1, loop)
 
+    text = f"Поздравляем! 🎉 вы теперь на планете {text_planet[1]}! 🙌\n\n" \
+           f"Ваш депозит {dbUser.get_deposit(user.user_id, loop)}\n\n" \
+           f"👩‍🚀 На ваш депозит было подарено  🎁 +{sum_add} RUB, из них Вы можете вывести {out_money[text_planet[0]]} RUB ( с 20% комиссией )\n\n" \
+           f"Чтобы взлететь 🚀 на планету Венера, Вам нужно удвоить депозит и сделать подарок Астронавту @{astr}"
+
     with open(path, "rb") as file:
         await bot.send_photo(
             chat_id=user.user_id,
             photo=file,
-            caption=f"🎆 Поздравляем, вы теперь на планете {text_planet[1]}! 🎆"
+            caption=text,
+            reply_markup=inline_keybords.get_double_dep()
         )
-    await bot.send_message(
-        user.user_id,
-        f"👩‍🚀 На ваш счет начисленно +{sum_gift} RUB, из них вы можете вывести {out_money[text_planet[0]]} RUB."
-    )
-    await bot.send_message(
-        user.user_id,
-        f"❗ Для того чтобы Вам активироваться на уровне 1 на планете "
-                f"{planets[int(planet[0]) + 1]} нужно сделать подарок в "
-                f"размере {sums[text_planet[0] + 1]} RUB астронавту❗"
-    )
-
-    await bot.send_message(
-        user.user_id,
-        f"Вы можете удвоить ваш подарок в размере {sum_add - out_money[text_planet[0]] + sum_gift} RUB",
-        reply_markup=inline_keybords.get_double_dep()
-    )
 
 
 async def get_queue(planet, user_id, loop):
