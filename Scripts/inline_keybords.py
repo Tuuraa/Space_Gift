@@ -45,10 +45,10 @@ async def create_capcha(bot, id):
 
 def profile_markup():
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add().row(types.KeyboardButton("🚀 Взлёт"), types.KeyboardButton("📝 О проекте"))
-    markup.add().row(types.KeyboardButton("💳 Кошелёк"), types.KeyboardButton("🌑 Space Money"))
-    markup.add().row(types.KeyboardButton("🔧 Инструменты"), types.KeyboardButton("⚙ Техническая поддержка"))
-    markup.add().row("Тестовое пополнение", "Удалить аккаунт", "Тестовые клоны")
+    markup.add().row("🚀 Взлёт", "📝 О проекте")
+    markup.add().row("💻 Инвестиции", "🔧 Инструменты")
+    markup.add().row("💳 Кошелёк", "⚙ Тех. поддержка")
+    #markup.add().row("Тестовое пополнение", "Удалить аккаунт", "Тестовые клоны")
 
     return markup
 
@@ -111,19 +111,46 @@ def cancel_pay():
 
 
 def get_about_project():
-    return types.ReplyKeyboardMarkup(resize_keyboard=True).add(
-        types.KeyboardButton("О Space Gift"),
-        types.KeyboardButton("O Space Money"),
-        types.KeyboardButton("Что такое арбитраж"),
+    reply = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
+    reply.row(
+        types.KeyboardButton("🚀 Инвестиции в Space Gift"),
+        types.KeyboardButton("💫 Инвестиции в Space Money")
+    )
+
+    reply.row(
+        types.KeyboardButton("🎁 Системе дарения"),
+        types.KeyboardButton("🤖 Системе клонов")
+    )
+
+    reply.row(
+        types.KeyboardButton("🤑 Вознаграждение за приглашение"),
+        types.KeyboardButton("🤑 Вознаграждение за пополнение реферала")
+    )
+
+    reply.row(
+        types.KeyboardButton("💰 Что такое арбитраж"),
+        types.KeyboardButton("👥 Условия за сетевиков")
+    )
+
+    #reply.row(
+        #types.KeyboardButton("О Space Gift"),
+        #types.KeyboardButton("O Space Money")
+    #)
+
+    reply.row(
         types.KeyboardButton("⬅ Вернуться")
     )
+
+    return reply
 
 
 def get_tools():
     return types.ReplyKeyboardMarkup(resize_keyboard=True).add(
-        types.KeyboardButton("Рассчитать пассив"),
-        types.KeyboardButton("Реферальная система"),
-        types.KeyboardButton("Презентация"),
+        types.KeyboardButton("💻 Рассчитать пассив"),
+        types.KeyboardButton("👥 Реферальная система")).add(
+        types.KeyboardButton("📄 Презентация"),
+        types.KeyboardButton("Удалить аккаунт"),
         types.KeyboardButton("⬅ Вернуться")
     )
 
@@ -136,8 +163,10 @@ def get_link_to_space_money():
 
 def get_wallet_inline():
     return types.InlineKeyboardMarkup().add(
-        types.InlineKeyboardButton("➕ Пополнить", callback_data="add_money"),
-        types.InlineKeyboardButton("➖ Вывести", callback_data="remove_money"))
+        types.InlineKeyboardButton("➕ Пополнить", callback_data="add_money")).add(
+        types.InlineKeyboardButton("➖ Вывести дивиденды", callback_data="remove_money")).add(
+        types.InlineKeyboardButton("💫 Вывести инвестиции", callback_data="remove_money_invest")
+    )
 
 
 def get_double_dep():
@@ -166,7 +195,7 @@ def get_admi_crypt_type():
 
 
 def get_gift_ok_inline():
-    return types.InlineKeyboardMarkup().add(types.InlineKeyboardButton("Вперед", callback_data="ok_gift"))
+    return types.InlineKeyboardMarkup().add(types.InlineKeyboardButton("💬 Написать", callback_data="ok_gift"))
 
 
 def cancel_trans_money():
@@ -174,20 +203,36 @@ def cancel_trans_money():
 
 
 async def laucnh_inline(db: ManagerUsersDataBase, user_id, loop):
-
     mark = types.InlineKeyboardMarkup()
     status = await db.get_status(user_id, loop)
 
     if status[0] == 0:  #🎁 Сделать подарок
         return mark.add(types.InlineKeyboardButton("🎁 Сделать подарок", callback_data="get_gift"))
     else:
-        return types.InlineKeyboardMarkup().add(
-            types.InlineKeyboardButton("💸 Пополнить баланс", callback_data="set_money_for_gift"))\
-            .add(types.InlineKeyboardButton("🙋‍♂ Пригласить участника", callback_data="invite_new_person")
-        )
+        reply = types.InlineKeyboardMarkup()
+        now_dep = await db.get_now_depozit(user_id, loop)
+        if now_dep > 0:
+            reply.add(types.InlineKeyboardButton("🎁 Получить подарок от Space Gift",
+                                                 callback_data="get_gift_from_space_gift"))
+
+        reply.add(types.InlineKeyboardButton("💸 Пополнить баланс", callback_data="set_money_for_gift")).add(
+            types.InlineKeyboardButton("🙋‍♂ Пригласить участника", callback_data="invite_new_person"))
+        return reply
 
 
 def inform_pers():
     return types.InlineKeyboardMarkup().\
         add(types.InlineKeyboardButton("💬 Осведомить участника", callback_data="inform_pers"))
+
+
+def invest_buttons():
+    return types.InlineKeyboardMarkup().add(
+        types.InlineKeyboardButton("➕ Инвестировать", callback_data="s")).add(
+        types.InlineKeyboardButton("💫 Инвестиции в Space money", callback_data="link_to_space_money")).add(
+        types.InlineKeyboardButton("🤖 Система клонов", callback_data="system_clones"))
+
+
+def get_link_space_money():
+    return types.InlineKeyboardMarkup()\
+        .add(types.InlineKeyboardButton("💫 Перейти на сайт Space money", url="spacemoney.space"))
 

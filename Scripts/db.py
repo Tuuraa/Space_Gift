@@ -62,19 +62,19 @@ class ManagerUsersDataBase:
             result = await cursor.fetchall()
             return result
 
-    async def add_user(self, loop, name, user_id, date, date_now, user_name, last_withd, referrer_id=None):
+    async def add_user(self, loop, name, user_id, date, date_now, user_name, last_withd, code, referrer_id=None):
         connection, cursor = await async_connect_to_mysql(loop)
 
         async with connection.cursor() as cursor:
             if referrer_id is not None:
                 await cursor.execute("INSERT INTO `users` (`name`, `user_id`, `date`, `referrer_id`, `date_now`, "
-                                           "`link_name`, last_withd) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                                           (name, user_id, date, referrer_id, date_now, user_name, last_withd,))
+                                           "`link_name`, last_withd, `code`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                                           (name, user_id, date, referrer_id, date_now, user_name, last_withd, code, ))
                 await connection.commit()
             else:
                 await cursor.execute("INSERT INTO `users` (`name`, `user_id`, `date`, `date_now`, `link_name`, "
-                                           "`last_withd`) VALUES (%s, %s, %s, %s, %s, %s)",
-                                           (name, user_id, date, date_now, user_name, last_withd))
+                                           "`last_withd`, `code`) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                                           (name, user_id, date, date_now, user_name, last_withd, code))
                 await connection.commit()
 
     async def count_referrer(self, user_id, loop):
@@ -453,8 +453,23 @@ class ManagerUsersDataBase:
 
     async def remove_depozit(self, money, user_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
-        async with connection.cursor as cursor:
-            await cursor.execute("UPDATE `users` SET depozit = depozit - %? WHERE `user_id` = %s", (money, user_id))
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET `depozit` = `depozit` - %s WHERE `user_id` = %s", (money, user_id, ))
+            await connection.commit()
+
+    async def get_percent_ref_money(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("select `percent_ref_money` from users where user_id = %s",
+                                 (user_id,))
+            result = (await cursor.fetchall())[0][0]
+            return result
+
+    async def set_percent_ref_money(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("update `users` set `percent_ref_money` = `percent_ref_money` + $s where user_id = %s",
+                                 (money, user_id,))
             await connection.commit()
 
 
@@ -621,7 +636,23 @@ class ManagerWithDrawDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("INSERT INTO `withdraw` (`card`, `data`, `type`, `amount`, `amount_commission`, `user_id`, `date`, `status`) VALUES (%s, %s, %s, %s, "
-                                       "%s, %s, %s, %s)", (card, data, type, amount, amount_commission, user_id, date, 'В ожидании'))
+                                       "%s, %s, %s, %s)", (card, data, type, amount, amount_commission, user_id, date, 'В ожидании', ))
+            await connection.commit()
+
+    async def create_request_crypt_percent(self, card, data, type, amount, amount_crypt, amount_commission, user_id, date, type_crypt, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("INSERT INTO `withdraw_wallet` (`card`, `data`, `type`, `amount`, `amount_crypt`, "
+                                 "`amount_commission`,`user_id`, `date`, `status`, `type_crypt`) VALUES (%s, %s, %s, %s, "
+                                       "%s, %s,  %s, %s, %s, %s)", (card, data, type, amount, amount_crypt,
+                                                                    amount_commission, user_id, date, 'В ожидании', type_crypt, ))
+            await connection.commit()
+
+    async def create_request_bank_percent(self, card, data, type, amount, amount_commission, user_id, date, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("INSERT INTO `withdraw_wallet` (`card`, `data`, `type`, `amount`, `amount_commission`, `user_id`, `date`, `status`) VALUES (%s, %s, %s, %s, "
+                                       "%s, %s, %s, %s)", (card, data, type, amount, amount_commission, user_id, date, 'В ожидании', ))
             await connection.commit()
 
     async def delete_request(self, user_id, loop):

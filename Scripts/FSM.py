@@ -24,6 +24,15 @@ class WithdrawMoneyFSM(StatesGroup):
     DATA_USER = State()
 
 
+class WithdrawMoneyPercentFSM(StatesGroup):
+    WITHDRAW_AMOUNT = State()
+    WITHDRAW_TYPE = State()
+    TYPE_CRYPT = State()
+    NUMBER_CARD = State()
+    CRYPT_CARD = State()
+    DATA_USER = State()
+
+
 class ChangeCryptTypeFSN(StatesGroup):
     TYPE = State()
 
@@ -35,3 +44,7 @@ class AnswerAfterGiftFSM(StatesGroup):
 class SendGiftFSM(StatesGroup):
     WHOM = State()
     AMOUNT = State()
+
+
+class UserCodeFSM(StatesGroup):
+    code = State()

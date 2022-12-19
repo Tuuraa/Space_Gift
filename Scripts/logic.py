@@ -10,7 +10,7 @@ dbPay = db.ManagerPayDataBase()
 first_path = PATH + "/img/"
 
 planets = ["Меркурий", "Венера", "Земля", "Марс", "Юпитер", "Сатурн"]
-money_add = [20_000, 60_000, 200_000, 800_000, 3_200_000, 9_000_000]
+money_add = [25_000, 75_000, 250_000, 1_000_000, 4_200_000, 12_000_000]
 sums = [5000, 15_000, 50_000, 200_000, 800_000, 3_000_000]
 out_money = [10_000, 25_000, 50_000, 200_000, 1_000_000, 3_000_000]
 count_ref = [0, 2, 6, 12, 20, 54]
@@ -36,6 +36,9 @@ def get_photo(planet):
 
 async def get_launch(bot, user_id, loop):
     planet = await dbUser.get_planet(user_id, loop)
+
+    user = (await get_user_on_planet(planet, user_id, loop))
+
     level = int((await dbUser.get_step(user_id, loop))[0])
     level_text = f"Уровень {level}"
     path = ""
@@ -77,7 +80,7 @@ async def get_launch(bot, user_id, loop):
     else:
         path += first_path + f"{text_planet[1]}/Шаг {int(level)} ({text_planet[1].lower()}).png"
         more_text += "\n\nПоздравляем 🎉 На этом уровне новый участник подарит Вам + 5000₽ к Вашему депозиту! \n" \
-                        f"До планеты Меркурий осталось {4 - int(await dbUser.get_step(user_id, loop))} подарка 🎁"
+                        f"До планеты Меркурий осталось {5 - int(await dbUser.get_step(user_id, loop))} подарка 🎁"
 
     text_plan = f"🪐 Движемся к планете: {text_planet[1]}"
     if text_planet[1] == planets[4] and level == 5:
@@ -92,9 +95,9 @@ async def get_launch(bot, user_id, loop):
         f"🚀 Статус: {level_text} {text_status} {more_text}\n {active_text}"
 
     if status[0] == 0:
-        text = "✅ Для того что бы активизироваться в системе, и встать в «очередь» на " \
-               f"подарки на планете {planets[int(planet[0])]}, Вам нужно сделать 🎁 подарок " \
-               f"в размере {sums[text_planet[0]]} RUB астронавту."
+        text += "\n✅ Для того что бы активироваться в системе, и встать в «очередь» на " \
+               f"подарки, Вам нужно сделать 🎁 подарок " \
+               f"в размере {sums[text_planet[0]]} RUB астронавту @{user.link}."
 
     with open(path, "rb") as file:
         await bot.send_photo(
@@ -140,7 +143,9 @@ async def get_gift(user_id, gift_user: UserDB, loop):
     if int(await dbUser.get_money(user_id, loop)) < sum_gift:
         return False, "Недостаточно денег"
 
+    await dbUser.add_amount_gift_money(gift_user.user_id, sum_gift, loop)
     await dbUser.remove_money(user_id, sum_gift, loop)
+    await dbUser.add_money(gift_user.user_id, sum_gift, loop)
     return True, f"Вы успешно подарили @{gift_user.link} {sum_gift} RUB", sum_gift
 
 
@@ -148,7 +153,7 @@ async def gift(bot, user: UserDB, loop):
     planet = await dbUser.get_planet(user.user_id, loop)
     path = first_path
 
-    astr = await get_user_on_planet(user.planet + 1, user.user_id, loop)
+    astr = await get_user_on_planet(int(user.planet) + 1, user.user_id, loop)
     text_planet = get_photo(planet[0])
     sum_add = money_add[text_planet[0]]
     sum_gift = sums[text_planet[0]]
@@ -156,28 +161,25 @@ async def gift(bot, user: UserDB, loop):
 
     await dbUser.add_money(user.user_id, (sum_add - out_money[text_planet[0]]) + sum_gift, loop)
     await dbUser.add_gift_money(user.user_id, out_money[text_planet[0]], loop)
-    await dbUser.set_now_depozit(user.user_id, 0, loop)
-    await dbUser.set_now_depozit(user.user_id, (sum_add - out_money[text_planet[0]]), loop)
     await dbUser.change_first_dep(user.user_id, 1, loop)
 
     text = f"Поздравляем! 🎉 вы теперь на планете {text_planet[1]}! 🙌\n\n" \
-           f"Ваш депозит {dbUser.get_deposit(user.user_id, loop)}\n\n" \
-           f"👩‍🚀 На ваш депозит было подарено  🎁 +{sum_add} RUB, из них Вы можете вывести {out_money[text_planet[0]]} RUB ( с 20% комиссией )\n\n" \
-           f"Чтобы взлететь 🚀 на планету Венера, Вам нужно удвоить депозит и сделать подарок Астронавту @{astr}"
+           f"👩‍🚀 На ваш депозит было подарено  🎁 +{sum_add} RUB, " \
+           f"из них Вы можете вывести {out_money[text_planet[0]]} RUB ( с 20% комиссией )\n\n" \
+           f"Чтобы взлететь 🚀 на планету Венера, Вам нужно ваш остаток " \
+           f"депозита  сделать подарок Астронавту @{astr.link}"
 
     with open(path, "rb") as file:
         await bot.send_photo(
             chat_id=user.user_id,
             photo=file,
             caption=text,
-            reply_markup=inline_keybords.get_double_dep()
         )
 
 
 async def get_queue(planet, user_id, loop):
     users = await dbUser.get_users_on_planet(planet, loop)
     users_on_planet = helper.get_users(users)
-    # current_user = helper.get_current_user(users_on_planet, user_id)
     active_users = helper.get_active_status_users(users_on_planet, int((await dbUser.get_planet(user_id, loop))[0]))
 
     if len(active_users) > 0:
@@ -194,7 +196,7 @@ async def get_queue(planet, user_id, loop):
 async def check_active(planet, user_id, loop):
     users = await dbUser.get_users_on_planet(planet, loop)
     users_on_planet = helper.get_users(users)
-    active_users = helper.get_active_status_users(users_on_planet, int(await dbUser.get_planet(user_id, loop)[0]))
+    active_users = helper.get_active_status_users(users_on_planet, int((await dbUser.get_planet(user_id, loop))[0]))
     gifts_users = helper.active_users(active_users)
 
     if len(active_users) > 0:

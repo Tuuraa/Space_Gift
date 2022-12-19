@@ -14,7 +14,6 @@ from helper import clear_repeat, cancel_unnecessary
 import clones
 import helper
 import datetime
-from logic import get_launch
 
 dbPay = ManagerPayDataBase()
 dbUser = ManagerUsersDataBase()
@@ -67,7 +66,7 @@ async def worker(bot: Bot, loop):
                                     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
                                     await dbUser.insert_ref_money(dep, referrer_id, user[0], date_time_now, loop)
                                     await dbUser.add_money(int(referrer_id), dep, loop)
-                                    await dbUser.add_depozit(int(referrer_id), dep, loop)
+                                    await dbUser.set_percent_ref_money(int(referrer_id), dep, loop)
                                     await bot.send_message(
                                         referrer_id,
                                         f"Ваш реферал {await dbUser.get_name(user[0], loop)} "
@@ -93,24 +92,6 @@ async def worker(bot: Bot, loop):
                                 if depozit >= 5000:
                                     await clones.create_clones(pay[1], loop)
 
-                                # В случай первого пополнения
-                                now_dep = await dbUser.get_now_depozit(user[0], loop)
-                                if now_dep <= 0:
-                                    await dbUser.set_now_depozit(user[0], pay[1], loop)
-                                    response = "Супер 🙌 \n" \
-                                               f"Вы пополнили депозит на {pay[1]}₽\n\n" \
-                                               "Хорошая новость!!!\n" \
-                                               "Space Gift увеличит 🚀 Ваш депозит в 2 раза, для этого \n" \
-                                               "Вам нужно нажать кнопку 👇"
-
-                                    with open(PATH + "/img/double_dep.png", 'rb') as file:
-                                        await bot.send_photo(
-                                            user[0], photo=file,
-                                            caption=response,
-                                            parse_mode="HTML",
-                                            reply_markup=inline_keybords.get_double_dep()
-                                        )
-
                         elif status_payment == "WAIT_PAYMENT":
                             print(f"Платеж {pay[0]} в процессе")
 
@@ -122,8 +103,6 @@ async def worker(bot: Bot, loop):
 
                 if transaction.status == "PROCESSED":
                     for pay in pays_db:
-
-                        print(float(pay[0]) - float(transaction.amount))
                         if transaction.date > pay[2] and float(transaction.amount) == float(pay[0]) \
                                 and transaction.currency == pay[3] and await dbPay.get_status(pay[4], loop) != "CANCELED"\
                                 and await dbPay.get_status(pay[4], loop) != 'OPERATION_COMPLETED':
@@ -162,20 +141,10 @@ async def worker(bot: Bot, loop):
                                     referrer_id,
                                     f"Ваш реферал {dbUser.get_name(pay[1], loop)} пополнил баланс и вам подарили {dep} RUB."
                                 )
-                            now_dep = await dbUser.get_now_depozit(pay[1], loop)
-                            if now_dep <= 0:
-                                await dbUser.set_now_depozit(pay[1], amount_rub, loop)
-                                response = "Поздравлем! <b>Space Gift</b> увеличит 🚀 Ваш депозит, " \
-                                           "для того что бы Вы сделали подарок астронавту на планете меркурий " \
-                                           "и активировались на уровне 1, для этого нажмите на кнопку 👇"
+                            depozit = await dbUser.get_deposit(pay[1], loop)
 
-                                with open(PATH + "/img/launch.jpg", 'rb') as file:
-                                    await bot.send_photo(
-                                        pay[1], photo=file,
-                                        caption=response,
-                                        parse_mode="HTML",
-                                        reply_markup=inline_keybords.get_double_dep()
-                                    )
+                            if depozit >= 5000:
+                                await clones.create_clones(amount_rub, loop)
 
             end_program_time = time.time()
             print(f'BACKGROUND LAP PAY TIME: {end_program_time - start_program_time}')

@@ -7,6 +7,7 @@ from aiogram import Bot
 import sys
 from db import ManagerPayDataBase
 import coinbase_data
+from helper import clear_none
 
 from db import ManagerUsersDataBase
 
@@ -18,7 +19,7 @@ async def worker_percent(bot: Bot, loop):
     while True:
         try:
             start_program_time = time.time()
-            users = await dbUser.get_users(loop)
+            users = clear_none(await dbUser.get_users(loop))
 
             for user in users:
                 date = str(await dbUser.get_date_now(user[0], loop))
@@ -34,7 +35,12 @@ async def worker_percent(bot: Bot, loop):
                         date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
                         await dbUser.set_new_date(user[0], date_time_now, loop)
-                        money = round(float(await dbUser.get_money(user[0], loop)) * .006)
+                        cd = float(await dbUser.get_amount_gift_money(user[0], loop))
+                        dep = float(await dbUser.get_deposit(user[0], loop))
+                        ref = float(await dbUser.get_count_ref(user[0], loop)) * 5000
+                        ref_money = float(await dbUser.get_percent_ref_money(user[0], loop))
+                        full_money = cd + dep + ref + ref_money
+                        money = round(float(full_money) * .006)
                         await bot.send_message(user[0], f"На ваш счет начислилось {money} RUB")
                         await dbUser.add_gift_money(user[0], money, loop)
                         print(f"На {user[0]} счет был начислен процент")

@@ -64,6 +64,14 @@ def create_new_block(users, user_id, db: ManagerUsersDataBase, loop):
         db.new_block_user(user.user_id, user_id, loop)
 
 
+def clear_none(users: list):
+    result = []
+    for user in users:
+        if user[0] is not None:
+            result.append(user)
+    return result
+
+
 def get_have_jump_users(users: list):
     result = []
     for user in users:

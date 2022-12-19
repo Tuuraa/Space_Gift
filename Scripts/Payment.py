@@ -20,15 +20,15 @@ async def client_payment_types():
 
 
 async def create_order(payment_type, rub_sum):
-    с = ConfigDBManager.get()
+    c = ConfigDBManager.get()
     headers = {
-        'Authorization': f'Api-Key {с.api_pay}'
+        'Authorization': f'Api-Key {c.api_pay}'
     }
 
     params = {
         'payment_type': payment_type,
         'rub_sum': rub_sum,
-        'cryptocurrency': config.TYPE_CRIPT,
+        'cryptocurrency': c.TYPE_CRIPT,
         'cryptocurrency_wallet': "MSmBXKzawd7tEr6LjQEvWpZixBKuGCB2CB",
     }
 
