@@ -31,22 +31,24 @@ CREATE TABLE `users` (
   `money` decimal(10,0) DEFAULT '0',
   `date_now` datetime DEFAULT NULL,
   `link_name` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `depozit` decimal(10,0) DEFAULT '0',
-  `gift_value` decimal(10,0) DEFAULT '0',
-  `now_depozit` decimal(10,0) DEFAULT '0',
+  `depozit` double DEFAULT '0',
+  `gift_value` double DEFAULT '0',
+  `now_depozit` double DEFAULT '0',
   `planet` varchar(5) COLLATE utf8mb4_unicode_ci DEFAULT '0',
   `step` varchar(5) COLLATE utf8mb4_unicode_ci DEFAULT '1',
   `first_dep` tinyint DEFAULT '1',
   `status` tinyint DEFAULT '0',
   `count_ref` int DEFAULT '0',
   `active` tinyint DEFAULT '0',
-  `gift_money` decimal(10,0) DEFAULT '0',
-  `amount_gift_money` decimal(10,0) DEFAULT '0',
-  `ref_money` decimal(10,0) DEFAULT '0',
+  `gift_money` double DEFAULT '0',
+  `amount_gift_money` double DEFAULT '0',
+  `ref_money` double DEFAULT '0',
   `jump` tinyint DEFAULT '0',
   `last_withd` datetime DEFAULT NULL,
+  `code` varchar(80) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `percent_ref_money` float DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -55,7 +57,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (13,288113313,NULL,'Михаил','2022-12-09',10000,'2022-12-11 19:18:26','zeusmisha',10000,0,0,'0','1',0,0,0,0,120,0,0,0,'2022-12-09 09:54:21'),(14,378632841,NULL,'Dan?','2022-12-10',5000,'2022-12-11 19:18:27','linkbrt',0,0,0,'0','1',1,0,1,0,30,0,5000,0,'2022-12-10 16:50:08'),(15,855151774,378632841,'Tura','2022-12-10',0,'2022-12-10 16:51:46','just_aartur',0,0,0,'0','1',1,0,0,0,0,0,0,0,'2022-12-10 16:51:46');
+INSERT INTO `users` VALUES (14,378632841,NULL,'Dan?','2022-12-10',5000,'2022-12-18 11:27:46','linkbrt',0,0,0,'0','1',1,0,1,0,120,0,5000,0,'2022-12-10 16:50:08',NULL,0),(29,1328872217,NULL,'Матвей','2022-12-14',10,'2022-12-14 15:54:21','m_kravts',10,0,0,'0','1',1,0,0,0,10,0,0,0,'2022-12-14 15:54:21',NULL,0),(42,668776362,NULL,'Nikolay','2022-12-15',10000,'2022-12-18 11:30:09','dolgocom',10000,0,0,'1','1',0,1,2,1,0,0,0,0,'2022-12-15 17:27:09',NULL,0),(45,1167759105,NULL,'Ivan','2022-12-15',0,'2022-12-15 18:16:39','huff_g',0,0,0,'0','1',1,0,0,0,0,0,0,0,'2022-12-15 18:16:39',NULL,0),(53,932803482,NULL,'BANG','2022-12-16',5000,'2022-12-18 11:32:20','Bang_Bros007',55000,0,0,'0','1',0,1,0,0,0,5000,0,0,'2022-12-16 16:17:12','Тех',0),(72,855151774,NULL,'Tura','2022-12-17',5000,'2022-12-18 11:44:36','bluabitch',100000,0,0,'0','1',1,0,0,0,1630,5000,0,0,'2022-12-18 15:57:52','3qdase',0),(73,NULL,NULL,NULL,NULL,0,NULL,NULL,0,0,0,'0','1',1,0,0,0,0,0,0,0,NULL,NULL,0),(74,288113313,NULL,'Михаил','2022-12-19',0,'2022-12-19 17:17:02','zeusmisha',0,0,0,'0','1',1,0,0,0,0,0,0,0,'2022-12-19 17:17:02','Корвет',0),(75,288113313,NULL,'Михаил','2022-12-19',0,'2022-12-19 17:18:21','zeusmisha',0,0,0,'0','1',1,0,0,0,0,0,0,0,'2022-12-19 17:18:21','Корвет',0);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -68,4 +70,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-11 19:53:30
+-- Dump completed on 2022-12-19 21:01:23
