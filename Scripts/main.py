@@ -1383,9 +1383,9 @@ async def change_type_res(message: types.Message):
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    #asyncio.run_coroutine_threadsafe(worker(bot, loop), loop)
-    #asyncio.run_coroutine_threadsafe(worker_percent(bot, loop), loop)
-    #asyncio.run_coroutine_threadsafe(worker_clones(bot, loop), loop)
-    #asyncio.run_coroutine_threadsafe(worker_jumps(bot, loop), loop)
+    asyncio.run_coroutine_threadsafe(worker(bot, loop), loop)
+    asyncio.run_coroutine_threadsafe(worker_percent(bot, loop), loop)
+    asyncio.run_coroutine_threadsafe(worker_clones(bot, loop), loop)
+    asyncio.run_coroutine_threadsafe(worker_jumps(bot, loop), loop)
 
     executor.start_polling(dp, skip_updates=True)
