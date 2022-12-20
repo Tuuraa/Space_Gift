@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
@@ -63,7 +64,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mydb',
+        'NAME': 'yougiftdb',
         'USER': 'root',
         'PASSWORD': '6CHWb6QmNUy9bLuX',
         'HOST': 'localhost',
@@ -106,7 +107,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -150,3 +151,4 @@ JET_THEMES = [
 ]
 
 JET_SIDE_MENU_COMPACT = False
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
