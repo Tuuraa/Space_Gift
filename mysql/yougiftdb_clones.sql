@@ -25,9 +25,8 @@ DROP TABLE IF EXISTS `clones`;
 CREATE TABLE `clones` (
   `id` int NOT NULL AUTO_INCREMENT,
   `active` tinyint DEFAULT NULL,
-  `clonescol` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -36,6 +35,7 @@ CREATE TABLE `clones` (
 
 LOCK TABLES `clones` WRITE;
 /*!40000 ALTER TABLE `clones` DISABLE KEYS */;
+INSERT INTO `clones` VALUES (5,1),(6,1),(7,1),(8,1),(9,1),(10,1),(11,1),(12,1),(13,1),(14,1),(15,1),(16,1),(17,1),(18,1),(19,1),(20,1),(21,1),(22,1),(23,1),(24,1),(25,1);
 /*!40000 ALTER TABLE `clones` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -48,4 +48,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-19 21:01:23
+-- Dump completed on 2022-12-21 21:52:23
