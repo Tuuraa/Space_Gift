@@ -743,7 +743,7 @@ async def amount_crypt(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["AMOUNT"] = str(message.text)
 
-    if int(message.text) < 1:
+    if int(message.text) < 5000:
         if await db.get_deposit(message.from_user.id, loop) < 5000:
             await message.answer("🚫 Минимальная сумма пополнения 5000.0 RUB, введите корректную сумму!")
             return
@@ -891,9 +891,9 @@ async def get_amount(message: types.Message, state: FSMContext):
             await message.answer("🚫 Это не число, введите корректную сумму!")
             return
 
-    if int(message.text) < 1:
+    if int(message.text) < 5000:
         await message.answer("🚫 Минимальная сумма пополнения 5000.0 RUB, введите корректную сумму!")
-    if int(message.text) % 5 == 0:
+    if int(message.text) % 5 != 0:
         await message.answer("Сумма должна быть кратна 5-ти!")
         return
     else:
@@ -1376,7 +1376,7 @@ async def change_type_res(message: types.Message):
 
 
 if __name__ == '__main__':
-    loop = asyncio.new_event_loop()
+    loop = asyncio.get_event_loop()
     asyncio.run_coroutine_threadsafe(worker(bot, loop), loop)
     asyncio.run_coroutine_threadsafe(worker_percent(bot, loop), loop)
     asyncio.run_coroutine_threadsafe(worker_clones(bot, loop), loop)
