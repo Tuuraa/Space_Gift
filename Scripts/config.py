@@ -14,7 +14,7 @@ class Config:
         self.errors_group_id = errors_group_id
 
 
-name_bot = "yougift_donation_bot"
+name_bot = "space_gift_bot"
 
 domain_pay = "orionbtc.xyz"
 
