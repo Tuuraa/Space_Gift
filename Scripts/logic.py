@@ -140,7 +140,7 @@ async def get_gift(user_id, gift_user: UserDB, loop):
     text_planet = get_photo(planet[0])
 
     sum_gift = sums[text_planet[0]]
-    if int(await dbUser.get_money(user_id, loop)) < sum_gift:
+    if int(await dbUser.get_deposit(user_id, loop)) < sum_gift:
         return False, "Недостаточно денег"
 
     await dbUser.add_amount_gift_money(gift_user.user_id, sum_gift, loop)

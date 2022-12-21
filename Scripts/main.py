@@ -34,7 +34,7 @@ API_TOKEN = configCl.api_bot  # Считывание токена
 NAME_BOT = config.name_bot  # Считывание имени бота
 NUMBER_PAY = config.NUMBER_PAY
 
-bot = Bot(token=API_TOKEN)      # Объявление всех классов, для работы с ботом
+bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 db = ManagerUsersDataBase()
@@ -342,13 +342,7 @@ async def about_space_gift(message: types.Message):
 async def ard(message: types.Message):
     with open(PATH + "/Data/arbit.txt", 'r', encoding="utf-8") as file:
         text = file.read()
-    with open(PATH + "/img/about_arbitrag.png", 'rb') as file:
-        await bot.send_photo(
-            message.from_user.id,
-            photo=file,
-            caption=text,
-            parse_mode="HTML"
-        )
+        await message.answer(text + '<a href="https://i.ibb.co/p2LMd75/about-arbitrag.png">.</a>', parse_mode="HTML")
 
 
 @dp.message_handler(text="💻 Инвестиции")
@@ -793,7 +787,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
     status = await db.get_status(callback.from_user.id, loop)
     if status[0] == 0:
 
-        user: UserDB = await logic.get_user_on_planet((await db.get_planet(callback.from_user.id, loop))[0], callback.from_user.id, loop)
+        user: UserDB = (await logic.get_user_on_planet((await db.get_planet(callback.from_user.id, loop))[0], callback.from_user.id, loop))
         if user == "Нет пользователя":
             await bot.send_message(
                 callback.from_user.id,
@@ -899,7 +893,7 @@ async def get_amount(message: types.Message, state: FSMContext):
 
     if int(message.text) < 1:
         await message.answer("🚫 Минимальная сумма пополнения 5000.0 RUB, введите корректную сумму!")
-    if int(message.text) % 5 != 0:
+    if int(message.text) % 5 == 0:
         await message.answer("Сумма должна быть кратна 5-ти!")
         return
     else:
@@ -1382,7 +1376,7 @@ async def change_type_res(message: types.Message):
 
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     asyncio.run_coroutine_threadsafe(worker(bot, loop), loop)
     asyncio.run_coroutine_threadsafe(worker_percent(bot, loop), loop)
     asyncio.run_coroutine_threadsafe(worker_clones(bot, loop), loop)

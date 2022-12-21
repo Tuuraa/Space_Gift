@@ -36,13 +36,15 @@ class ConfigDBManager:
     @staticmethod
     def get():
         connection, cursor = create_sync_con()
-        data = ['bot_api', 'api_pay', 'api_coinbase_pay', 'api_coinbase_secret', 'ltc_id', 'btc_id', 'eth_id', 'usdt_wallet', 'type_crypt']
+        data = ['bot_api', 'api_pay', 'api_coinbase_pay', 'api_coinbase_secret', 'ltc_id', 'btc_id',
+                'eth_id', 'usdt_wallet', 'type_crypt', 'errors_token', 'errors_group_id']
         result = []
         for item in data:
             cursor.execute("select `title` from `tokens` where `api` = %s", (item, ))
             result.append(cursor.fetchone()[0])
 
-        return Config(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8])
+        return Config(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7],
+                      result[8], result[9], result[10])
 
 
 class ManagerUsersDataBase:

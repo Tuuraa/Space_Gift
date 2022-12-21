@@ -60,13 +60,23 @@ async def worker_clones(bot, loop):
                 elif exc_obj.match == 'bot was blocked by the user':
                     await dbUser.change_status(active_user.user_id, 0, loop)
                     await dbUser.reset_active(active_user.user_id, loop)
-                    print(f"The user {active_user.link} has been reset. Reason: canceled the bot")
+
+                    config = db.ConfigDBManager().get()
+                    await bot.send_message(
+                        config.errors_group_id,
+                        f"The user {active_user.link} has been reset. Reason: canceled the bot"
+                    )
 
             end_program_time = time.time()
             print(f'BACKGROUND LAP CLONES SYSTEM TIME: {end_program_time - start_program_time}\n')
 
         except Exception:
             exc_type, exc_obj, exc_tb = sys.exc_info()
+            config = db.ConfigDBManager().get()
+            await bot.send_message(
+                config.errors_group_id,
+                f'{exc_type}, {exc_obj}, {exc_tb} from back_clones'
+            )
             print(exc_type, exc_obj, exc_tb.tb_lineno)
 
         await asyncio.sleep(30)

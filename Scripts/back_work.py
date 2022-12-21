@@ -4,8 +4,9 @@ import pytz
 from aiogram import Bot
 import sys
 import coinbase_data
-import inline_keybords
 import time
+
+import db
 from config import PATH
 
 from db import ManagerPayDataBase, ManagerUsersDataBase, ManagerClonesDataBase
@@ -95,7 +96,6 @@ async def worker(bot: Bot, loop):
                         elif status_payment == "WAIT_PAYMENT":
                             print(f"Платеж {pay[0]} в процессе")
 
-
             #Обработчик пополнения Coinbase
             transactions = await coinbase_data.get_completed_transactions(loop)
             pays_db = helper.clear_crypt_requests(await dbPay.get_all_data_crypt(loop))
@@ -151,6 +151,11 @@ async def worker(bot: Bot, loop):
 
         except Exception:
             exc_type, exc_obj, exc_tb = sys.exc_info()
-            print(exc_type, exc_obj, exc_tb.tb_lineno)
+
+            config = db.ConfigDBManager().get()
+            await bot.send_message(
+                config.errors_group_id,
+                f'{exc_type}, {exc_obj}, {exc_tb} from back_clones'
+            )
 
         await asyncio.sleep(30)
