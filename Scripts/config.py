@@ -16,7 +16,7 @@ class Config:
 
 name_bot = "space_gift_bot"
 
-domain_pay = "orionbtc.xyz"
+domain_pay = "hermesbtc.com"
 
 NUMBER_PAY = 0
 ADMINS = [855151774]
