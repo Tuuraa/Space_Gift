@@ -698,11 +698,11 @@ class ManagerClonesDataBase:
     async def change_active(self, id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
-            await cursor.execute("UPDATE `clones` SET `active` = 0 WHERE `id` = ?", (id, ))
+            await cursor.execute("UPDATE `clones` SET `active` = 0 WHERE `id` = %s", (id, ))
             await connection.commit()
 
     async def reset_clone(self, id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
-            await cursor.execute("DELETE FROM `clones` WHERE `id` = ?", (id, ))
+            await cursor.execute("DELETE FROM `clones` WHERE `id` = %s", (id, ))
             await connection.commit()
