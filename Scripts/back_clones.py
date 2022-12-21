@@ -13,6 +13,13 @@ dbUser = db.ManagerUsersDataBase()
 dbClones = db.ManagerClonesDataBase()
 
 
+async def send_message_safe(bot, tel_id, text, reply_markup=None):
+    try:
+        await bot.send_message(tel_id, text, parse_mode='HTML', reply_markup=reply_markup)
+    except Exception:
+        pass
+
+
 async def worker_clones(bot, loop):
     while True:
         try:
@@ -23,55 +30,51 @@ async def worker_clones(bot, loop):
             active_user: UserDB = await clones.get_active_user(status_active_users)
 
             try:
-                while int(await dbUser.get_step(active_user.user_id, loop)) < 5:
-                    if int((await dbUser.get_planet(active_user.user_id, loop))[0]) == 0:
-                        if await dbClones.get_count_clones(loop) > 0:
-                            if int(await dbUser.get_step(active_user.user_id, loop)) == 4:
+                if active_user is not None:
 
-                                await logic.gift(bot, active_user, loop)
-                                await dbUser.reset_step(active_user.user_id, loop)
-                                await dbUser.change_status(active_user.user_id, 0, loop)
-                                await dbUser.update_planet(active_user.user_id, loop)
-                                await dbUser.reset_active(active_user.user_id, loop)
+                    while int(await dbUser.get_step(active_user.user_id, loop)) < 5:
+                        if int((await dbUser.get_planet(active_user.user_id, loop))[0]) == 0:
+                            if await dbClones.get_count_clones(loop) > 0:
+                                if int(await dbUser.get_step(active_user.user_id, loop)) == 4:
 
-                                await bot.send_message(
-                                    active_user.user_id,
-                                    "🎆 Поздравляем 🎆 вам сделал подарок \
-                                    <b>клон системы и продвинул вас на новую планету 🪐.",
-                                    parse_mode='HTML'
-                                )
+                                    await logic.gift(bot, active_user, loop)
+                                    await dbUser.reset_step(active_user.user_id, loop)
+                                    await dbUser.change_status(active_user.user_id, 0, loop)
+                                    await dbUser.update_planet(active_user.user_id, loop)
+                                    await dbUser.reset_active(active_user.user_id, loop)
+
+                                    await send_message_safe(
+                                        bot,
+                                        active_user.user_id,
+                                        "🎆 Поздравляем 🎆 вам сделал подарок \
+                                        <b>клон системы и продвинул вас на новую планету 🪐."
+                                    )
+                                else:
+                                    clones_act = await dbClones.get_all(loop)
+                                    await dbUser.update_step(active_user.user_id, loop)
+                                    ind = clones_act[0][0]
+                                    await dbClones.reset_clone(ind, loop)
+                                    await logic.get_launch(bot, active_user.user_id, loop)
+                                    await send_message_safe(
+                                        bot,
+                                        active_user.user_id,
+                                        "Поздравляем! 🎉 Вам сделал подарок 🎁 "
+                                        "<b>клон системы</b> и продвинул вас на новый уровень 🚀."
+                                    )
                             else:
-                                await bot.send_message(
-                                    active_user.user_id,
-                                    "Поздравляем! 🎉 Вам сделал подарок 🎁 "
-                                    "<b>клон системы</b> и продвинул вас на новый уровень 🚀.",
-                                    parse_mode='HTML'
-                                )
-                                clones_act = await dbClones.get_all(loop)
-                                await dbUser.update_step(active_user.user_id, loop)
-                                ind = clones_act[0][0]
-                                await dbClones.reset_clone(ind, loop)
-                                await logic.get_launch(bot, active_user.user_id, loop)
+                                continue
                         else:
-                            break
-                    else:
-                        break
-                    await clones.update_active_user(loop)
+                            continue
+                        await clones.update_active_user(loop)
 
             except Exception:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
-                if exc_obj.args[0] == "'NoneType' object has no attribute 'user_id'":
-                    pass
+                config = db.ConfigDBManager().get()
 
-                elif exc_obj.match == 'bot was blocked by the user':
-                    await dbUser.change_status(active_user.user_id, 0, loop)
-                    await dbUser.reset_active(active_user.user_id, loop)
-
-                    config = db.ConfigDBManager().get()
-                    await bot.send_message(
+                await bot.send_message(
                         config.errors_group_id,
-                        f"The user {active_user.link} has been reset. Reason: canceled the bot"
-                    )
+                    f'{exc_type}, {exc_obj}, {exc_tb} from back_clones'
+                )
 
             end_program_time = time.time()
             print(f'BACKGROUND LAP CLONES SYSTEM TIME: {end_program_time - start_program_time}\n')

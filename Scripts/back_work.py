@@ -21,6 +21,22 @@ dbUser = ManagerUsersDataBase()
 dbClones = ManagerClonesDataBase()
 
 
+async def send_message_safe(bot: Bot, tel_id, text, link=None, reply_markup=None):
+    try:
+        if link is not None:
+            await bot.send_photo(
+                tel_id,
+                photo=link,
+                caption=text,
+                reply_markup=reply_markup,
+                parse_mode='HTML'
+            )
+        else:
+            await bot.send_message(tel_id, text, parse_mode='HTML', reply_markup=reply_markup)
+    except Exception:
+        pass
+
+
 async def worker(bot: Bot, loop):
     while True:
         try:
@@ -39,20 +55,18 @@ async def worker(bot: Bot, loop):
 
                         status_payment = await Payment.status_requets(pay[0])
                         if status_payment == "CANCELED":
-                            #if dbPay.get_status_credit(pay[5]) != "CANCELED":
-                                await bot.send_message(
-                                    user[0],
-                                    f"Ваша заявка на пополнение {pay[0]} отменена автоматечески т.к. "
-                                    f"оплата не поступила в течении 60-ти минут"
-                                )
-                                await dbPay.change_status_for_cancel("CANCELED", pay[5], "CREDIT", loop)
-                                print(f"Ваша заявка на пополнение {pay[0]} отменена автоматечески")
-                                #dbPay.cancel_request(pay[5], "CREDIT")   #Удаление платежа из БД
-                                await bot.delete_message(user[0], pay[5])
+                            await dbPay.change_status_for_cancel("CANCELED", pay[5], "CREDIT", loop)
+                            print(f"Ваша заявка на пополнение {pay[0]} отменена автоматечески")
+                            await bot.delete_message(user[0], pay[5])
+
+                            await send_message_safe(
+                                bot,
+                                user[0],
+                                f"Ваша заявка на пополнение {pay[0]} отменена автоматечески т.к. "
+                                f"оплата не поступила в течении 60-ти минут"
+                            )
 
                         elif status_payment == "OPERATION_COMPLETED":   # Проверка пополнения счета
-                            # print(dbPay.get_status_credit(pay[5]))
-                            #if dbPay.get_status_credit(pay[5]) != "OPERATION_COMPLETED":
                                 # Пополнение счетов
                                 await dbUser.add_depozit(user[0], pay[1], loop)
                                 await dbUser.add_money(user[0], pay[1], loop)
@@ -68,7 +82,8 @@ async def worker(bot: Bot, loop):
                                     await dbUser.insert_ref_money(dep, referrer_id, user[0], date_time_now, loop)
                                     await dbUser.add_money(int(referrer_id), dep, loop)
                                     await dbUser.set_percent_ref_money(int(referrer_id), dep, loop)
-                                    await bot.send_message(
+                                    await send_message_safe(
+                                        bot,
                                         referrer_id,
                                         f"Ваш реферал {await dbUser.get_name(user[0], loop)} "
                                         f"пополнил баланс и вам подарили {dep} RUB."
@@ -77,16 +92,15 @@ async def worker(bot: Bot, loop):
 
                                 if pay[1] <= 5000:
                                     with open(PATH + "/img/dep_done.png", 'rb') as file:
-                                        await bot.send_photo(
+                                        await send_message_safe(
+                                            bot,
                                             user[0],
-                                            photo=file,
-                                            caption=f"Платеж {pay[0]} успешно выполнен. Ваш счет пополненен на {pay[1]} руб."
+                                            f"Платеж {pay[0]} успешно выполнен. Ваш счет пополненен на {pay[1]} руб.",
+                                            file
                                         )
                                 else:
-                                    await bot.send_message(
-                                        user[0],
-                                        f"Платеж {pay[0]} успешно выполнен. Ваш счет пополненен на {pay[1]} руб."
-                                    )
+                                    await send_message_safe(bot, user[0], f"Платеж {pay[0]} успешно выполнен. Ваш счет пополненен на {pay[1]} руб.")
+
                                 await dbPay.change_status_for_cancel("OPERATION_COMPLETED", pay[5], "CREDIT", loop)
                                 depozit = await dbUser.get_deposit(user[0], loop)
 
@@ -113,16 +127,16 @@ async def worker(bot: Bot, loop):
                             await dbUser.add_gift_money(pay[1], amount_rub, loop)
 
                             if float(pay[6]) <= 5000:
+
                                 with open(PATH + "/img/dep_done.png", 'rb') as file:
-                                    await bot.send_photo(
-                                        pay[1], photo=file,
-                                        caption=f"Платеж успешно выполнен. Ваш счет пополненен на {pay[0]} {pay[3]}."
+                                    await send_message_safe(
+                                        bot,
+                                        pay[1],
+                                        f"Платеж успешно выполнен. Ваш счет пополненен на {pay[0]} {pay[3]}.",
+                                        file
                                     )
                             else:
-                                await bot.send_message(
-                                    pay[1],
-                                    f"Платеж успешно выполнен. Ваш счет пополненен на {pay[0]} {pay[3]}."
-                                )
+                                await send_message_safe(bot, pay[1], f"Платеж успешно выполнен. Ваш счет пополненен на {pay[0]} {pay[3]}.")
 
                             await bot.delete_message(pay[1], pay[4])
                             await dbPay.change_status_for_cancel("OPERATION_COMPLETED", pay[4], "CRYPT", loop)
@@ -137,10 +151,9 @@ async def worker(bot: Bot, loop):
                                 await dbUser.add_money(int(referrer_id), dep, loop)
                                 await dbUser.add_depozit(int(referrer_id), dep, loop)
 
-                                await bot.send_message(
-                                    referrer_id,
-                                    f"Ваш реферал {dbUser.get_name(pay[1], loop)} пополнил баланс и вам подарили {dep} RUB."
-                                )
+                                await send_message_safe(bot, referrer_id,
+                                                        f"Ваш реферал {dbUser.get_name(pay[1], loop)} пополнил баланс и вам подарили {dep} RUB.")
+
                             depozit = await dbUser.get_deposit(pay[1], loop)
 
                             if depozit >= 5000:
@@ -155,7 +168,7 @@ async def worker(bot: Bot, loop):
             config = db.ConfigDBManager().get()
             await bot.send_message(
                 config.errors_group_id,
-                f'{exc_type}, {exc_obj}, {exc_tb} from back_clones'
+                f'{exc_type}, {exc_obj}, {exc_tb} from back_works'
             )
 
         await asyncio.sleep(30)

@@ -9,6 +9,13 @@ import logic
 dbUser = db.ManagerUsersDataBase()
 
 
+async def send_message_safe(bot, tel_id, text, reply_markup=None):
+    try:
+        await bot.send_message(tel_id, text, parse_mode='HTML', reply_markup=reply_markup)
+    except Exception:
+        pass
+
+
 async def worker_jumps(bot, loop):
     while True:
         try:
@@ -33,9 +40,15 @@ async def worker_jumps(bot, loop):
                             await dbUser.change_status(user.user_id, 0, loop)
                             await dbUser.update_planet(user.user_id, loop)
                             await logic.check_active(int(user.planet) + 1, user.user_id, loop)
+                            await send_message_safe(
+                                bot,
+                                user.user_id,
+                                "🎆 Поздравляем 🎆 с помощью системы сетивиков вы попали на новую планету!"
+                            )
 
                         else:
-                            await bot.send_message(
+                            await send_message_safe(
+                                bot,
                                 user.user_id,
                                 "Вы закончили игру"
                             )
@@ -45,6 +58,6 @@ async def worker_jumps(bot, loop):
 
             await bot.send_message(
                 config.errors_group_id,
-                f'{exc_type}, {exc_obj}, {exc_tb} from back_clones'
+                f'{exc_type}, {exc_obj}, {exc_tb} from jump'
             )
         await asyncio.sleep(60)

@@ -16,6 +16,13 @@ dbUser = ManagerUsersDataBase()
 dbPay = ManagerPayDataBase()
 
 
+async def send_message_safe(bot, tel_id, text, reply_markup=None):
+    try:
+        await bot.send_message(tel_id, text, parse_mode='HTML', reply_markup=reply_markup)
+    except Exception:
+        pass
+
+
 async def worker_percent(bot: Bot, loop):
     while True:
         try:
@@ -42,7 +49,7 @@ async def worker_percent(bot: Bot, loop):
                         ref_money = float(await dbUser.get_percent_ref_money(user[0], loop))
                         full_money = cd + dep + ref + ref_money
                         money = round(float(full_money) * .006)
-                        await bot.send_message(user[0], f"На ваш счет начислилось {money} RUB")
+                        await send_message_safe(bot, user[0], f"На ваш счет начислилось {money} RUB")
                         await dbUser.add_gift_money(user[0], money, loop)
                         print(f"На {user[0]} счет был начислен процент")
 
@@ -57,7 +64,8 @@ async def worker_percent(bot: Bot, loop):
                         (await dbPay.get_status(pay[4], loop)) == "WAIT_PAYMENT":
 
                     await bot.delete_message(pay[1], pay[4])
-                    await bot.send_message(
+                    await send_message_safe(
+                        bot,
                         pay[1],
                         f"Ваша заявка на пополнение криптовалюты отменена "
                         f"автоматечески т.к. оплата не поступила в течении 60-ти минут"
@@ -84,7 +92,7 @@ async def worker_percent(bot: Bot, loop):
             config = db.ConfigDBManager().get()
             await bot.send_message(
                 config.errors_group_id,
-                f'{exc_type}, {exc_obj}, {exc_tb} from back_clones'
+                f'{exc_type}, {exc_obj}, {exc_tb} from Percent'
             )
 
         await asyncio.sleep(30)
