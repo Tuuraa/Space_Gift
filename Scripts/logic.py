@@ -120,7 +120,7 @@ async def get_user_on_planet(planet, user_id, loop):
         active_users.sort(key=lambda sort: sort.count_ref, reverse=1)
 
         active_user = active_users[0]
-        active = dbUser.get_active(active_user.user_id, loop)
+        active = await dbUser.get_active(active_user.user_id, loop)
         if active != 1:
             await dbUser.update_active(active_users[0].user_id, loop)
         if len(gifts_users) > 0:
