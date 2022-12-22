@@ -152,7 +152,8 @@ async def worker(bot: Bot, loop):
                                 await dbUser.add_depozit(int(referrer_id), dep, loop)
 
                                 await send_message_safe(bot, referrer_id,
-                                                        f"Ваш реферал {dbUser.get_name(pay[1], loop)} пополнил баланс и вам подарили {dep} RUB.")
+                                                        f"Ваш реферал {dbUser.get_name(pay[1], loop)} "
+                                                        f"пополнил баланс и вам подарили {dep} RUB.")
 
                             depozit = await dbUser.get_deposit(pay[1], loop)
 

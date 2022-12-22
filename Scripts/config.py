@@ -21,7 +21,7 @@ domain_pay = "hermesbtc.com"
 NUMBER_PAY = 0
 ADMINS = [855151774]
 
-PATH = 'C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot\\'
+PATH = 'C:/Users/turap/OneDrive/Рабочий стол/DonationBot'
 
 HOST = "localhost"
 USERS = "root"
