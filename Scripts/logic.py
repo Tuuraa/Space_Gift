@@ -67,12 +67,11 @@ async def get_launch(bot, user_id, loop):
         if type(number) is int:
             more_text = f"\nНомер в очереди: {number}\n\n" \
                      f"🙌Поздравляем! Вы заняли место в очереди на подарки от новых участников на свой депозит!\n" \
-                     f"⚡ Не жди очереди, начни увеличивать свой депозит уже сейчас и получать по 0,6% в день!\n\n "\
-                     f"Есть два способа\n" \
-                     f"1️⃣ Пополнить депозит с собственных средств\n" \
-                     f"2️⃣ За счет приглашений \n" \
-                     f"( За каждого приглашенного ты получишь  + 5000р на депозит )\n\n" \
-                     f"НЕ ЖДИ. ДЕЙСТВУЙ 💪 ✅"
+                        f"⚡️ Не жди очереди, начни увеличивать свой депозит уже сейчас и получать по 0,6% в день!\n\n" \
+                        f"1️⃣ Инвестируй в Space gift с собственных средств.\n" \
+                        f"2️⃣ Получай +5000р на депозит за каждого приглашенного реферала.\n" \
+                        f"3️⃣ Space gift начислит на депозит 10% от инвестиций реферала.\n\n" \
+                        f"НЕ ЖДИ. ДЕЙСТВУЙ 💪 ✅"
 
     elif active == 0 and status[0] == 1 and await dbUser.get_count_ref(user_id, loop) < count_ref[int(planet[0])]:
         path = first_path + f"{text_planet[1]}/В очереди ({text_planet[1].lower()}).png"
@@ -86,10 +85,15 @@ async def get_launch(bot, user_id, loop):
     if text_planet[1] == planets[4] and level == 5:
         text_plan = "🎆 Поздравляем, вы долетели до Юпитера! Ваш полет завершен! 🎆"
 
+    cd = await dbUser.get_amount_gift_money(user_id, loop)
+    dep = await dbUser.get_deposit(user_id, loop)
+    ref = await dbUser.get_count_ref(user_id, loop) * 5000
+    ref_money = await dbUser.get_percent_ref_money(user_id, loop)
+
     text = f"📆 Профиль создан: {await dbUser.get_date(user_id, loop)}\n" \
         f"🤖 Ваш ID: {user_id}\n\n" \
         f"👩‍🚀 Астронавт: {await dbUser.get_name(user_id, loop)}\n"\
-        f"💰 Ваш депозит: {await dbUser.get_deposit(user_id, loop)} RUB\n"\
+        f"💰 Общий депозит: {int(cd + dep + ref + ref_money)} RUB\n"\
         f"{text_plan}\n" \
         f"👥 Лично приглашенных: {await dbUser.get_count_ref(user_id, loop)} чел.\n"\
         f"🚀 Статус: {level_text} {text_status} {more_text}\n {active_text}"
@@ -140,12 +144,13 @@ async def get_gift(user_id, gift_user: UserDB, loop):
     text_planet = get_photo(planet[0])
 
     sum_gift = sums[text_planet[0]]
-    if int(await dbUser.get_deposit(user_id, loop)) < sum_gift:
+    if int(await dbUser.get_money(user_id, loop)) < sum_gift:
         return False, "Недостаточно денег"
 
     await dbUser.add_amount_gift_money(gift_user.user_id, sum_gift, loop)
     await dbUser.remove_money(user_id, sum_gift, loop)
     await dbUser.add_money(gift_user.user_id, sum_gift, loop)
+    await dbUser.remove_depozit(sum_gift, user_id, loop)
     return True, f"Вы успешно подарили @{gift_user.link} {sum_gift} RUB", sum_gift
 
 
@@ -159,19 +164,22 @@ async def gift(bot, user: UserDB, loop):
     else:
         link = f"@{astr.link}"
     text_planet = get_photo(planet[0])
+    text_planet_next = get_photo(int(planet[0]) + 1)
+
     sum_add = money_add[text_planet[0]]
     sum_gift = sums[text_planet[0]]
     path += f"{text_planet[1]}/Поздравляем. {text_planet[1]}.png"
 
     await dbUser.add_money(user.user_id, (sum_add - out_money[text_planet[0]]) + sum_gift, loop)
     await dbUser.add_gift_money(user.user_id, out_money[text_planet[0]], loop)
-    await dbUser.change_first_dep(user.user_id, 1, loop)
+    await dbUser.add_amount_gift_money(user.user_id, (sum_add - out_money[text_planet[0]]) + sum_gift, loop)
+    await dbUser.change_first_dep(user.user_id, 0, loop)
 
     text = f"Поздравляем! 🎉 вы теперь на планете {text_planet[1]}! 🙌\n\n" \
-           f"👩‍🚀 На ваш депозит было подарено  🎁 +{sum_add} RUB, " \
+           f"👩‍🚀 На ваш депозит было подаsено  🎁 +{sum_add} RUB, " \
            f"из них Вы можете вывести {out_money[text_planet[0]]} RUB ( с 20% комиссией )\n\n" \
-           f"Чтобы взлететь 🚀 на планету Венера, Вам нужно ваш остаток " \
-           f"депозита  сделать подарок Астронавту {link}"
+           f"Чтобы взлететь 🚀 на планету {text_planet_next[1]}, нужно остаток " \
+           f"Вашего депозита подарить Астронавту {link}"
 
     with open(path, "rb") as file:
         await bot.send_photo(

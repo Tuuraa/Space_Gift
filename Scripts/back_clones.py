@@ -52,7 +52,7 @@ async def worker_clones(bot, loop):
                                     await dbUser.reset_step(active_user.user_id, loop)
                                     await dbUser.change_status(active_user.user_id, 0, loop)
                                     await dbUser.reset_active(active_user.user_id, loop)
-                                    await dbUser.change_first_dep(active_user.user_id, 0)
+                                    await dbUser.change_first_dep(active_user.user_id, 0, loop)
                                     await logic.gift(bot, active_user, loop)
                                     await dbUser.update_planet(active_user.user_id, loop)
 

@@ -190,8 +190,9 @@ async def cancel_capcha(callback: types.CallbackQuery):
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[1]) # Взлет
 async def launch(message: types.Message):
     dep = await db.get_deposit(message.from_user.id, loop)
+    status = await db.get_status(message.from_user.id, loop)
 
-    if dep < 5000:
+    if dep < 5000 and status == 0:
         text = "Для того чтобы взлететь, Вам нужно пополнить кошелек на 5000 RUB"
 
         with open(PATH + "/img/add_dep.png", "rb") as file:
@@ -366,8 +367,7 @@ async def invest(message: types.Message):
         f"📠 Процент от инвестиций: 0.6% в сутки\n"
         f"⏱ Время доходности: 24 часа\n"
         f"📆 Срок вклада: Бессрочный c возможностью вывода через 100 дней\n\n"
-        f"💳 Ваш вклад: {dep} RUB\n"
-        f"💵 Накопление: {gift_money} RUB\n\n",
+        f"💳 Ваш вклад: {dep} RUB",
         reply_markup=inline_keybords.invest_buttons()
     )
 
@@ -818,6 +818,13 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
             callback.from_user.id,
             "Вы уже активированы в системе"
         )
+
+
+@dp.callback_query_handler(text="get_gift_from_space_gift")
+async def get_gift_from_space_gift(callback: types.CallbackQuery):
+    now_dep = await db.get_now_depozit(callback.from_user.id, loop)
+    await db.add_amount_gift_money(callback.from_user.id, now_dep, loop)
+    await db.set_now_depozit(callback, 0, loop)
 
 
 @dp.callback_query_handler(text="payrement_bank")
