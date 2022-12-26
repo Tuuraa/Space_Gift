@@ -191,8 +191,9 @@ async def cancel_capcha(callback: types.CallbackQuery):
 async def launch(message: types.Message):
     dep = await db.get_deposit(message.from_user.id, loop)
     status = await db.get_status(message.from_user.id, loop)
+    planet = await db.get_planet(message.from_user.id, loop)
 
-    if dep < 5000 and status == 0:
+    if dep < 5000 and (status == 0 or int(planet[0]) > 0):
         text = "Для того чтобы взлететь, Вам нужно пополнить кошелек на 5000 RUB"
 
         with open(PATH + "/img/add_dep.png", "rb") as file:
