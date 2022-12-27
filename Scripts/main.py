@@ -158,6 +158,10 @@ async def code(message: types.Message, state: FSMContext):
         await db.add_money(login_user.referrer_id, 5000, loop)
         await db.add_ref_money(login_user.referrer_id, 5000, loop)
         await db.insert_ref_money(5000, login_user.referrer_id, message.from_user.id, date_time_now, loop)
+        await bot.send_message(
+            message.from_user.id,
+            f"По вашей реферальной ссылке зарегистрировался {message.from_user.username}."
+        )
 
     with open(PATH + "/img/login_done.png", 'rb') as file:
         await bot.send_photo(
@@ -187,13 +191,16 @@ async def cancel_capcha(callback: types.CallbackQuery):
     await bot.send_message(callback.from_user.id, "Для возобновления используйте команду /start")
 
 
-@dp.message_handler(lambda mes: mes.text == message_handlers_commands[1]) # Взлет
+@dp.message_handler(lambda mes: mes.text == message_handlers_commands[1])# Взлет
 async def launch(message: types.Message):
     dep = await db.get_deposit(message.from_user.id, loop)
     status = await db.get_status(message.from_user.id, loop)
     planet = await db.get_planet(message.from_user.id, loop)
 
-    if dep < 5000 and (status == 0 or int(planet[0]) > 0):
+    if status[0] == 1 or int(planet[0]) > 0:
+        await logic.get_launch(bot, message.from_user.id, loop)
+
+    else:
         text = "Для того чтобы взлететь, Вам нужно пополнить кошелек на 5000 RUB"
 
         with open(PATH + "/img/add_dep.png", "rb") as file:
@@ -203,9 +210,6 @@ async def launch(message: types.Message):
                 caption=text,
                 reply_markup=inline_keybords.takeoff()
             )
-
-    else:
-        await logic.get_launch(bot, message.from_user.id, loop)
 
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[2])
