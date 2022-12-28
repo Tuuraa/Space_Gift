@@ -54,7 +54,8 @@ async def send_welcome(message: types.Message):
             referrer_id = message.get_args()
             if referrer_id != "":
                 global now_user
-                now_user = User(message.from_user.first_name, message.from_user.id, datetime.date.today(), int(referrer_id))
+                now_user = User(message.from_user.first_name, message.from_user.id,
+                                datetime.date.today(), int(referrer_id))
                 if now_user in list_persons:
                     list_persons.remove(now_user)
                 if now_user not in list_persons:
@@ -385,7 +386,7 @@ async def TestClones(message: types.Message):
 @dp.message_handler(lambda mes: mes.text == "Тестовое пополнение")
 async def TestPay(message: types.Message):
     await db.add_money(message.from_user.id, 5000, loop)
-    await db.set_now_depozit(message.from_user.id, 5000, loop)
+    #await db.set_now_depozit(message.from_user.id, 5000, loop)
     await db.add_depozit(message.from_user.id, 5000, loop)
     await message.answer("Баланс пополнен")
 
@@ -511,7 +512,8 @@ async def inform_pers_ok(callback: types.CallbackQuery):
 async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: UserDB, answer):
     data = await state.get_data()
     if len(data) == 0:
-        await bot.send_message(callback.from_user.id, "Вы не сделали никому подарок, чтобы  его сделать нажмите на 🎁 Сделать подарок")
+        await bot.send_message(callback.from_user.id,
+                               "Вы не сделали никому подарок, чтобы  его сделать нажмите на 🎁 Сделать подарок")
         return
 
     id = data.get("WHOM")
@@ -736,9 +738,8 @@ async def amount_crypt(message: types.Message, state: FSMContext):
         data["AMOUNT"] = str(message.text)
 
     if int(message.text) < 5000:
-        if await db.get_deposit(message.from_user.id, loop) < 5000:
-            await message.answer("🚫 Минимальная сумма пополнения 5000.0 RUB, введите корректную сумму!")
-            return
+        await message.answer("🚫 Минимальная сумма пополнения 5000.0 RUB, введите корректную сумму!")
+        return
     if int(message.text) % 5 != 0:
         await message.answer("Сумма должна быть кратна 5-ти!")
         return
@@ -890,7 +891,7 @@ async def get_amount(message: types.Message, state: FSMContext):
             await message.answer("🚫 Это не число, введите корректную сумму!")
             return
 
-    if int(message.text) < 1:
+    if int(message.text) < 5000:
         await message.answer("🚫 Минимальная сумма пополнения 5000.0 RUB, введите корректную сумму!")
     if int(message.text) % 5 != 0:
         await message.answer("Сумма должна быть кратна 5-ти!")

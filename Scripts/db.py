@@ -155,7 +155,8 @@ class ManagerUsersDataBase:
     async def set_gift_id(self, from_id, to_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
-            await cursor.execute("INSERT INTO `helper` (`from_id`, `to_id`) VALUES (%s, %s)", (from_id, to_id))
+            await cursor.execute("INSERT INTO `helper` (`from_id`, `to_id`) VALUES (%s, %s)",
+                                 (from_id, to_id))
             await connection.commit()
 
     async def get_gift_id(self, to_id, loop):
@@ -360,6 +361,13 @@ class ManagerUsersDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` + %s WHERE `user_id` = %s",
+                                       (money, user_id,))
+            await connection.commit()
+
+    async def remove_amount_gift_money(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` - %s WHERE `user_id` = %s",
                                        (money, user_id,))
             await connection.commit()
 

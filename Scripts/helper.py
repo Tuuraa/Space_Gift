@@ -3,6 +3,11 @@ from db import ManagerUsersDataBase
 import logic
 
 
+async def create_ref(amount, loop):
+    count = int(amount/10_000)
+
+
+
 def clear_repeat(users: list):
     return list(set(users))
 

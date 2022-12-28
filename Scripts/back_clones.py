@@ -78,9 +78,9 @@ async def worker_clones(loop):
                                     )
                                     await logic.get_launch(bot, active_user.user_id, loop)
                             else:
-                                continue
+                                break
                         else:
-                            continue
+                            break
                         await clones.update_active_user(loop)
 
             except Exception:
@@ -104,4 +104,4 @@ async def worker_clones(loop):
             )
             print(exc_type, exc_obj, exc_tb.tb_lineno)
 
-        await asyncio.sleep(30)
+        await asyncio.sleep(10)

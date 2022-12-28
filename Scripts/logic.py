@@ -68,7 +68,7 @@ async def get_launch(bot, user_id, loop):
         if type(number) is int:
             more_text = f"\nНомер в очереди: {number}\n\n" \
 
-        more_text += f"\n🙌Поздравляем! Вы заняли место в очереди на подарки от новых участников на свой депозит!\n" \
+        more_text += f"\n\n🙌Поздравляем! Вы заняли место в очереди на подарки от новых участников на свой депозит!\n" \
                         f"⚡️ Не жди очереди, начни увеличивать свой депозит уже сейчас и получать по 0,6% в день!\n\n" \
                         f"1️⃣ Инвестируй в Space gift с собственных средств.\n" \
                         f"2️⃣ Получай +5000р на депозит за каждого приглашенного реферала.\n" \
@@ -78,10 +78,17 @@ async def get_launch(bot, user_id, loop):
     elif active == 0 and status[0] == 1 and await dbUser.get_count_ref(user_id, loop) < count_ref[int(planet[0])]:
         path = first_path + f"{text_planet[1]}/В очереди ({text_planet[1].lower()}).png"
         level_text = "В очереди"
+
+        more_text += f"\n\n🙌Поздравляем! Вы заняли место в очереди на подарки от новых участников на свой депозит!\n" \
+                     f"⚡️ Не жди очереди, начни увеличивать свой депозит уже сейчас и получать по 0,6% в день!\n\n" \
+                     f"1️⃣ Инвестируй в Space gift с собственных средств.\n" \
+                     f"2️⃣ Получай +5000р на депозит за каждого приглашенного реферала.\n" \
+                     f"3️⃣ Space gift начислит на депозит 10% от инвестиций реферала.\n\n" \
+                     f"НЕ ЖДИ. ДЕЙСТВУЙ 💪 ✅"
     else:
         path += first_path + f"{text_planet[1]}/Шаг {int(level)} ({text_planet[1].lower()}).png"
         more_text += "\n\nПоздравляем 🎉 На этом уровне новый участник подарит Вам + 5000₽ к Вашему депозиту! \n" \
-                        f"До планеты Меркурий осталось {5 - int(await dbUser.get_step(user_id, loop))} подарка 🎁"
+                        f"До следующей планеты осталось {5 - int(await dbUser.get_step(user_id, loop))} подарка 🎁"
 
     text_plan = f"🪐 Движемся к планете: {text_planet[1]}"
     if text_planet[1] == planets[4] and level == 5:
@@ -146,13 +153,22 @@ async def get_gift(user_id, gift_user: UserDB, loop):
     text_planet = get_photo(planet[0])
 
     sum_gift = sums[text_planet[0]]
-    if int(await dbUser.get_money(user_id, loop)) < sum_gift:
-        return False, "Недостаточно денег"
+    system_gift = await dbUser.get_amount_gift_money(user_id, loop)
 
     await dbUser.add_amount_gift_money(gift_user.user_id, sum_gift, loop)
-    await dbUser.remove_money(user_id, sum_gift, loop)
     await dbUser.add_money(gift_user.user_id, sum_gift, loop)
-    await dbUser.remove_depozit(sum_gift, user_id, loop)
+    await dbUser.set_now_depozit(user_id, sum_gift, loop)
+    await dbUser.remove_money(user_id, sum_gift, loop)
+    now_dep = await dbUser.get_now_depozit(gift_user.user_id, loop)
+
+    if now_dep > 0:
+        await dbUser.add_amount_gift_money(gift_user.user_id, now_dep, loop)
+        await dbUser.set_now_depozit(gift_user.user_id, 0, loop)
+    if int(planet[0]) > 0:
+        await dbUser.remove_amount_gift_money(user_id, sum_gift, loop)
+    else:
+        await dbUser.remove_depozit(sum_gift, user_id, loop)
+
     return True, f"Вы успешно подарили @{gift_user.link} {sum_gift} RUB", sum_gift
 
 
@@ -178,7 +194,7 @@ async def gift(bot, user: UserDB, loop):
     await dbUser.change_first_dep(user.user_id, 0, loop)
 
     text = f"Поздравляем! 🎉 вы теперь на планете {text_planet[1]}! 🙌\n\n" \
-           f"👩‍🚀 На ваш депозит было подаsено  🎁 +{sum_add} RUB, " \
+           f"👩‍🚀 На ваш депозит было подарено  🎁 +{sum_add} RUB, " \
            f"из них Вы можете вывести {out_money[text_planet[0]]} RUB \n( с 20% комиссией )\n\n" \
            f"Чтобы взлететь 🚀 на планету {text_planet_next[1]}, нужно остаток " \
            f"Вашего депозита подарить Астронавту {link}"

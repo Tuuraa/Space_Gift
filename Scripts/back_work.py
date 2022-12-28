@@ -164,10 +164,12 @@ async def worker(loop):
                                                         f"Ваш реферал {dbUser.get_name(pay[1], loop)} "
                                                         f"пополнил баланс и вам подарили {dep} RUB.")
 
-                            depozit = await dbUser.get_deposit(pay[1], loop)
+                            status = await dbUser.get_status(pay[1], loop)
+                            planet = await dbUser.get_planet(pay[1], loop)
 
-                            if depozit >= 5000:
+                            if (status == 1 or int(planet) > 1) and amount_rub >= 5000:
                                 await clones.create_clones(amount_rub, loop)
+                                await helper.create_ref()
 
             end_program_time = time.time()
             print(f'BACKGROUND LAP PAY TIME: {end_program_time - start_program_time}')
