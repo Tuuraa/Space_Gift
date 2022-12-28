@@ -1,5 +1,6 @@
 import asyncio
 import os
+import threading
 
 import pytz
 from aiogram import Bot, types
@@ -13,7 +14,6 @@ import PayManager
 import config
 from FSM import PayFSM, CalculatorFSM, WithdrawMoneyFSM, ChangeCryptTypeFSN, AnswerAfterGiftFSM, \
     SendGiftFSM, PayCryptFSM, UserCodeFSM, WithdrawMoneyPercentFSM
-import Payment
 from db import ManagerUsersDataBase, ManagerPayDataBase, ManagerWithDrawDataBase, ConfigDBManager
 import coinbase_data
 from User import User, UserDB
@@ -55,10 +55,14 @@ async def send_welcome(message: types.Message):
             if referrer_id != "":
                 global now_user
                 now_user = User(message.from_user.first_name, message.from_user.id, datetime.date.today(), int(referrer_id))
+                if now_user in list_persons:
+                    list_persons.remove(now_user)
                 if now_user not in list_persons:
                     list_persons.append(now_user)
             else:
                 now_user = User(message.from_user.first_name, message.from_user.id, datetime.date.today())
+                if now_user in list_persons:
+                    list_persons.remove(now_user)
                 if now_user not in list_persons:
                     list_persons.append(now_user)
             with open(PATH + "/Data/start_text.txt", 'r', encoding='utf8') as file:
@@ -133,8 +137,8 @@ async def yes_ans(callback: types.CallbackQuery):
     await bot.delete_message(callback.from_user.id, callback.message.message_id)
     await bot.send_message(
         callback.from_user.id,
-        "Теперь Вам нужно придумать код-текст для восстановления "
-        "вашего профиля в случай потери. Введите данный код:"
+        "🔐 Теперь Вам нужно придумать код-текст для восстановления "
+        "вашего профиля в случай потери ( лучше записать ) Придумать данный код:👇"
     )
     await UserCodeFSM.code.set()
 
@@ -159,8 +163,8 @@ async def code(message: types.Message, state: FSMContext):
         await db.add_ref_money(login_user.referrer_id, 5000, loop)
         await db.insert_ref_money(5000, login_user.referrer_id, message.from_user.id, date_time_now, loop)
         await bot.send_message(
-            message.from_user.id,
-            f"По вашей реферальной ссылке зарегистрировался {message.from_user.username}."
+            login_user.referrer_id,
+            f"По вашей реферальной ссылке зарегистрировался @{message.from_user.username}"
         )
 
     with open(PATH + "/img/login_done.png", 'rb') as file:
@@ -197,7 +201,7 @@ async def launch(message: types.Message):
     status = await db.get_status(message.from_user.id, loop)
     planet = await db.get_planet(message.from_user.id, loop)
 
-    if status[0] == 1 or int(planet[0]) > 0:
+    if status[0] == 1 or int(planet[0]) > 0 or dep >= 5000:
         await logic.get_launch(bot, message.from_user.id, loop)
 
     else:
@@ -222,13 +226,13 @@ async def about_project(message: types.Message):
     await message.answer("Выберите пункт", reply_markup=inline_keybords.get_about_project())
 
 
-@dp.message_handler(lambda mes: mes.text == "💻 Рассчитать пассив")
+@dp.message_handler(lambda mes: mes.text == "💰 Калькулятор")
 async def read_numb(message: types.Message):
     await message.answer("▪ Введите сумму, которую хотите рассчитать:")
     await CalculatorFSM.COUNT_REFERRER.set()
 
 
-@dp.message_handler(lambda mes: mes.text == "👥 Реферальная система")
+@dp.message_handler(lambda mes: mes.text == "👥 Реферальная ссылка")
 async def ref(message: types.Message):
     count = await db.count_referrer(message.from_user.id, loop)
     text = f"🤖 Ваш ID: {message.from_user.id}\n"\
@@ -353,16 +357,6 @@ async def ard(message: types.Message):
 
 @dp.message_handler(text="💻 Инвестиции")
 async def invest(message: types.Message):
-
-    utc_now = pytz.utc.localize(datetime.datetime.utcnow())
-    date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
-    date = await db.get_date_now(message.from_user.id, loop)
-    time_by_percent = datetime.datetime.strptime(str(date_time_now)[:-13], '%Y-%m-%d %H:%M:%S') - \
-                      datetime.datetime.strptime(str(date), '%Y-%m-%d %H:%M:%S')
-
-    dt = datetime.datetime.strptime(str(date_time_now)[:-13], '%Y-%m-%d %H:%M:%S')
-    result = dt + datetime.timedelta(days=1)
-    gift_money = await db.get_gift_money(message.from_user.id, loop)
     dep = await db.get_deposit(message.from_user.id, loop)
 
     await message.answer(
@@ -393,19 +387,7 @@ async def TestPay(message: types.Message):
     await db.add_money(message.from_user.id, 5000, loop)
     await db.set_now_depozit(message.from_user.id, 5000, loop)
     await db.add_depozit(message.from_user.id, 5000, loop)
-    response = "Супер 🙌 \n" \
-               "Вы пополнили депозит на 5000₽\n\n" \
-               "Хорошая новость!!!\n" \
-               "Space Gift увеличит 🚀 Ваш депозит в 2 раза, для этого \n" \
-               "Вам нужно нажать кнопку 👇"
-
-    with open(PATH + "/img/double_dep.png", 'rb') as file:
-        await bot.send_photo(
-            message.from_user.id, photo=file,
-            caption=response,
-            parse_mode="HTML",
-            reply_markup=inline_keybords.get_double_dep()
-        )
+    await message.answer("Баланс пополнен")
 
 
 @dp.callback_query_handler(text="system_clones")
@@ -424,6 +406,11 @@ async def system_clones(callback: types.CallbackQuery):
 async def deleteacc(message: types.Message):
     await message.answer("Аккаунт удален, перезапустите бота \n/start")
     await db.delete_acc(message.from_user.id, loop)
+
+
+@dp.callback_query_handler(text='reinvest')
+async def reinvest(callback: types.CallbackQuery):
+    pass
 
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[4])
@@ -903,7 +890,7 @@ async def get_amount(message: types.Message, state: FSMContext):
             await message.answer("🚫 Это не число, введите корректную сумму!")
             return
 
-    if int(message.text) < 5000:
+    if int(message.text) < 1:
         await message.answer("🚫 Минимальная сумма пополнения 5000.0 RUB, введите корректную сумму!")
     if int(message.text) % 5 != 0:
         await message.answer("Сумма должна быть кратна 5-ти!")
@@ -976,16 +963,16 @@ async def cancel_pay(callback: types.CallbackQuery):
 async def calc(message: types.Message, state: FSMContext):
 
     if not message.text.isdigit():
-        if message.text in ["⬅ Вернуться", "📄 Презентация", "👥 Реферальная система", "💻 Рассчитать пассив"]:
+        if message.text in ["⬅ Вернуться", "📄 Презентация", "👥 Реферальная ссылка", "💰 Калькулятор"]:
             await state.reset_state(with_data=False)
             match message.text:
                 case "⬅ Вернуться":
                     await back(message)
-                case "Презентация":
+                case "📄 Презентация":
                     await back(message)
-                case "Реферальная система":
+                case "👥 Реферальная ссылка":
                     await ref(message)
-                case "Рассчитать пассив":
+                case "💰 Калькулятор":
                     await calc(message)
             return
         else:
@@ -1389,9 +1376,26 @@ async def change_type_res(message: types.Message):
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    asyncio.run_coroutine_threadsafe(worker(bot, loop), loop)
-    asyncio.run_coroutine_threadsafe(worker_percent(bot, loop), loop)
-    asyncio.run_coroutine_threadsafe(worker_clones(bot, loop), loop)
-    asyncio.run_coroutine_threadsafe(worker_jumps(bot, loop), loop)
+    #asyncio.run_coroutine_threadsafe(worker(bot, loop), loop)
+    #asyncio.run_coroutine_threadsafe(worker_percent(bot, loop), loop)
+    #asyncio.run_coroutine_threadsafe(worker_clones(bot, loop), loop)
+    #asyncio.run_coroutine_threadsafe(worker_jumps(bot, loop), loop)
+    loops = [asyncio.new_event_loop() for i in range(0, 4)]
+
+    thread = threading.Thread(target=loops[0].run_forever)
+    thread.start()
+    asyncio.run_coroutine_threadsafe(worker(loops[0]), loops[0])
+
+    thread = threading.Thread(target=loops[1].run_forever)
+    thread.start()
+    asyncio.run_coroutine_threadsafe(worker_percent(loops[1]), loops[1])
+
+    thread = threading.Thread(target=loops[2].run_forever)
+    thread.start()
+    asyncio.run_coroutine_threadsafe(worker_clones(loops[2]), loops[2])
+
+    thread = threading.Thread(target=loops[3].run_forever)
+    thread.start()
+    asyncio.run_coroutine_threadsafe(worker_jumps(loops[3]), loops[3])
 
     executor.start_polling(dp, skip_updates=True)

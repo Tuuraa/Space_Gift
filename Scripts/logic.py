@@ -54,7 +54,8 @@ async def get_launch(bot, user_id, loop):
         text_status = " ✅"
 
     if await dbUser.get_count_ref(user_id, loop) < count_ref[int(planet[0])]:
-        active_text = f"\n❗ Чтобы попасть в очередь вам нужно пригласить {count_ref[int(planet[0])] - int(await dbUser.get_count_ref(user_id, loop))} чел.❗ \n"
+        active_text = f"\n❗ Чтобы попасть в очередь вам нужно пригласить " \
+                      f"{count_ref[int(planet[0])] - int(await dbUser.get_count_ref(user_id, loop))} чел.❗ \n"
 
     if level == 1 and status[0] == 0:
         path = first_path + f"{text_planet[1]}/В ожидании ({text_planet[1].lower()}).png"
@@ -66,7 +67,8 @@ async def get_launch(bot, user_id, loop):
         number = await get_queue(ud, user_id, loop)
         if type(number) is int:
             more_text = f"\nНомер в очереди: {number}\n\n" \
-                     f"🙌Поздравляем! Вы заняли место в очереди на подарки от новых участников на свой депозит!\n" \
+
+        more_text += f"\n🙌Поздравляем! Вы заняли место в очереди на подарки от новых участников на свой депозит!\n" \
                         f"⚡️ Не жди очереди, начни увеличивать свой депозит уже сейчас и получать по 0,6% в день!\n\n" \
                         f"1️⃣ Инвестируй в Space gift с собственных средств.\n" \
                         f"2️⃣ Получай +5000р на депозит за каждого приглашенного реферала.\n" \
@@ -170,14 +172,14 @@ async def gift(bot, user: UserDB, loop):
     sum_gift = sums[text_planet[0]]
     path += f"{text_planet[1]}/Поздравляем. {text_planet[1]}.png"
 
-    await dbUser.add_money(user.user_id, (sum_add - out_money[text_planet[0]]) + sum_gift, loop)
+    await dbUser.add_money(user.user_id, (sum_add - out_money[text_planet[0]]), loop)
     await dbUser.add_gift_money(user.user_id, out_money[text_planet[0]], loop)
-    await dbUser.add_amount_gift_money(user.user_id, (sum_add - out_money[text_planet[0]]) + sum_gift, loop)
+    await dbUser.add_amount_gift_money(user.user_id, (sum_add - out_money[text_planet[0]] - sum_gift), loop)
     await dbUser.change_first_dep(user.user_id, 0, loop)
 
     text = f"Поздравляем! 🎉 вы теперь на планете {text_planet[1]}! 🙌\n\n" \
            f"👩‍🚀 На ваш депозит было подаsено  🎁 +{sum_add} RUB, " \
-           f"из них Вы можете вывести {out_money[text_planet[0]]} RUB ( с 20% комиссией )\n\n" \
+           f"из них Вы можете вывести {out_money[text_planet[0]]} RUB \n( с 20% комиссией )\n\n" \
            f"Чтобы взлететь 🚀 на планету {text_planet_next[1]}, нужно остаток " \
            f"Вашего депозита подарить Астронавту {link}"
 

@@ -9,7 +9,7 @@ import time
 import db
 from config import PATH
 
-from db import ManagerPayDataBase, ManagerUsersDataBase, ManagerClonesDataBase
+from db import ManagerPayDataBase, ManagerUsersDataBase, ManagerClonesDataBase, ConfigDBManager
 import Payment
 from helper import clear_repeat, cancel_unnecessary
 import clones
@@ -19,6 +19,11 @@ import datetime
 dbPay = ManagerPayDataBase()
 dbUser = ManagerUsersDataBase()
 dbClones = ManagerClonesDataBase()
+
+configCl = ConfigDBManager.get()
+
+API_TOKEN = configCl.api_bot  # Считывание токена
+bot = Bot(token=API_TOKEN)
 
 
 async def send_message_safe(bot: Bot, tel_id, text, link=None, reply_markup=None):
@@ -37,7 +42,7 @@ async def send_message_safe(bot: Bot, tel_id, text, link=None, reply_markup=None
         pass
 
 
-async def worker(bot: Bot, loop):
+async def worker(loop):
     while True:
         try:
             start_program_time = time.time()
@@ -74,8 +79,8 @@ async def worker(bot: Bot, loop):
 
                                 # Оповещение реферала
                                 referrer_id = await dbUser.get_referrer_of_user(user[0], loop)
-                                first_dep = await dbUser.get_first_dep(user[0], loop)
-                                if referrer_id != "None" and first_dep == 0:
+                                status = await dbUser.get_status(user[0], loop)
+                                if referrer_id != "None" and status[0] == 1:
                                     dep = pay[1] * .1
                                     utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                                     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
@@ -85,10 +90,10 @@ async def worker(bot: Bot, loop):
                                     await send_message_safe(
                                         bot,
                                         referrer_id,
-                                        f"Ваш реферал {await dbUser.get_name(user[0], loop)} "
+                                        f"Ваш реферал @{await dbUser.get_name(user[0], loop)} "
                                         f"пополнил баланс и вам подарили {dep} RUB."
                                     )
-                                await bot.delete_message(user[0], pay[5])
+                                #await bot.delete_message(user[0], pay[5])
 
                                 if pay[1] <= 5000:
                                     with open(PATH + "/img/dep_done.png", 'rb') as file:
@@ -107,8 +112,6 @@ async def worker(bot: Bot, loop):
                                 if depozit >= 5000:
                                     await clones.create_clones(pay[1], loop)
 
-                        elif status_payment == "WAIT_PAYMENT":
-                            print(f"Платеж {pay[0]} в процессе")
 
             #Обработчик пополнения Coinbase
             transactions = await coinbase_data.get_completed_transactions(loop)
@@ -136,14 +139,20 @@ async def worker(bot: Bot, loop):
                                         file
                                     )
                             else:
-                                await send_message_safe(bot, pay[1], f"Платеж успешно выполнен. Ваш счет пополненен на {pay[0]} {pay[3]}.")
+                                await send_message_safe(
+                                    bot,
+                                    pay[1],
+                                    f"Платеж успешно выполнен. Ваш счет пополненен на {pay[0]} {pay[3]}."
+                                )
 
                             await bot.delete_message(pay[1], pay[4])
                             await dbPay.change_status_for_cancel("OPERATION_COMPLETED", pay[4], "CRYPT", loop)
                             await dbPay.change_status_trans(transaction.id, "COMPLETED", loop)
 
                             referrer_id = await dbUser.get_referrer_of_user(pay[1], loop)
-                            if referrer_id != "None":
+                            status = await dbUser.get_status(pay[1], loop)
+
+                            if referrer_id != "None" and status[0] == 1:
                                 dep = pay[0] * .1
                                 utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                                 date_time_now = utc_now.astimezone(pytz.timezone("UTC"))

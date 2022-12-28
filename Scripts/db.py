@@ -38,6 +38,7 @@ class ConfigDBManager:
         connection, cursor = create_sync_con()
         data = ['bot_api', 'api_pay', 'api_coinbase_pay', 'api_coinbase_secret', 'ltc_id', 'btc_id',
                 'eth_id', 'usdt_wallet', 'type_crypt', 'errors_token', 'errors_group_id']
+
         result = []
         for item in data:
             cursor.execute("select `title` from `tokens` where `api` = %s", (item, ))
@@ -71,7 +72,7 @@ class ManagerUsersDataBase:
             if referrer_id is not None:
                 await cursor.execute("INSERT INTO `users` (`name`, `user_id`, `date`, `referrer_id`, `date_now`, "
                                            "`link_name`, last_withd, `code`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-                                           (name, user_id, date, referrer_id, date_now, user_name, last_withd, code, ))
+                                           (name, user_id, date, referrer_id, date_now, user_name, last_withd, code))
                 await connection.commit()
             else:
                 await cursor.execute("INSERT INTO `users` (`name`, `user_id`, `date`, `date_now`, `link_name`, "
@@ -188,7 +189,7 @@ class ManagerUsersDataBase:
         async with connection.cursor() as cursor:
             await cursor.execute("SELECT `user_id` FROM `users` WHERE `name` = %s", (name, ))
             result = (await cursor.fetchall())[0][0]
-            return result
+            return int(result)
 
     async def get_user_name(self, user_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
@@ -450,7 +451,8 @@ class ManagerUsersDataBase:
     async def insert_ref_money(self, money, ref_id, user_id, date, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
-            await cursor.execute("insert into ref_money (user_id, ref_id, money, date) values (%s, %s, %s, %s)", (user_id, ref_id, money, date, ))
+            await cursor.execute("insert into `ref_money` (`user_id`, `ref_id`, `money`, `date`) "
+                                 "values (%s, %s, %s, %s)", (user_id, ref_id, money, date, ))
             await connection.commit()
 
     async def remove_depozit(self, money, user_id, loop):
@@ -618,6 +620,19 @@ class ManagerPayDataBase:
             return result
 
     async def change_status_trans(self, id, status, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `transactions` SET `status` = %s WHERE `id` = %s", (status , id))
+            await connection.commit()
+
+    async def get_reinvest(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("")
+            result = await cursor.fetchone()
+            return result
+
+    async def set_reinvest(self, id, status, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("UPDATE `transactions` SET `status` = %s WHERE `id` = %s", (status , id))

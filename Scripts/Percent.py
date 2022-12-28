@@ -5,7 +5,7 @@ import datetime
 import pytz
 from aiogram import Bot
 import sys
-from db import ManagerPayDataBase
+from db import ManagerPayDataBase, ConfigDBManager
 import coinbase_data
 from helper import clear_none
 
@@ -16,6 +16,11 @@ dbUser = ManagerUsersDataBase()
 dbPay = ManagerPayDataBase()
 
 
+configCl = ConfigDBManager.get()
+
+API_TOKEN = configCl.api_bot  # Считывание токена
+bot = Bot(token=API_TOKEN)
+
 async def send_message_safe(bot, tel_id, text, reply_markup=None):
     try:
         await bot.send_message(tel_id, text, parse_mode='HTML', reply_markup=reply_markup)
@@ -23,7 +28,7 @@ async def send_message_safe(bot, tel_id, text, reply_markup=None):
         pass
 
 
-async def worker_percent(bot: Bot, loop):
+async def worker_percent(loop):
     while True:
         try:
             start_program_time = time.time()

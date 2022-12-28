@@ -2,6 +2,9 @@ import asyncio
 
 import sys
 import time
+
+from aiogram import Bot
+
 import helper
 import clones
 import db
@@ -11,6 +14,12 @@ from User import UserDB
 
 dbUser = db.ManagerUsersDataBase()
 dbClones = db.ManagerClonesDataBase()
+
+
+configCl = db.ConfigDBManager.get()
+
+API_TOKEN = configCl.api_bot  # Считывание токена
+bot = Bot(token=API_TOKEN)
 
 
 async def send_message_safe(bot, tel_id, text, reply_markup=None):
@@ -27,7 +36,7 @@ async def send_message_safe(bot, tel_id, text, reply_markup=None):
         print(exc_type, exc_obj, exc_tb.tb_lineno)
 
 
-async def worker_clones(bot, loop):
+async def worker_clones(loop):
     while True:
         try:
             start_program_time = time.time()

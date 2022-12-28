@@ -48,7 +48,6 @@ def profile_markup():
     markup.add().row("🚀 Взлёт", "📝 О проекте")
     markup.add().row("💻 Инвестиции", "🔧 Инструменты")
     markup.add().row("💳 Кошелёк", "⚙ Тех. поддержка")
-    markup.add().row("Тестовое пополнение", "Удалить аккаунт", "Тестовые клоны")
 
     return markup
 
@@ -107,7 +106,8 @@ async def banks_payment():
 
 
 def cancel_pay():
-    return types.InlineKeyboardMarkup().add(types.InlineKeyboardButton("❌ Отменить заявку", callback_data="cancel_pay"))
+    return types.InlineKeyboardMarkup()\
+        .add(types.InlineKeyboardButton("❌ Отменить заявку", callback_data="cancel_pay"))
 
 
 def get_about_project():
@@ -147,12 +147,11 @@ def get_about_project():
 
 def get_tools():
     return types.ReplyKeyboardMarkup(resize_keyboard=True).add(
-        types.KeyboardButton("💻 Рассчитать пассив"),
-        types.KeyboardButton("👥 Реферальная система")).add(
+        types.KeyboardButton("💰 Калькулятор"),
+        types.KeyboardButton("👥 Реферальная ссылка"),
         types.KeyboardButton("📄 Презентация"),
-        types.KeyboardButton("Удалить аккаунт"),
         types.KeyboardButton("⬅ Вернуться")
-    )
+    ).add().row("Тестовое пополнение", "Удалить аккаунт")
 
 
 def get_link_to_space_money():
@@ -163,7 +162,7 @@ def get_link_to_space_money():
 
 def get_wallet_inline():
     return types.InlineKeyboardMarkup().add(
-        types.InlineKeyboardButton("➕ Пополнить", callback_data="add_money")).add(
+        #types.InlineKeyboardButton("🪙 Реинвестировать", callback_data="reinvest")).add(
         types.InlineKeyboardButton("➖ Вывести дивиденды", callback_data="remove_money")).add(
         types.InlineKeyboardButton("💫 Вывести инвестиции", callback_data="remove_money_invest")
     )
@@ -227,7 +226,7 @@ def inform_pers():
 
 def invest_buttons():
     return types.InlineKeyboardMarkup().add(
-        types.InlineKeyboardButton("➕ Инвестировать", callback_data="s")).add(
+        types.InlineKeyboardButton("➕ Инвестировать", callback_data="add_money")).add(
         types.InlineKeyboardButton("💫 Инвестиции в Space money", callback_data="link_to_space_money")).add(
         types.InlineKeyboardButton("🤖 Система клонов", callback_data="system_clones"))
 
