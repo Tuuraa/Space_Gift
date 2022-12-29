@@ -15,7 +15,6 @@ import PayManager
 import config
 from FSM import PayFSM, CalculatorFSM, WithdrawMoneyFSM, ChangeCryptTypeFSN, AnswerAfterGiftFSM, \
     SendGiftFSM, PayCryptFSM, UserCodeFSM, WithdrawMoneyPercentFSM
-import helper
 from db import ManagerUsersDataBase, ManagerPayDataBase, ManagerWithDrawDataBase, ConfigDBManager
 import coinbase_data
 from User import User, UserDB
@@ -165,9 +164,6 @@ async def code(message: types.Message, state: FSMContext):
                           last_withd=date_time_now, code=message.text)
         if login_user.referrer_id is not None:
             await db.update_count_ref(login_user.referrer_id, loop)
-            await db.add_money(login_user.referrer_id, 5000, loop)
-            await db.add_ref_money(login_user.referrer_id, 5000, loop)
-            await db.insert_ref_money(5000, login_user.referrer_id, message.from_user.id, date_time_now, loop)
             await bot.send_message(
                 login_user.referrer_id,
                 f"По вашей реферальной ссылке зарегистрировался @{message.from_user.username}"
@@ -206,9 +202,15 @@ async def launch(message: types.Message):
     dep = await db.get_deposit(message.from_user.id, loop)
     status = await db.get_status(message.from_user.id, loop)
     planet = await db.get_planet(message.from_user.id, loop)
+    step = await db.get_step(message.from_user.id, loop)
+
+    if int(planet[0]) == 5 and int(step) == 5:
+        await message.answer("Поздравляю, ты красавчик!")
+        return
 
     if status[0] == 1 or int(planet[0]) > 0 or dep >= 5000:
         await logic.get_launch(bot, message.from_user.id, loop)
+        return
 
     else:
         text = "Для того чтобы взлететь, Вам нужно пополнить кошелек на 5000 RUB"
@@ -470,7 +472,7 @@ async def wallet(message: types.Message):
 
             cd = await db.get_amount_gift_money(message.from_user.id, loop)
             dep = await db.get_deposit(message.from_user.id, loop)
-            ref = await db.get_count_ref(message.from_user.id, loop) * 5000
+            ref = await db.get_count_ref_wallet(message.from_user.id, loop) * 5000
             ref_money = await db.get_percent_ref_money(message.from_user.id, loop)
             reinv = await db.get_reinvest(message.from_user.id, loop)
             date = await db.get_date(message.chat.id, loop)
@@ -488,7 +490,7 @@ async def wallet(message: types.Message):
                    f"🤑 За инвистиции реферала - {int(ref_money)}₽\n" \
                    "——————————————————\n" \
                    f"💵 Общий депозит: {int(cd + dep + ref + ref_money + reinv)}₽\n" \
-                   f"💵 Пассив: {round(float(cd + dep + ref + ref_money) * .006, 5)} руб/день!\n" \
+                   f"💵 Пассив: {round(float(cd + dep + ref + ref_money + reinv) * .006, 5)} руб/день!\n" \
                    f"💵 На вывод: {await db.get_gift_money(message.from_user.id, loop)}₽ \n" \
                    "( минимальная сумма вывода 1000₽ )"
 
@@ -542,7 +544,6 @@ async def inform_pers_ok(callback: types.CallbackQuery):
 
 @dp.callback_query_handler(text="inform_pers")
 async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: UserDB=None, answer=None):
-    async with lock:
         data = await state.get_data()
         if len(data) == 0:
             await bot.send_message(callback.from_user.id,
@@ -776,8 +777,8 @@ async def amount_crypt(message: types.Message, state: FSMContext):
     if int(message.text) < 5000:
         await message.answer("🚫 Минимальная сумма пополнения 5000.0 RUB, введите корректную сумму!")
         return
-    if int(message.text) % 5 != 0:
-        await message.answer("Сумма должна быть кратна 5-ти!")
+    if int(message.text) % 5000 != 0:
+        await message.answer("Сумма должна быть кратна 5000 RUB!")
         return
     else:
         async with state.proxy() as data:
@@ -818,14 +819,6 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
         if status[0] == 0:
 
             user: UserDB = (await logic.get_user_on_planet((await db.get_planet(callback.from_user.id, loop))[0], callback.from_user.id, loop))
-            if user == "Нет пользователя":
-                await bot.send_message(
-                    callback.from_user.id,
-                    "В данный момент нет людей кому Вы можете сделать подарок"
-                )
-                return
-
-            user: UserDB = (await logic.get_user_on_planet((await db.get_planet(callback.from_user.id, loop))[0], callback.from_user.id, loop))
             if user is not None:
                 answer = await logic.get_gift(callback.from_user.id, user, loop)
                 await bot.send_message(
@@ -844,18 +837,56 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                         "Пользователю было отправлено сообщение о подарке ✅"
                     )
 
+                    ref = await db.get_referrer_of_user(callback.from_user.id, loop)
+                    refgift = await db.get_refgift(callback.from_user.id, loop)
+
+                    if ref is not None and refgift == 0:
+                        await db.add_amount_gift_money(ref, 5000, loop)
+                        await db.add_money(ref, 5000, loop)
+                        await db.reset_refgift(callback.from_user.id, loop)
+                        await bot.send_message(
+                            int(ref),
+                            "💸 Вам начислено реферальное вознаграждение "
+                            "5000₽ за нового пользователя в системе"
+                        )
+
                     await db.change_status(callback.from_user.id, 1, loop)
                     await inform_pers(callback, state, user=user, answer=answer[2])
+                else:
+                    await bot.send_message(
+                        callback.from_user.id,
+                        answer[1]
+                    )
             else:
                 planet = await db.get_planet(callback.from_user.id, loop)
                 text_planet = logic.get_photo(planet[0])
                 sum_gift = logic.sums[text_planet[0]]
 
+                ref = await db.get_ref(callback.from_user.id, loop)
+                refgift = await db.get_refgift(callback.from_user.id, loop)
+
+                if ref is not None and refgift == 0:
+                    await db.add_money(ref, 5000, loop)
+                    await db.reset_refgift(callback.from_user.id, loop)
+                    await bot.send_message(
+                        int(ref),
+                        "💸 Вам начислено реферальное вознаграждение "
+                        "5000₽ за нового пользователя в системе"
+                    )
+
                 await db.set_now_depozit(callback.from_user.id, sum_gift, loop)
                 await db.remove_money(callback.from_user.id, sum_gift, loop)
 
                 if int(planet[0]) > 0:
-                    await db.remove_amount_gift_money(callback.from_user.id, sum_gift, loop)
+                    amount = await db.get_amount_gift_money(callback.from_user.id, loop)
+                    if amount >= sum_gift:
+                        await db.remove_amount_gift_money(callback.from_user.id, sum_gift, loop)
+                    else:
+                        await bot.send_message(
+                            callback.from_user.id,
+                            "Недостаточно денег"
+                        )
+                        return
                 else:
                     await db.remove_depozit(sum_gift, callback.from_user.id, loop)
 
@@ -934,17 +965,17 @@ async def get_amount(message: types.Message, state: FSMContext):
         if message.text in message_handlers_commands:
             await state.reset_state(with_data=False)
 
-            if message.text ==  "💳 Кошелёк":
+            if message.text == "💳 Кошелёк":
                 await wallet(message)
-            elif message.text ==  "🚀 Взлёт":
+            elif message.text == "🚀 Взлёт":
                 await launch(message)
-            elif message.text ==  "🔧 Инструменты":
+            elif message.text == "🔧 Инструменты":
                 await tools(message)
-            elif message.text ==  "📝 О проекте":
+            elif message.text == "📝 О проекте":
                 await about_project(message)
-            elif message.text ==  "🌑 Space Money":
+            elif message.text == "🌑 Space Money":
                 await space_go(message)
-            elif message.text ==  "⚙ Техническая поддержка":
+            elif message.text == "⚙ Техническая поддержка":
                 await support(message)
 
             return
@@ -954,8 +985,9 @@ async def get_amount(message: types.Message, state: FSMContext):
 
     if int(message.text) < 5000:
         await message.answer("🚫 Минимальная сумма пополнения 5000.0 RUB, введите корректную сумму!")
-    if int(message.text) % 5 != 0:
-        await message.answer("Сумма должна быть кратна 5-ти!")
+        return
+    if int(message.text) % 5000 != 0:
+        await message.answer("Сумма должна быть кратна 5000 RUB!")
         return
     else:
 
@@ -1041,7 +1073,9 @@ async def calc(message: types.Message, state: FSMContext):
         else:
             await message.answer("🚫 Это не число, введите корректную сумму!")
             return
-
+    if int(message.text) > 5_000_000:
+        await message.answer("Введите сумму до 5 млн.")
+        return
     async with state.proxy() as data:
         data["COUNT_REFERRER"] = int(message.text)
 
@@ -1053,8 +1087,8 @@ async def calc(message: types.Message, state: FSMContext):
             caption="💱 В данном разделе Вы сумеете рассчитать Вашу прибыль, от суммы вашей инвестиции в наш проект:\n\n"
                 f"💵 Ваша инвестиция: {message.text} RUB\n\n"
                 f"Прибыль в сутки: {numb} RUB\n"
-                f"Прибыль в месяц: {numb * 30} RUB\n"
-                f'Прибыль в год: {numb * 30 * 12} RUB\n',
+                f"Прибыль в месяц: {round(numb * 30, 2)} RUB\n"
+                f'Прибыль в год: {round(numb * 30 * 12, 2)} RUB\n',
             reply_markup=inline_keybords.calculate()
         )
         await state.reset_state(with_data=False)

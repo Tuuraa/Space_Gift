@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: yougiftdb
+-- Host: localhost    Database: yougiftdb
 -- ------------------------------------------------------
 -- Server version	8.0.31
 
@@ -24,15 +24,15 @@ DROP TABLE IF EXISTS `crypt_pay`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `crypt_pay` (
   `amount` float DEFAULT NULL,
-  `user_id` int DEFAULT NULL,
+  `user_id` bigint DEFAULT NULL,
   `date` datetime DEFAULT NULL,
-  `pay_type` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `cancel_id` int DEFAULT NULL,
-  `status` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pay_type` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cancel_id` bigint DEFAULT NULL,
+  `status` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `amount_rub` decimal(15,10) DEFAULT NULL,
   `id` int NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,6 +41,7 @@ CREATE TABLE `crypt_pay` (
 
 LOCK TABLES `crypt_pay` WRITE;
 /*!40000 ALTER TABLE `crypt_pay` DISABLE KEYS */;
+INSERT INTO `crypt_pay` VALUES (70.0574,2117649351,'2022-12-28 18:06:07','USDT',20737,'CANCELED',5000.0000000000,26);
 /*!40000 ALTER TABLE `crypt_pay` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -53,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-29 20:58:37
+-- Dump completed on 2022-12-30  1:38:45

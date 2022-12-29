@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: yougiftdb
+-- Host: localhost    Database: yougiftdb
 -- ------------------------------------------------------
 -- Server version	8.0.31
 
@@ -23,16 +23,16 @@ DROP TABLE IF EXISTS `pay`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `pay` (
-  `pay_id` int DEFAULT NULL,
+  `pay_id` bigint DEFAULT NULL,
   `pay_amount` int DEFAULT NULL,
-  `date` date DEFAULT NULL,
-  `pay_type` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_id` int DEFAULT NULL,
-  `cancel_id` int DEFAULT NULL,
-  `status` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date` datetime DEFAULT NULL,
+  `pay_type` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_id` bigint DEFAULT NULL,
+  `cancel_id` bigint DEFAULT NULL,
+  `status` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `id` int NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +41,7 @@ CREATE TABLE `pay` (
 
 LOCK TABLES `pay` WRITE;
 /*!40000 ALTER TABLE `pay` DISABLE KEYS */;
-INSERT INTO `pay` VALUES (2294862,1,'2022-12-20','sberbank',855151774,17377,'OPERATION_COMPLETED',7),(2301626,5,'2022-12-21','sberbank',855151774,17391,'CANCELED',8),(2301652,1,'2022-12-21','tinkoff',855151774,17403,'OPERATION_COMPLETED',9),(2302731,1,'2022-12-21','sberbank',855151774,17448,'CANCELED',10),(2302737,1,'2022-12-21','tinkoff',855151774,17458,'OPERATION_COMPLETED',11);
+INSERT INTO `pay` VALUES (1525172,5,'2022-12-29 00:00:00','sberbank',415321692,3484,'CANCELED',25),(1525173,0,'2022-12-29 00:00:00','sberbank',415321692,3527,'CANCELED',26),(1525174,10000,'2022-12-29 00:00:00','tinkoff',1328872217,3717,'CANCELED',27),(1525175,1000000000,'2022-12-29 00:00:00','sberbank',628931867,3726,'CANCELED',28),(1525176,10000,'2022-12-29 00:00:00','tinkoff',1328872217,3741,'CANCELED',29),(1525177,5000,'2022-12-29 00:00:00','sberbank',628931867,3751,'CANCELED',30),(1525178,10000,'2022-12-29 00:00:00','sberbank',628931867,3761,'CANCELED',31),(1525179,5000,'2022-12-30 00:00:00','sberbank',855151774,4684,'CANCELED',32),(1525180,5000,'2022-12-30 00:00:00','sberbank',1396645031,4711,'OPERATION_COMPLETED',33);
 /*!40000 ALTER TABLE `pay` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-29 20:58:36
+-- Dump completed on 2022-12-30  1:38:45

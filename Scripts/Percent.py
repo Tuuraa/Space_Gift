@@ -45,7 +45,7 @@ async def worker_percent(loop):
                     status = await dbUser.get_status(user[0], loop)
                     planet = await dbUser.get_planet(user[0], loop)
 
-                    if status == 1 or int(planet[0]) > 1:
+                    if status == 1 or int(planet[0]) > 0:
                         utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                         date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 

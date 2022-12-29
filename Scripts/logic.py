@@ -50,7 +50,9 @@ async def get_launch(bot, user_id, loop):
     active = await dbUser.get_active(user_id, loop)
     more_text = ""
     active_text = ""
+    text_planet = get_photo(planet[0])
 
+    sum_gift = sums[text_planet[0]]
     text_planet = get_photo(planet[0])
     status = await dbUser.get_status(user_id, loop)
 
@@ -59,7 +61,7 @@ async def get_launch(bot, user_id, loop):
         text_status = " ✅"
 
     if await dbUser.get_count_ref(user_id, loop) < count_ref[int(planet[0])]:
-        active_text = f"\n❗ Чтобы попасть в очередь вам нужно пригласить " \
+        active_text = f"\n❗ Чтобы попасть в очередь вам нужно пригласить еще " \
                       f"{count_ref[int(planet[0])] - int(await dbUser.get_count_ref(user_id, loop))} чел.❗ \n"
 
     if level == 1 and status[0] == 0:
@@ -76,7 +78,7 @@ async def get_launch(bot, user_id, loop):
         more_text += f"\n\n🙌Поздравляем! Вы заняли место в очереди на подарки от новых участников на свой депозит!\n" \
                         f"⚡ Не жди очереди, начни увеличивать свой депозит уже сейчас и получать по 0,6% в день!\n\n"\
                         f"1️⃣ Инвестируй в Space gift с собственных средств.\n" \
-                        f"2️⃣ Получай +5000р на депозит за каждого приглашенного реферала.\n" \
+                        f"2️⃣ Получай +{sum_gift}р на депозит за каждого приглашенного реферала.\n" \
                         f"3️⃣ Space gift начислит на депозит 10% от инвестиций реферала.\n\n" \
                         f"НЕ ЖДИ. ДЕЙСТВУЙ 💪 ✅"
 
@@ -87,12 +89,12 @@ async def get_launch(bot, user_id, loop):
         more_text += f"\n\n🙌Поздравляем! Вы заняли место в очереди на подарки от новых участников на свой депозит!\n" \
                      f"⚡️ Не жди очереди, начни увеличивать свой депозит уже сейчас и получать по 0,6% в день!\n\n" \
                      f"1️⃣ Инвестируй в Space gift с собственных средств.\n" \
-                     f"2️⃣ Получай +5000р на депозит за каждого приглашенного реферала.\n" \
+                     f"2️⃣ Получай +{sum_gift}р на депозит за каждого приглашенного реферала.\n" \
                      f"3️⃣ Space gift начислит на депозит 10% от инвестиций реферала.\n\n" \
                      f"НЕ ЖДИ. ДЕЙСТВУЙ 💪 ✅"
     else:
         path += first_path + f"{text_planet[1]}/Шаг {int(level)} ({text_planet[1].lower()}).png"
-        more_text += "\n\nПоздравляем 🎉 На этом уровне новый участник подарит Вам + 5000₽ к Вашему депозиту! \n" \
+        more_text += f"\n\nПоздравляем 🎉 На этом уровне новый участник подарит Вам + {sum_gift}₽ к Вашему депозиту! \n" \
                         f"До следующей планеты осталось {5 - int(await dbUser.get_step(user_id, loop))} подарка 🎁"
 
     text_plan = f"🪐 Движемся к планете: {text_planet[1]}"
@@ -106,10 +108,10 @@ async def get_launch(bot, user_id, loop):
     reinv = await dbUser.get_reinvest(user_id, loop)
 
     text = f"📆 Профиль создан: {await dbUser.get_date(user_id, loop)}\n" \
-        f"🤖 Ваш ID: {user_id}\n\n" \
+        f"🤖 Ваш ID: {user_id}\n\n"\
         f"👩‍🚀 Астронавт: {await dbUser.get_name(user_id, loop)}\n"\
         f"💰 Общий депозит: {int(cd + dep + ref + ref_money + reinv)} RUB\n"\
-        f"{text_plan}\n" \
+        f"{text_plan}\n"\
         f"👥 Лично приглашенных: {await dbUser.get_count_ref(user_id, loop)} чел.\n"\
         f"🚀 Статус: {level_text} {text_status} {more_text}\n {active_text}"
 
@@ -172,7 +174,11 @@ async def get_gift(user_id, gift_user: UserDB, loop):
         await dbUser.set_now_depozit(gift_user.user_id, 0, loop)
 
     if int(planet[0]) > 0:
-        await dbUser.remove_amount_gift_money(user_id, sum_gift, loop)
+        amount = await dbUser.get_amount_gift_money(user_id, loop)
+        if amount >= sum_gift:
+            await dbUser.remove_amount_gift_money(user_id, sum_gift, loop)
+        else:
+            return False, "Недостаточно денег"
     else:
         await dbUser.remove_depozit(sum_gift, user_id, loop)
 
@@ -186,10 +192,14 @@ async def gift(bot, user: UserDB, loop):
     astr = await get_user_on_planet(int(user.planet), user.user_id, loop)
     if astr is None:
         link = "@space_gift_bot"
+    elif astr.link == (await dbUser.get_name(user.user_id, loop)):
+        link = "@space_gift_bot"
     else:
         link = f"@{astr.link}"
     text_planet = get_photo(planet[0])
     text_planet_next = get_photo(int(planet[0]) + 1)
+    if text_planet_next is None:
+        text_planet_next = (5, 'Сатурн')
 
     sum_add = money_add[text_planet[0]]
     sum_gift = sums[text_planet[0]]
@@ -203,7 +213,7 @@ async def gift(bot, user: UserDB, loop):
     now_dep = await dbUser.get_now_depozit(user.user_id, loop)
     if now_dep > 0:
         await dbUser.add_amount_gift_money(user.user_id, now_dep, loop)
-        await dbUser.set_now_depozit(user.user_id, -now_dep, loop)
+        await dbUser.remove_now_depozit(user.user_id, now_dep, loop)
 
     text = f"Поздравляем! 🎉 вы теперь на планете {text_planet[1]}! 🙌\n\n" \
            f"👩‍🚀 На ваш депозит было подарено  🎁 +{sum_add} RUB, " \

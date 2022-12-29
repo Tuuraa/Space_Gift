@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: yougiftdb
+-- Host: localhost    Database: yougiftdb
 -- ------------------------------------------------------
 -- Server version	8.0.31
 
@@ -25,10 +25,10 @@ DROP TABLE IF EXISTS `transactions`;
 CREATE TABLE `transactions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `amount` decimal(10,8) DEFAULT NULL,
-  `currency` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `currency` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `date` datetime DEFAULT NULL,
-  `wallet` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `wallet` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -52,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-29 20:58:35
+-- Dump completed on 2022-12-30  1:38:45

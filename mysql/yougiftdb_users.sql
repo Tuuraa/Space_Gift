@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: yougiftdb
+-- Host: localhost    Database: yougiftdb
 -- ------------------------------------------------------
 -- Server version	8.0.31
 
@@ -24,8 +24,8 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int DEFAULT NULL,
-  `referrer_id` int DEFAULT NULL,
+  `user_id` text COLLATE utf8mb4_unicode_ci,
+  `referrer_id` text COLLATE utf8mb4_unicode_ci,
   `name` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `date` date DEFAULT NULL,
   `money` decimal(10,0) DEFAULT '0',
@@ -48,8 +48,9 @@ CREATE TABLE `users` (
   `code` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `percent_ref_money` float DEFAULT '0',
   `reinvest` float DEFAULT '0',
+  `refgift` tinyint DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=109 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -58,7 +59,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (14,378632841,NULL,'Dan?','2022-12-10',25000,'2022-12-28 20:36:06','linkbrt',0,0,0,'0','1',0,0,3,0,1020,20000,5000,0,'2022-12-10 16:50:08',NULL,0,0),(93,932803482,NULL,'BANG','2022-12-25',110000,'2022-12-28 20:36:07','Bang_Bros007',5000,0,0,'1','1',0,0,2,0,20060,100000,0,0,'2022-12-25 14:25:47','jj',0,0),(94,288113313,NULL,'Михаил','2022-12-25',15000,'2022-12-25 18:18:49','zeusmisha',0,0,5000,'1','1',0,0,0,0,10000,10000,0,0,'2022-12-25 18:18:49','Й',0,0),(106,628931867,NULL,'meow','2022-12-29',0,'2022-12-29 17:20:38',NULL,0,0,0,'0','1',1,0,0,0,0,0,0,0,'2022-12-29 17:20:38','123',0,0),(107,415321692,NULL,'?','2022-12-29',5000,'2022-12-29 17:20:47','teaeye',5000,0,0,'0','1',1,0,0,0,0,0,0,0,'2022-12-29 17:20:47','12434324',0,0),(108,855151774,NULL,'Tura','2022-12-29',0,'2022-12-29 17:35:10','bluabitch',0,0,15000,'1','1',0,1,0,0,10000,-5000,0,0,'2022-12-29 17:35:10','⬅ Вернуться',0,0);
+INSERT INTO `users` VALUES (10,'415321692','855151774','?','2022-12-29',75000,'2022-12-29 20:17:39','teaeye',55000,0,0,'1','1',0,1,0,0,0,15000,0,0,'2022-12-29 20:17:39','676787',0,10000,1),(12,'628931867','855151774','meow','2022-12-29',15000,'2022-12-29 20:29:22','EluciferE',0,0,0,'1','1',0,0,0,0,8000,15000,0,0,'2022-12-29 20:29:22','? Реферальная ссылка',0,0,1),(23,'1328872217',NULL,'Матвей','2022-12-30',-40000,'2022-12-29 22:32:07','m_kravts',0,0,15000,'1','1',1,1,1,0,0,0,0,0,'2022-12-29 22:32:07','1234',0,0,0),(24,'1396645031','1328872217','??‍? Hermes оператор | Обмен BTC, EXMO, ETH, LTC ?','2022-12-30',0,'2022-12-29 22:32:24','hermes_btc_admin',0,0,15000,'1','1',0,1,0,0,10000,0,0,0,'2022-12-29 22:32:24','Про',0,0,1);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -71,4 +72,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-29 20:58:36
+-- Dump completed on 2022-12-30  1:38:45

@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: yougiftdb
+-- Host: localhost    Database: yougiftdb
 -- ------------------------------------------------------
 -- Server version	8.0.31
 
@@ -26,7 +26,7 @@ CREATE TABLE `clones` (
   `id` int NOT NULL AUTO_INCREMENT,
   `active` tinyint DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -35,7 +35,7 @@ CREATE TABLE `clones` (
 
 LOCK TABLES `clones` WRITE;
 /*!40000 ALTER TABLE `clones` DISABLE KEYS */;
-INSERT INTO `clones` VALUES (94,1),(95,1),(96,1),(97,1),(98,1),(99,1),(100,1),(101,1),(102,1),(103,1),(104,1),(105,1);
+INSERT INTO `clones` VALUES (58,1),(59,1),(60,1);
 /*!40000 ALTER TABLE `clones` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -48,4 +48,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-29 20:58:35
+-- Dump completed on 2022-12-30  1:38:45

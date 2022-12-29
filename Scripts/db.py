@@ -166,6 +166,13 @@ class ManagerUsersDataBase:
             result = str((await cursor.fetchall())[0])[1:-2]
             return result
 
+    async def get_ref(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("SELECT `referrer_id` FROM `users` WHERE `user_id` = %s", (user_id,))
+            result = await cursor.fetchone()
+            return result[0]
+
     async def set_gift_id(self, from_id, to_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
@@ -179,6 +186,14 @@ class ManagerUsersDataBase:
             await cursor.execute("SELECT `from_id` FROM `helper` WHERE `to_id` = %s", (to_id,))
             result = await cursor.fetchall()
             return result
+
+    async def get_count_ref_wallet(self, ref, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("SELECT `user_id` FROM `users` WHERE `referrer_id` = %s "
+                                 "AND `refgift` = 1", (ref,))
+            result = await cursor.fetchall()
+            return len(result)
 
     async def delete_gift(self, from_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
@@ -310,6 +325,13 @@ class ManagerUsersDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("UPDATE `users` SET `first_dep` = %s WHERE `user_id` = %s", (value, user_id,))
+            await connection.commit()
+
+    async def remove_now_depozit(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET `now_depozit` = now_depozit - %s WHERE `user_id` = %s",
+                                 (money, user_id,))
             await connection.commit()
 
     async def get_users_on_planet(self, planet, loop):
@@ -524,6 +546,21 @@ class ManagerUsersDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("update `users` set `planet` = 0 and `step` = 0 and `status` = 0 where user_id = %s",
+                                 (user_id,))
+            await connection.commit()
+
+    async def get_refgift(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("select `refgift` from users where user_id = %s",
+                                 (user_id,))
+            result = (await cursor.fetchall())[0][0]
+            return result
+
+    async def reset_refgift(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("update `users` set `refgift` = 1 where user_id = %s",
                                  (user_id,))
             await connection.commit()
 
