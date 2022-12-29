@@ -162,7 +162,7 @@ def get_link_to_space_money():
 
 def get_wallet_inline():
     return types.InlineKeyboardMarkup().add(
-        #types.InlineKeyboardButton("🪙 Реинвестировать", callback_data="reinvest")).add(
+        types.InlineKeyboardButton("🪙 Реинвестировать", callback_data="reinvest")).add(
         types.InlineKeyboardButton("➖ Вывести дивиденды", callback_data="remove_money")).add(
         types.InlineKeyboardButton("💫 Вывести инвестиции", callback_data="remove_money_invest")
     )

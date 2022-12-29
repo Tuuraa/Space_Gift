@@ -107,10 +107,12 @@ async def worker(loop):
                                     await send_message_safe(bot, user[0], f"Платеж {pay[0]} успешно выполнен. Ваш счет пополненен на {pay[1]} руб.")
 
                                 await dbPay.change_status_for_cancel("OPERATION_COMPLETED", pay[5], "CREDIT", loop)
-                                depozit = await dbUser.get_deposit(user[0], loop)
+                                status = await dbUser.get_status(user[0], loop)
+                                planet = await dbUser.get_planet(user[0], loop)
 
-                                if depozit >= 5000:
+                                if (status == 1 or int(planet[0]) > 1) and pay[1] >= 5000:
                                     await clones.create_clones(pay[1], loop)
+                                    await helper.create_ref(pay[1], user[0], loop)
 
 
             #Обработчик пополнения Coinbase
@@ -167,9 +169,9 @@ async def worker(loop):
                             status = await dbUser.get_status(pay[1], loop)
                             planet = await dbUser.get_planet(pay[1], loop)
 
-                            if (status == 1 or int(planet) > 1) and amount_rub >= 5000:
+                            if (status == 1 or int(planet[0]) > 1) and amount_rub >= 5000:
                                 await clones.create_clones(amount_rub, loop)
-                                await helper.create_ref()
+                                await helper.create_ref(amount_rub, pay[1], loop)
 
             end_program_time = time.time()
             print(f'BACKGROUND LAP PAY TIME: {end_program_time - start_program_time}')

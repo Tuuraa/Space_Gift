@@ -1,11 +1,17 @@
+from aiogram import Bot
+
 from User import UserDB
-from db import ManagerUsersDataBase
+from db import ManagerUsersDataBase, ConfigDBManager
 import logic
 
 
-async def create_ref(amount, loop):
-    count = int(amount/10_000)
+dbUser = ManagerUsersDataBase()
 
+
+async def create_ref(amount, user_id, loop):
+    count = int(amount/10_000)
+    for i in range(count):
+        await dbUser.update_count_ref(user_id, loop)
 
 
 def clear_repeat(users: list):
@@ -93,3 +99,36 @@ def clear_crypt_requests(pays: list):
             result.append(pay)
 
     return result
+
+
+async def send_message_safe(bot, tel_id, text, reply_markup=None):
+    try:
+        await bot.send_message(tel_id, text, parse_mode='HTML', reply_markup=reply_markup)
+    except Exception:
+        pass
+
+
+async def test():
+    configCl = ConfigDBManager.get()
+
+    API_TOKEN = configCl.api_bot  # Считывание токена
+    bot = Bot(token=API_TOKEN)
+    await send_message_safe(bot, 855151774, "test")
+
+
+async def db_reset(loop):
+    configCl = ConfigDBManager.get()
+
+    API_TOKEN = configCl.api_bot
+    bot = Bot(token=API_TOKEN)
+
+    users = await dbUser.get_users(loop)
+    for user in users:
+        await dbUser.reset_data(user, loop)
+        await send_message_safe(
+            bot,
+            user,
+            "Все участники Space gift 🎁 \n"
+                  "система дарения готова к повторной активации!!! \n"
+                  "Успейте встать в очередь на подарки, одними из первых 🙌"
+        )

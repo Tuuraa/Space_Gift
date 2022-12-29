@@ -9,11 +9,14 @@ from aiogram.utils import executor
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 import datetime
 import PayManager
 import config
 from FSM import PayFSM, CalculatorFSM, WithdrawMoneyFSM, ChangeCryptTypeFSN, AnswerAfterGiftFSM, \
     SendGiftFSM, PayCryptFSM, UserCodeFSM, WithdrawMoneyPercentFSM
+import helper
 from db import ManagerUsersDataBase, ManagerPayDataBase, ManagerWithDrawDataBase, ConfigDBManager
 import coinbase_data
 from User import User, UserDB
@@ -411,7 +414,27 @@ async def deleteacc(message: types.Message):
 
 @dp.callback_query_handler(text='reinvest')
 async def reinvest(callback: types.CallbackQuery):
-    pass
+    gift_money = await db.get_gift_money(callback.from_user.id, loop)
+    print(type(gift_money))
+    if gift_money <= 0:
+        await callback.answer("🚫 У вас недостаточно средств для реинвестирования", show_alert=True)
+        return
+
+    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    await db.add_reinvest(callback.from_user.id, gift_money, loop)
+    await db.remove_gift_money(callback.from_user.id, gift_money, loop)
+
+    cd = await db.get_amount_gift_money(callback.from_user.id, loop)
+    dep = await db.get_deposit(callback.from_user.id, loop)
+    ref = await db.get_count_ref(callback.from_user.id, loop) * 5000
+    ref_money = await db.get_percent_ref_money(callback.from_user.id, loop)
+    reinv = await db.get_reinvest(callback.from_user.id, loop)
+
+    await bot.send_message(
+        callback.from_user.id,
+        f"Вы реинвестировали {round(gift_money, 2)} RUB теперь Ваш "
+        f"общий депозит {cd + dep + ref + ref_money + reinv}"
+    )
 
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[4])
@@ -443,6 +466,7 @@ async def wallet(message: types.Message):
         dep = await db.get_deposit(message.from_user.id, loop)
         ref = await db.get_count_ref(message.from_user.id, loop) * 5000
         ref_money = await db.get_percent_ref_money(message.from_user.id, loop)
+        reinv = await db.get_reinvest(message.from_user.id, loop)
         date = await db.get_date(message.chat.id, loop)
 
         text = f"🤖 Ваш ID: {message.from_user.id}\n" \
@@ -456,7 +480,7 @@ async def wallet(message: types.Message):
                f"🤑 За приглашения - {int(ref)}₽\n" \
                f"🤑 За инвистиции реферала - {int(ref_money)}₽\n" \
                "——————————————————\n" \
-               f"💵 Общий депозит: {int(cd + dep + ref + ref_money)}₽\n" \
+               f"💵 Общий депозит: {int(cd + dep + ref + ref_money + reinv)}₽\n" \
                f"💵 Пассив: {round(float(cd + dep + ref + ref_money) * .006, 5)} руб/день!\n" \
                f"💵 На вывод: {await db.get_gift_money(message.from_user.id, loop)}₽ \n" \
                "( минимальная сумма вывода 1000₽ )"

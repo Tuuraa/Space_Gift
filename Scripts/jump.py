@@ -42,7 +42,7 @@ async def worker_jumps(loop):
                         if await dbUser.ref_count(ref_user.user_id, loop) >= 5:
                             count_ref += 1
 
-                    if count_ref == len_ref_users:
+                    if count_ref >= 2 and len_ref_users >= 2:
                         await logic.gift(bot, user, loop)
                         if int(user.planet) < 5:
                             await dbUser.reset_jump(user.user_id, loop)

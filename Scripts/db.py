@@ -34,6 +34,20 @@ def get_tokens(title):
 
 class ConfigDBManager:
     @staticmethod
+    def get_all_users():
+        connection, cursor = create_sync_con()
+        cursor.execute('select `user_id` from `users`')
+        result = cursor.fetchall()
+        return result
+
+    @staticmethod
+    def reset_data(user_id):
+        connection, cursor = create_sync_con()
+        cursor.execute("update `users` set `planet` = 0 and `step` = 0 and `status` = 0 where user_id = %s",
+                       (user_id,))
+        connection.commit()
+
+    @staticmethod
     def get():
         connection, cursor = create_sync_con()
         data = ['bot_api', 'api_pay', 'api_coinbase_pay', 'api_coinbase_secret', 'ltc_id', 'btc_id',
@@ -480,8 +494,37 @@ class ManagerUsersDataBase:
     async def set_percent_ref_money(self, user_id, money, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
-            await cursor.execute("update `users` set `percent_ref_money` = `percent_ref_money` + $s where user_id = %s",
+            await cursor.execute("update `users` set `percent_ref_money` = `percent_ref_money` + %s where user_id = %s",
                                  (money, user_id,))
+            await connection.commit()
+
+    async def get_reinvest(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("select `reinvest` from users where user_id = %s",
+                                 (user_id,))
+            result = (await cursor.fetchall())[0][0]
+            return result
+
+    async def add_reinvest(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("update `users` set `reinvest` = `reinvest` + %s where user_id = %s",
+                                 (money, user_id,))
+            await connection.commit()
+
+    async def remove_reinvest(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("update `users` set `reinvest` = `reinvest` - %s where user_id = %s",
+                                 (money, user_id,))
+            await connection.commit()
+
+    async def reset_data(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("update `users` set `planet` = 0 and `step` = 0 and `status` = 0 where user_id = %s",
+                                 (user_id,))
             await connection.commit()
 
 

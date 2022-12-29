@@ -21,6 +21,7 @@ configCl = ConfigDBManager.get()
 API_TOKEN = configCl.api_bot  # Считывание токена
 bot = Bot(token=API_TOKEN)
 
+
 async def send_message_safe(bot, tel_id, text, reply_markup=None):
     try:
         await bot.send_message(tel_id, text, parse_mode='HTML', reply_markup=reply_markup)
@@ -41,9 +42,10 @@ async def worker_percent(loop):
                 date_time_now = datetime.datetime.strptime(str(utc_now.astimezone(pytz.timezone("UTC")))[:-13], '%Y-%m-%d %H:%M:%S')
 
                 if (date_time_now - dt_to_datetime).days >= 1:
-                    money = float(await dbUser.get_money(user[0], loop))
+                    status = await dbUser.get_status(user[0], loop)
+                    planet = await dbUser.get_planet(user[0], loop)
 
-                    if money >= 5000.0:
+                    if status == 1 or int(planet[0]) > 1:
                         utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                         date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
@@ -52,7 +54,9 @@ async def worker_percent(loop):
                         dep = float(await dbUser.get_deposit(user[0], loop))
                         ref = float(await dbUser.get_count_ref(user[0], loop)) * 5000
                         ref_money = float(await dbUser.get_percent_ref_money(user[0], loop))
-                        full_money = cd + dep + ref + ref_money
+                        reinv = float(await dbUser.get_reinvest(user[0], loop))
+
+                        full_money = cd + dep + ref + ref_money + reinv
                         money = round(float(full_money) * .006)
                         await send_message_safe(bot, user[0], f"На ваш счет начислилось {money} RUB")
                         await dbUser.add_gift_money(user[0], money, loop)

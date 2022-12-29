@@ -66,10 +66,10 @@ async def get_launch(bot, user_id, loop):
         ud = (await dbUser.get_planet(user_id, loop))[0]
         number = await get_queue(ud, user_id, loop)
         if type(number) is int:
-            more_text = f"\nНомер в очереди: {number}\n\n" \
+            more_text = f"\nНомер в очереди: {number}" \
 
         more_text += f"\n\n🙌Поздравляем! Вы заняли место в очереди на подарки от новых участников на свой депозит!\n" \
-                        f"⚡️ Не жди очереди, начни увеличивать свой депозит уже сейчас и получать по 0,6% в день!\n\n" \
+                        f"⚡ Не жди очереди, начни увеличивать свой депозит уже сейчас и получать по 0,6% в день!\n\n"\
                         f"1️⃣ Инвестируй в Space gift с собственных средств.\n" \
                         f"2️⃣ Получай +5000р на депозит за каждого приглашенного реферала.\n" \
                         f"3️⃣ Space gift начислит на депозит 10% от инвестиций реферала.\n\n" \
@@ -98,11 +98,12 @@ async def get_launch(bot, user_id, loop):
     dep = await dbUser.get_deposit(user_id, loop)
     ref = await dbUser.get_count_ref(user_id, loop) * 5000
     ref_money = await dbUser.get_percent_ref_money(user_id, loop)
+    reinv = await dbUser.get_reinvest(user_id, loop)
 
     text = f"📆 Профиль создан: {await dbUser.get_date(user_id, loop)}\n" \
         f"🤖 Ваш ID: {user_id}\n\n" \
         f"👩‍🚀 Астронавт: {await dbUser.get_name(user_id, loop)}\n"\
-        f"💰 Общий депозит: {int(cd + dep + ref + ref_money)} RUB\n"\
+        f"💰 Общий депозит: {int(cd + dep + ref + ref_money + reinv)} RUB\n"\
         f"{text_plan}\n" \
         f"👥 Лично приглашенных: {await dbUser.get_count_ref(user_id, loop)} чел.\n"\
         f"🚀 Статус: {level_text} {text_status} {more_text}\n {active_text}"
