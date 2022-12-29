@@ -295,7 +295,7 @@ async def about_space_gift(message: types.Message):
 async def about_space_gift(message: types.Message):
     await bot.send_document(
         chat_id=message.from_user.id,
-        document="BQACAgIAAxkBAAIGpGOtxWNxiXF8wzZQtBtVE6a5sHrKAAINIgACVtZwSVJkhZxSxmw8LAQ",
+        document="BQACAgIAAxkBAAIIcWOt4NorfbboGlhmUpNu9DXrPPAcAAKjIQACu61pSTqL2GKFg1MVLAQ",
     )
 
 
