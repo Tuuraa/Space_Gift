@@ -845,7 +845,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                     )
 
                     await db.change_status(callback.from_user.id, 1, loop)
-                    await inform_pers(callback, state, user, answer[2])
+                    await inform_pers(callback, state, user=user, answer=answer[2])
             else:
                 planet = await db.get_planet(callback.from_user.id, loop)
                 text_planet = logic.get_photo(planet[0])
@@ -865,6 +865,11 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                 )
 
                 await db.change_status(callback.from_user.id, 1, loop)
+        else:
+            await bot.send_message(
+                callback.from_user.id,
+                "Вы уже активны в системе"
+            )
 
 
 @dp.callback_query_handler(text="get_gift_from_space_gift")
