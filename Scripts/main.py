@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import threading
 
@@ -28,6 +29,8 @@ import inline_keybords
 import logic
 import clones
 
+
+lock = asyncio.Lock()
 
 PATH = config.PATH
 
@@ -163,9 +166,9 @@ async def code(message: types.Message, state: FSMContext):
                       last_withd=date_time_now, code=message.text)
     if login_user.referrer_id is not None:
         await db.update_count_ref(login_user.referrer_id, loop)
-        await db.add_money(login_user.referrer_id, 5000, loop)
-        await db.add_ref_money(login_user.referrer_id, 5000, loop)
-        await db.insert_ref_money(5000, login_user.referrer_id, message.from_user.id, date_time_now, loop)
+        await db.add_money(login_user.referrer_id, 5000, loop) #TODO
+        await db.add_ref_money(login_user.referrer_id, 5000, loop) #TODO
+        await db.insert_ref_money(5000, login_user.referrer_id, message.from_user.id, date_time_now, loop) # TODO
         await bot.send_message(
             login_user.referrer_id,
             f"По вашей реферальной ссылке зарегистрировался @{message.from_user.username}"
@@ -291,8 +294,10 @@ async def about_space_gift(message: types.Message):
 
 @dp.message_handler(text="📄 Презентация")
 async def about_space_gift(message: types.Message):
-    with open(PATH + "/Data/Презентация.pdf", 'rb') as file:
-        await bot.send_document(message.from_user.id, file)
+    await bot.send_document(
+        chat_id=message.from_user.id,
+        document="BQACAgIAAxkBAAIGpGOtxWNxiXF8wzZQtBtVE6a5sHrKAAINIgACVtZwSVJkhZxSxmw8LAQ",
+    )
 
 
 @dp.message_handler(text="💫 Инвестиции в Space Money")
@@ -388,9 +393,9 @@ async def TestClones(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == "Тестовое пополнение")
 async def TestPay(message: types.Message):
-    await db.add_money(message.from_user.id, 5000, loop)
+    await db.add_money(message.from_user.id, 5000, loop) #TODO
     #await db.set_now_depozit(message.from_user.id, 5000, loop)
-    await db.add_depozit(message.from_user.id, 5000, loop)
+    await db.add_depozit(message.from_user.id, 5000, loop) #TODO
     await message.answer("Баланс пополнен")
 
 
@@ -421,10 +426,10 @@ async def reinvest(callback: types.CallbackQuery):
         return
 
     await bot.delete_message(callback.from_user.id, callback.message.message_id)
-    await db.add_reinvest(callback.from_user.id, gift_money, loop)
-    await db.remove_gift_money(callback.from_user.id, gift_money, loop)
+    await db.add_reinvest(callback.from_user.id, gift_money, loop) # TODO
+    await db.remove_gift_money(callback.from_user.id, gift_money, loop) #TODO
 
-    cd = await db.get_amount_gift_money(callback.from_user.id, loop)
+    cd = await db.get_amount_gift_money(callback.from_user.id, loop) # TODO
     dep = await db.get_deposit(callback.from_user.id, loop)
     ref = await db.get_count_ref(callback.from_user.id, loop) * 5000
     ref_money = await db.get_percent_ref_money(callback.from_user.id, loop)
@@ -463,7 +468,7 @@ async def wallet(message: types.Message):
             text_status = " ✅"
 
         cd = await db.get_amount_gift_money(message.from_user.id, loop)
-        dep = await db.get_deposit(message.from_user.id, loop)
+        dep = await db.get_deposit(message.from_user.id, loop) # TODO
         ref = await db.get_count_ref(message.from_user.id, loop) * 5000
         ref_money = await db.get_percent_ref_money(message.from_user.id, loop)
         reinv = await db.get_reinvest(message.from_user.id, loop)
@@ -512,8 +517,8 @@ async def get_gift_from_space_gift(callback: types.CallbackQuery):
     status = (await db.get_status(callback.from_user.id, loop))[0]
     if status == 1:
         now_dep = await db.get_now_depozit(callback.from_user.id, loop)
-        await db.add_money(callback.from_user.id, now_dep, loop)
-        await db.add_amount_gift_money(callback.from_user.id, now_dep, loop)
+        await db.add_money(callback.from_user.id, now_dep, loop) #TODO
+        await db.add_amount_gift_money(callback.from_user.id, now_dep, loop) #TODO
         await db.set_now_depozit(callback.from_user.id, 0, loop)
 
         await bot.delete_message(
@@ -561,16 +566,16 @@ async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: Us
             sum_gift = logic.sums[text_planet[0]]
 
             await db.set_now_depozit(callback.from_user.id, 0, loop)
-            await db.set_now_depozit(callback.from_user.id, sum_gift, loop)
+            await db.set_now_depozit(callback.from_user.id, sum_gift, loop) #TODO
             await logic.get_launch(bot, callback.from_user.id, loop)
             if int(step) == 5:
                 if int(await db.get_count_ref(user.user_id, loop)) >= logic.count_ref[int(user.planet)]:
-                    await logic.gift(bot, user, loop)
+                    await logic.gift(bot, user, loop) #TODO
                     if int(user.planet) < 5:
                         await db.reset_step(user.user_id, loop)
                         await db.change_status(user.user_id, 0, loop)
                         await db.update_planet(user.user_id, loop)
-                        await db.remove_depozit(user.money, answer, loop)
+                        await db.remove_depozit(user.money, answer, loop) # TODO
                         await logic.check_active(int(user.planet) + 1, user.user_id, loop)
 
                     else:
@@ -643,8 +648,8 @@ async def send_gift(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["WHOM"] = message.text
 
-    await db.add_money(message.text, 5000, loop)
-    await db.remove_money(message.from_user.id, 5000, loop)
+    await db.add_money(message.text, 5000, loop) #TODO
+    await db.remove_money(message.from_user.id, 5000, loop) #TODO
     await message.answer(f"Вы сделали подарок {message.text}", reply_markup=inline_keybords.profile_markup())
     await bot.send_message(
         message.from_user.id,
@@ -658,8 +663,8 @@ async def send_gift(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(text="get_double_deposit")
 async def get_double_depozit(callback: types.CallbackQuery):
     now_dep = await db.get_now_depozit(callback.from_user.id, loop)
-    await db.add_money(callback.from_user.id, now_dep, loop)
-    await db.add_depozit(callback.from_user.id, now_dep, loop)
+    await db.add_money(callback.from_user.id, now_dep, loop) #TODO
+    await db.add_depozit(callback.from_user.id, now_dep, loop) #TODO
     await db.change_first_dep(callback.from_user.id, 0, loop)
     await db.set_now_depozit(callback.from_user.id, 0, loop)
 
@@ -688,19 +693,20 @@ async def payrement_crypt(callback: types.CallbackQuery):
 @dp.message_handler(lambda mes: mes.text in message_handlers_commands, state="*")
 async def cancel_handler(message: types.Message, state: FSMContext):
     await state.reset_state()
-    match message.text:
-        case "💳 Кошелёк":
-            await wallet(message)
-        case "🚀 Взлёт":
-            await launch(message)
-        case "🔧 Инструменты":
-            await tools(message)
-        case "📝 О проекте":
-            await about_project(message)
-        case "🌑 Space Money":
-            await space_go(message)
-        case "⚙ Техническая поддержка":
-            await support(message)
+
+    if message.text == "💳 Кошелёк":
+        await wallet(message)
+    if message.text == "🚀 Взлёт":
+        await launch(message)
+    if message.text == "🔧 Инструменты":
+        await tools(message)
+    if message.text == "📝 О проекте":
+        await about_project(message)
+    if message.text == "🌑 Space Money":
+        await space_go(message)
+    if message.text == "⚙ Техническая поддержка":
+        await support(message)
+
     return
 
 
@@ -801,46 +807,48 @@ async def amount_crypt(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(text="get_gift")
 async def get_gift(callback: types.CallbackQuery, state: FSMContext):
-    status = await db.get_status(callback.from_user.id, loop)
-    if status[0] == 0:
+    async with lock:
+        status = await db.get_status(callback.from_user.id, loop)
+        if status[0] == 0:
 
-        user: UserDB = (await logic.get_user_on_planet((await db.get_planet(callback.from_user.id, loop))[0], callback.from_user.id, loop))
-        if user == "Нет пользователя":
+            user: UserDB = (await logic.get_user_on_planet((await db.get_planet(callback.from_user.id, loop))[0], callback.from_user.id, loop))
+            if user == "Нет пользователя":
+                await bot.send_message(
+                    callback.from_user.id,
+                    "В данный момент нет людей кому Вы можете сделать подарок"
+                )
+                return
+
+            answer = await logic.get_gift(callback.from_user.id, user, loop)
             await bot.send_message(
                 callback.from_user.id,
-                "В данный момент нет людей кому Вы можете сделать подарок"
+                answer[1]
             )
-            return
-        answer = await logic.get_gift(callback.from_user.id, user, loop)
-        await bot.send_message(
-            callback.from_user.id,
-            answer[1]
-        )
 
-        if answer[0]:
-            #await state.reset_state(with_data=True)
-            async with state.proxy() as data:
-                data["WHOM"] = user.user_id
-                data["AMOUNT"] = answer[2]
+            if answer[0]:
+                #await state.reset_state(with_data=True)
+                async with state.proxy() as data:
+                    data["WHOM"] = user.user_id
+                    data["AMOUNT"] = answer[2]
 
+                await bot.send_message(
+                    callback.from_user.id,
+                    "Пользователю было отправлено сообщение о подарке ✅"
+                )
+
+                await db.change_status(callback.from_user.id, 1, loop)
+                await inform_pers(callback, state, user, answer[2])
+        else:
             await bot.send_message(
                 callback.from_user.id,
-                "Пользователю было отправлено сообщение о подарке ✅"
+                "Вы уже активированы в системе"
             )
-
-            await db.change_status(callback.from_user.id, 1, loop)
-            await inform_pers(callback, state, user, answer[2])
-    else:
-        await bot.send_message(
-            callback.from_user.id,
-            "Вы уже активированы в системе"
-        )
 
 
 @dp.callback_query_handler(text="get_gift_from_space_gift")
 async def get_gift_from_space_gift(callback: types.CallbackQuery):
     now_dep = await db.get_now_depozit(callback.from_user.id, loop)
-    await db.add_amount_gift_money(callback.from_user.id, now_dep, loop)
+    await db.add_amount_gift_money(callback.from_user.id, now_dep, loop) #TODO
     await db.set_now_depozit(callback, 0, loop)
 
 
@@ -897,19 +905,20 @@ async def get_amount(message: types.Message, state: FSMContext):
         global message_handlers_commands
         if message.text in message_handlers_commands:
             await state.reset_state(with_data=False)
-            match message.text:
-                case "💳 Кошелёк":
-                    await wallet(message)
-                case "🚀 Взлёт":
-                    await launch(message)
-                case "🔧 Инструменты":
-                    await tools(message)
-                case "📝 О проекте":
-                    await about_project(message)
-                case "🌑 Space Money":
-                    await space_go(message)
-                case "⚙ Техническая поддержка":
-                    await support(message)
+
+            if message.text ==  "💳 Кошелёк":
+                await wallet(message)
+            elif message.text ==  "🚀 Взлёт":
+                await launch(message)
+            elif message.text ==  "🔧 Инструменты":
+                await tools(message)
+            elif message.text ==  "📝 О проекте":
+                await about_project(message)
+            elif message.text ==  "🌑 Space Money":
+                await space_go(message)
+            elif message.text ==  "⚙ Техническая поддержка":
+                await support(message)
+
             return
         else:
             await message.answer("🚫 Это не число, введите корректную сумму!")
@@ -990,16 +999,17 @@ async def calc(message: types.Message, state: FSMContext):
     if not message.text.isdigit():
         if message.text in ["⬅ Вернуться", "📄 Презентация", "👥 Реферальная ссылка", "💰 Калькулятор"]:
             await state.reset_state(with_data=False)
-            match message.text:
-                case "⬅ Вернуться":
-                    await back(message)
-                case "📄 Презентация":
-                    await back(message)
-                case "👥 Реферальная ссылка":
-                    await ref(message)
-                case "💰 Калькулятор":
-                    await calc(message)
+
+            if message.text == "⬅ Вернуться":
+                await back(message)
+            elif message.text == "📄 Презентация":
+                await back(message)
+            elif message.text == "👥 Реферальная ссылка":
+                await ref(message)
+            elif message.text == "💰 Калькулятор":
+                await calc(message)
             return
+
         else:
             await message.answer("🚫 Это не число, введите корректную сумму!")
             return
@@ -1211,7 +1221,7 @@ async def number_card(message: types.Message, state: FSMContext):
     utc_now = pytz.utc.localize(datetime.datetime.utcnow())
     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
-    await db.remove_depozit(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
+    await db.remove_depozit(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop) # TODO
     await db.set_last_withd(message.from_user.id, date_time_now, loop)
     await state.reset_state(with_data=False)
 
@@ -1365,7 +1375,7 @@ async def number_card(message: types.Message, state: FSMContext):
         reply_markup=inline_keybords.profile_markup()
     )
 
-    await db.remove_gift_money(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
+    await db.remove_gift_money(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop) #TODO
     await state.reset_state(with_data=False)
 
 #------------------------------------------------Admin------------------------------------------------------------------------------
