@@ -817,12 +817,10 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                 )
                 return
 
-<<<<<<< HEAD
-=======
+
+
         user: UserDB = (await logic.get_user_on_planet((await db.get_planet(callback.from_user.id, loop))[0], callback.from_user.id, loop))
         if user is not None:
-
->>>>>>> origin/master
             answer = await logic.get_gift(callback.from_user.id, user, loop)
             await bot.send_message(
                 callback.from_user.id,
@@ -839,8 +837,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                     callback.from_user.id,
                     "Пользователю было отправлено сообщение о подарке ✅"
                 )
-<<<<<<< HEAD
-=======
+
 
                 await db.change_status(callback.from_user.id, 1, loop)
                 await inform_pers(callback, state, user, answer[2])
@@ -861,7 +858,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                 callback.from_user.id,
                 f"Вы успешно подарили @space_gift_bot {sum_gift} RUB"
             )
->>>>>>> origin/master
+
 
                 await db.change_status(callback.from_user.id, 1, loop)
                 await inform_pers(callback, state, user, answer[2])
@@ -871,8 +868,6 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                 "Вы уже активированы в системе"
             )
 
-<<<<<<< HEAD
-=======
             await db.change_status(callback.from_user.id, 1, loop)
     else:
         await bot.send_message(
@@ -880,7 +875,6 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
             "Вы уже активированы в системе"
         )
 
->>>>>>> origin/master
 
 @dp.callback_query_handler(text="get_gift_from_space_gift")
 async def get_gift_from_space_gift(callback: types.CallbackQuery):
