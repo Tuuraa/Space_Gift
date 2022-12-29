@@ -39,6 +39,11 @@ async def get_launch(bot, user_id, loop):
 
     user = (await get_user_on_planet(planet, user_id, loop))
 
+    if user is None:
+        link = 'space_gift_bot'
+    else:
+        link = user.link
+
     level = int((await dbUser.get_step(user_id, loop))[0])
     level_text = f"Уровень {level}"
     path = ""
@@ -111,7 +116,7 @@ async def get_launch(bot, user_id, loop):
     if status[0] == 0:
         text += "\n✅ Для того что бы активироваться в системе, и встать в «очередь» на " \
                f"подарки, Вам нужно сделать 🎁 подарок " \
-               f"в размере {sums[text_planet[0]]} RUB астронавту @{user.link}."
+               f"в размере {sums[text_planet[0]]} RUB астронавту @{link}."
 
     with open(path, "rb") as file:
         await bot.send_photo(
@@ -143,7 +148,7 @@ async def get_user_on_planet(planet, user_id, loop):
                     await dbUser.reset_active(user.user_id, loop)
         return active_users[0]
     else:
-        return "Нет пользователя"
+        return None
 
 
 async def get_gift(user_id, gift_user: UserDB, loop):
@@ -154,7 +159,7 @@ async def get_gift(user_id, gift_user: UserDB, loop):
     text_planet = get_photo(planet[0])
 
     sum_gift = sums[text_planet[0]]
-    system_gift = await dbUser.get_amount_gift_money(user_id, loop)
+    #system_gift = await dbUser.get_amount_gift_money(user_id, loop)
 
     await dbUser.add_amount_gift_money(gift_user.user_id, sum_gift, loop)
     await dbUser.add_money(gift_user.user_id, sum_gift, loop)
@@ -178,8 +183,8 @@ async def gift(bot, user: UserDB, loop):
     path = first_path
 
     astr = await get_user_on_planet(int(user.planet), user.user_id, loop)
-    if astr == "Нет пользователя":
-        link = "None"
+    if astr is None:
+        link = "@space_gift_bot"
     else:
         link = f"@{astr.link}"
     text_planet = get_photo(planet[0])

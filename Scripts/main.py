@@ -10,8 +10,6 @@ from aiogram.utils import executor
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-
 import datetime
 import PayManager
 import config
@@ -420,7 +418,6 @@ async def deleteacc(message: types.Message):
 @dp.callback_query_handler(text='reinvest')
 async def reinvest(callback: types.CallbackQuery):
     gift_money = await db.get_gift_money(callback.from_user.id, loop)
-    print(type(gift_money))
     if gift_money <= 0:
         await callback.answer("🚫 У вас недостаточно средств для реинвестирования", show_alert=True)
         return
@@ -482,6 +479,7 @@ async def wallet(message: types.Message):
                "——————————————————\n"\
                f"🎁 Системы дарения - {int(cd)}₽\n" \
                f"💸 Вы инвестировали - {int(dep)}₽\n" \
+               f"🪙 Вы реинвестировали - {int(reinv)}₽\n"\
                f"🤑 За приглашения - {int(ref)}₽\n" \
                f"🤑 За инвистиции реферала - {int(ref_money)}₽\n" \
                "——————————————————\n" \
@@ -538,7 +536,7 @@ async def inform_pers_ok(callback: types.CallbackQuery):
 
 
 @dp.callback_query_handler(text="inform_pers")
-async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: UserDB, answer):
+async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: UserDB=None, answer=None):
     data = await state.get_data()
     if len(data) == 0:
         await bot.send_message(callback.from_user.id,
@@ -819,6 +817,12 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                 )
                 return
 
+<<<<<<< HEAD
+=======
+        user: UserDB = (await logic.get_user_on_planet((await db.get_planet(callback.from_user.id, loop))[0], callback.from_user.id, loop))
+        if user is not None:
+
+>>>>>>> origin/master
             answer = await logic.get_gift(callback.from_user.id, user, loop)
             await bot.send_message(
                 callback.from_user.id,
@@ -835,6 +839,29 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                     callback.from_user.id,
                     "Пользователю было отправлено сообщение о подарке ✅"
                 )
+<<<<<<< HEAD
+=======
+
+                await db.change_status(callback.from_user.id, 1, loop)
+                await inform_pers(callback, state, user, answer[2])
+        else:
+            planet = await db.get_planet(callback.from_user.id, loop)
+            text_planet = logic.get_photo(planet[0])
+            sum_gift = logic.sums[text_planet[0]]
+
+            await db.set_now_depozit(callback.from_user.id, sum_gift, loop)
+            await db.remove_money(callback.from_user.id, sum_gift, loop)
+
+            if int(planet[0]) > 0:
+                await db.remove_amount_gift_money(callback.from_user.id, sum_gift, loop)
+            else:
+                await db.remove_depozit(sum_gift, callback.from_user.id, loop)
+
+            await bot.send_message(
+                callback.from_user.id,
+                f"Вы успешно подарили @space_gift_bot {sum_gift} RUB"
+            )
+>>>>>>> origin/master
 
                 await db.change_status(callback.from_user.id, 1, loop)
                 await inform_pers(callback, state, user, answer[2])
@@ -844,6 +871,16 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                 "Вы уже активированы в системе"
             )
 
+<<<<<<< HEAD
+=======
+            await db.change_status(callback.from_user.id, 1, loop)
+    else:
+        await bot.send_message(
+            callback.from_user.id,
+            "Вы уже активированы в системе"
+        )
+
+>>>>>>> origin/master
 
 @dp.callback_query_handler(text="get_gift_from_space_gift")
 async def get_gift_from_space_gift(callback: types.CallbackQuery):
@@ -1067,7 +1104,7 @@ async def remove_money_invest(callback: types.CallbackQuery):
                               show_alert=True)
         return
     if money < 1000:
-        await callback.answer("🚫 У вас на балансе не достаточно средств для вывода, минимальная сумма: 1000RUB",
+        await callback.answer("🚫 У вас на балансе не достаточно средств для вывода, минимальная сумма: 1000 RUB",
                               show_alert=True)
         return
     else:
@@ -1077,7 +1114,7 @@ async def remove_money_invest(callback: types.CallbackQuery):
         )
         await bot.send_message(
             callback.from_user.id,
-            f"Какую сумму вы хотите вывести.\nМин. 1000.0 RUB, макс. 2000000.0 RUB)\n\nДоступно {money}RUB",
+            f"Какую сумму вы хотите вывести.\nМин. 1000.0 RUB, макс. 2000000.0 RUB)\n\nДоступно {money} RUB",
             reply_markup=inline_keybords.cancel_trans_money()
         )
         await WithdrawMoneyPercentFSM.WITHDRAW_AMOUNT.set()
@@ -1231,7 +1268,7 @@ async def remove_money(callback: types.CallbackQuery):
     money = int(await db.get_gift_money(callback.from_user.id, loop))
 
     if money < 1000:
-        await callback.answer("🚫 У вас на балансе не достаточно средств для вывода, минимальная сумма: 1000RUB",
+        await callback.answer("🚫 У вас на балансе не достаточно средств для вывода, минимальная сумма: 1000 RUB",
                               show_alert=True)
     else:
 
@@ -1241,7 +1278,7 @@ async def remove_money(callback: types.CallbackQuery):
         )
         await bot.send_message(
             callback.from_user.id,
-            f"Какую сумму вы хотите вывести.\nМин. 1000.0 RUB, макс. 2000000.0 RUB)\n\nДоступно {money}RUB",
+            f"Какую сумму вы хотите вывести.\nМин. 1000.0 RUB, макс. 2000000.0 RUB)\n\nДоступно {money} RUB",
             reply_markup=inline_keybords.cancel_trans_money()
         )
         await WithdrawMoneyFSM.WITHDRAW_AMOUNT.set()
@@ -1256,6 +1293,10 @@ async def withdraw_amount(message: types.Message, state: FSMContext):
         return
 
     else:
+        if not message.text.isdigit():
+            await message.answer("Введите пожалуйста сумму в виде цифр!")
+            return
+
         if int(message.text) < 1000:
             await message.answer("Слишком маленькая сумма")
             return
