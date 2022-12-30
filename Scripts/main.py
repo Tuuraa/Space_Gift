@@ -546,7 +546,7 @@ async def inform_pers_ok(callback: types.CallbackQuery):
 @dp.callback_query_handler(text="inform_pers")
 async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: UserDB=None, answer=None):
         data = await state.get_data()
-        if len(data) == 0:
+        if not data or len(data) == 0:
             await bot.send_message(callback.from_user.id,
                                    "Вы не сделали никому подарок, чтобы  его сделать нажмите на 🎁 Сделать подарок")
             return
@@ -846,7 +846,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                         await db.add_money(ref, 5000, loop)
                         await db.reset_refgift(callback.from_user.id, loop)
                         await bot.send_message(
-                            int(ref),
+                            int(ref), #TODO ref= "'12332131'" => not int
                             "💸 Вам начислено реферальное вознаграждение "
                             "5000₽ за нового пользователя в системе"
                         )

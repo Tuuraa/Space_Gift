@@ -163,7 +163,7 @@ class ManagerUsersDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("SELECT `referrer_id` FROM `users` WHERE `user_id` = %s", (user_id,))
-            result = str((await cursor.fetchall())[0])[1:-2]
+            result = cursor.fetchall()[0][0]
             return result
 
     async def get_ref(self, user_id, loop):

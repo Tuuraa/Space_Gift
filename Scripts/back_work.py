@@ -84,7 +84,7 @@ async def worker(loop):
                                     dep = pay[1] * .1
                                     utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                                     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
-                                    await dbUser.insert_ref_money(dep, referrer_id, user[0], date_time_now, loop)
+                                    await dbUser.insert_ref_money(dep, referrer_id, user[0], date_time_now, loop) #TODO тоже referrer_id "'123321312'" => not int
                                     await dbUser.add_money(int(referrer_id), dep, loop)
                                     await dbUser.set_percent_ref_money(int(referrer_id), dep, loop)
                                     await send_message_safe(
