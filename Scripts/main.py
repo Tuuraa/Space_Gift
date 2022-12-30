@@ -99,7 +99,7 @@ async def login_after_callback(callback: types.CallbackQuery):
     await bot.delete_message(callback.from_user.id, callback.message.message_id)
     await bot.send_message(callback.from_user.id,
                             "Пользовательское соглашение Space Gift и политика конфиденциальности"
-                            "\n<<Ссылка>>",
+                            "\nhttps://telegra.ph/Polzovatelskoe-soglashenie-Space-Gift-12-30",
                             reply_markup=inline_keybords.accept_inline())
 
 
@@ -385,7 +385,7 @@ async def invest(message: types.Message):
 async def support(message: types.Message):
     await message.answer("По любым вопросам пишите @smfadmin \nОтветит в течении часа!")
 
-
+'''
 @dp.message_handler(lambda mes: mes.text == "Тестовые клоны")
 async def TestClones(message: types.Message):
     await message.answer("Создано 20 клонов")
@@ -399,7 +399,7 @@ async def TestPay(message: types.Message):
         #await db.set_now_depozit(message.from_user.id, 5000, loop)
         await db.add_depozit(message.from_user.id, 5000, loop)
         await message.answer("Баланс пополнен")
-
+'''
 
 @dp.callback_query_handler(text="system_clones")
 async def system_clones(callback: types.CallbackQuery):
@@ -413,11 +413,12 @@ async def system_clones(callback: types.CallbackQuery):
         )
 
 
+'''
 @dp.message_handler(lambda mes: mes.text == "Удалить аккаунт")
 async def deleteacc(message: types.Message):
     await message.answer("Аккаунт удален, перезапустите бота \n/start")
     await db.delete_acc(message.from_user.id, loop)
-
+'''
 
 @dp.callback_query_handler(text='reinvest')
 async def reinvest(callback: types.CallbackQuery):
@@ -839,7 +840,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
 
                     ref = await db.get_referrer_of_user(callback.from_user.id, loop)
                     refgift = await db.get_refgift(callback.from_user.id, loop)
-
+                    print(ref is not None, refgift == 0)
                     if ref is not None and refgift == 0:
                         await db.add_amount_gift_money(ref, 5000, loop)
                         await db.add_money(ref, 5000, loop)

@@ -16,16 +16,16 @@ class Config:
 
 name_bot = "space_gift_bot"
 
-domain_pay = "hermesbtc.com"
+domain_pay = "orionbtc.xyz"
 
 NUMBER_PAY = 0
 ADMINS = [855151774]
 
-PATH = 'C:\\Users\\Tura\\PycharmProjects\\Space_Gift'#'C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot' #
+PATH = '/opt/Space_Gift'
 
 HOST = "localhost"
 USERS = "root"
-PASSWORD = "5377"
+PASSWORD = "6CHWb6QmNUy9bLuX"
 DB_NAME = "yougiftdb"
 
 COMMISSION = 0.2
