@@ -122,6 +122,74 @@ class ManagerUsersDataBase:
             result = str((await cursor.fetchall())[0][0])
             return result
 
+    async def add_money_and_pecr_ref_money(self, ref_id, dep, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET `money` = `money` + %s WHERE `user_id` = %s", (dep, ref_id,))
+            await cursor.execute("UPDATE `users` SET `percent_ref_money` = `percent_ref_money` + %s WHERE `user_id` = %s", (dep, ref_id,))
+
+            await connection.commit()
+
+    async def add_gift_space_money(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET money = money + %s WHERE user_id = %s", (money, user_id,))
+            await cursor.execute(
+                "UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` + %s WHERE `user_id` = %s",
+                (money, user_id,))
+            await cursor.execute("UPDATE `users` SET `now_depozit` = 0 WHERE user_id = %s", (user_id,))
+
+            await connection.commit()
+
+    async def add_money_ref(self, user_id, ref_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute(
+                "UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` + %s WHERE `user_id` = %s",
+                (money, ref_id,))
+            await cursor.execute("UPDATE `users` SET money = money + %s WHERE user_id = %s", (money, ref_id,))
+            await cursor.execute("update `users` set `refgift` = 1 where user_id = %s",
+                                 (user_id,))
+            await connection.commit()
+
+    async def reset_now_dep_for_new_planet(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute(
+                "UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` + %s WHERE `user_id` = %s",
+                (money, user_id,))
+            await cursor.execute("UPDATE `users` SET `now_depozit` = now_depozit - %s WHERE `user_id` = %s",
+                                 (money, user_id,))
+            await connection.commit()
+
+    async def update_new_step(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET `step` = 1 WHERE user_id = %s", (user_id,))
+            await cursor.execute("UPDATE `users` SET `status` = 0 WHERE `user_id` = %s", (user_id,))
+            await cursor.execute("UPDATE `users` SET `gift_value` = `gift_value` + 1 WHERE `user_id` = %s", (user_id,))
+
+            await connection.commit()
+
+    async def set_now_depozit_for_step(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET `now_depozit` =  0 WHERE user_id = %s", (user_id,))
+            await cursor.execute("UPDATE `users` SET `now_depozit` =  %s WHERE user_id = %s", (money, user_id,))
+            await connection.commit()
+
+    async def gift(self, user_id, money1, money2, money3, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET money = money + %s WHERE user_id = %s", (money1, user_id,))
+            await cursor.execute("UPDATE `users` SET `gift_money` =  `gift_money` + %s WHERE `user_id` = %s",
+                                 (money2, user_id,))
+            await cursor.execute(
+                "UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` + %s WHERE `user_id` = %s",
+                (money3, user_id,))
+            await cursor.execute("UPDATE `users` SET `first_dep` = %s WHERE `user_id` = %s", (0, user_id,))
+            await connection.commit()
+
     async def add_money(self, user_id, money, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
@@ -256,6 +324,35 @@ class ManagerUsersDataBase:
             result = (await cursor.fetchall())[0][0]
             return result
 
+    async def get_gift(self, gift_id, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` + %s WHERE `user_id` = %s",
+                                       (money, gift_id,))
+            await cursor.execute("UPDATE `users` SET money = money + %s WHERE user_id = %s", (money, gift_id,))
+            await cursor.execute("UPDATE `users` SET `now_depozit` =  %s WHERE user_id = %s", (money, user_id,))
+            await cursor.execute("UPDATE `users` SET money = money - %s WHERE user_id = %s", (money, user_id,))
+
+            await connection.commit()
+
+    async def add_money_and_dep(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute(
+                "UPDATE `users` SET `depozit` =  `depozit` + %s WHERE `user_id` = %s",
+                (money, user_id,))
+            await cursor.execute("UPDATE `users` SET `money` = money = %s WHERE user_id = %s", (user_id,))
+            await connection.commit()
+
+    async def add_now_dep(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute(
+                "UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` + %s WHERE `user_id` = %s",
+                (money, user_id,))
+            await cursor.execute("UPDATE `users` SET `now_depozit` = 0 WHERE user_id = %s", (user_id,))
+            await connection.commit()
+
     async def set_now_depozit(self, user_id, money, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
@@ -266,6 +363,16 @@ class ManagerUsersDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("UPDATE `users` SET `step` = `step` + %s WHERE user_id = %s", (1, user_id,))
+            await connection.commit()
+
+    async def update_planet_clones(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET `step` = 1 WHERE user_id = %s", (user_id,))
+            await cursor.execute("UPDATE `users` SET `status` = %s WHERE `user_id` = %s", (0, user_id,))
+            await cursor.execute("UPDATE `users` SET `active` =  0 WHERE `user_id` = %s", (user_id,))
+            await cursor.execute("UPDATE `users` SET `first_dep` = %s WHERE `user_id` = %s", (0, user_id,))
+
             await connection.commit()
 
     async def reset_step(self, user_id, loop):

@@ -21,11 +21,11 @@ domain_pay = "orionbtc.xyz"
 NUMBER_PAY = 0
 ADMINS = [855151774]
 
-PATH = '/opt/Space_Gift'
+PATH = 'C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot'
 
 HOST = "localhost"
 USERS = "root"
-PASSWORD = "6CHWb6QmNUy9bLuX"
+PASSWORD = '5377'#"6CHWb6QmNUy9bLuX"
 DB_NAME = "yougiftdb"
 
 COMMISSION = 0.2

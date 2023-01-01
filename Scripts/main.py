@@ -523,9 +523,11 @@ async def get_gift_from_space_gift(callback: types.CallbackQuery):
         status = (await db.get_status(callback.from_user.id, loop))[0]
         if status == 1:
             now_dep = await db.get_now_depozit(callback.from_user.id, loop)
-            await db.add_money(callback.from_user.id, now_dep, loop)
-            await db.add_amount_gift_money(callback.from_user.id, now_dep, loop)
-            await db.set_now_depozit(callback.from_user.id, 0, loop)
+
+            await db.add_gift_space_money(callback.from_user.id, now_dep, loop)
+            #await db.add_money(callback.from_user.id, now_dep, loop)
+            #await db.add_amount_gift_money(callback.from_user.id, now_dep, loop)
+            #await db.set_now_depozit(callback.from_user.id, 0, loop)
 
             await bot.delete_message(
                 callback.from_user.id,
@@ -535,6 +537,7 @@ async def get_gift_from_space_gift(callback: types.CallbackQuery):
                 callback.from_user.id,
                 f"Поздравляем! 🎉 Space Gift подарил вам {now_dep} RUB 🙌"
             )
+            await bot.delete_message(callback.from_user.id, callback.message.message_id)
             await logic.get_launch(bot, callback.from_user.id, loop)
 
 
@@ -571,16 +574,18 @@ async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: Us
                 text_planet = logic.get_photo(user.planet)
                 sum_gift = logic.sums[text_planet[0]]
 
-                await db.set_now_depozit(callback.from_user.id, 0, loop)
-                await db.set_now_depozit(callback.from_user.id, sum_gift, loop)
+                await db.set_now_depozit_for_step(callback.from_user.id, sum_gift, loop)
+                # await db.set_now_depozit(callback.from_user.id, 0, loop)
+                # await db.set_now_depozit(callback.from_user.id, sum_gift, loop)
                 await logic.get_launch(bot, callback.from_user.id, loop)
                 if int(step) == 5:
                     if int(await db.get_count_ref(user.user_id, loop)) >= logic.count_ref[int(user.planet)]:
                         await logic.gift(bot, user, loop)
                         if int(user.planet) < 5:
-                            await db.reset_step(user.user_id, loop)
-                            await db.change_status(user.user_id, 0, loop)
-                            await db.update_planet(user.user_id, loop)
+                            await db.update_new_step(user.user_id, loop)
+                            # await db.reset_step(user.user_id, loop)
+                            # await db.change_status(user.user_id, 0, loop)
+                            # await db.update_planet(user.user_id, loop)
                             await db.remove_depozit(user.money, answer, loop)
                             await logic.check_active(int(user.planet) + 1, user.user_id, loop)
 
@@ -816,6 +821,7 @@ async def amount_crypt(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(text="get_gift")
 async def get_gift(callback: types.CallbackQuery, state: FSMContext):
     async with lock:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
         status = await db.get_status(callback.from_user.id, loop)
         if status[0] == 0:
 
@@ -842,9 +848,10 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                     refgift = await db.get_refgift(callback.from_user.id, loop)
                     print(ref is not None, refgift == 0)
                     if ref is not None and refgift == 0:
-                        await db.add_amount_gift_money(ref, 5000, loop)
-                        await db.add_money(ref, 5000, loop)
-                        await db.reset_refgift(callback.from_user.id, loop)
+                        await db.add_money_ref(callback.from_user.id, ref, 5000, loop)
+                        # await db.add_amount_gift_money(ref, 5000, loop)
+                        # await db.add_money(ref, 5000, loop)
+                        # await db.reset_refgift(callback.from_user.id, loop)
                         await bot.send_message(
                             int(ref), #TODO ref= "'12332131'" => not int
                             "💸 Вам начислено реферальное вознаграждение "
@@ -902,14 +909,6 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                 callback.from_user.id,
                 "Вы уже активны в системе"
             )
-
-
-@dp.callback_query_handler(text="get_gift_from_space_gift")
-async def get_gift_from_space_gift(callback: types.CallbackQuery):
-    async with lock:
-        now_dep = await db.get_now_depozit(callback.from_user.id, loop)
-        await db.add_amount_gift_money(callback.from_user.id, now_dep, loop)
-        await db.set_now_depozit(callback, 0, loop)
 
 
 @dp.callback_query_handler(text="payrement_bank")

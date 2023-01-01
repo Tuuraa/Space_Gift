@@ -163,15 +163,17 @@ async def get_gift(user_id, gift_user: UserDB, loop):
     sum_gift = sums[text_planet[0]]
     #system_gift = await dbUser.get_amount_gift_money(user_id, loop)
 
-    await dbUser.add_amount_gift_money(gift_user.user_id, sum_gift, loop)
-    await dbUser.add_money(gift_user.user_id, sum_gift, loop)
-    await dbUser.set_now_depozit(user_id, sum_gift, loop)
-    await dbUser.remove_money(user_id, sum_gift, loop)
+    await dbUser.get_gift(gift_user.user_id, user_id, sum_gift, loop)
+    #await dbUser.add_amount_gift_money(gift_user.user_id, sum_gift, loop)
+    #await dbUser.add_money(gift_user.user_id, sum_gift, loop)
+    #await dbUser.set_now_depozit(user_id, sum_gift, loop)
+    #await dbUser.remove_money(user_id, sum_gift, loop)
     now_dep = await dbUser.get_now_depozit(gift_user.user_id, loop)
 
     if now_dep > 0:
-        await dbUser.add_amount_gift_money(gift_user.user_id, now_dep, loop)
-        await dbUser.set_now_depozit(gift_user.user_id, 0, loop)
+        await dbUser.add_now_dep(gift_user.user_id, now_dep, loop)
+        #await dbUser.add_amount_gift_money(gift_user.user_id, now_dep, loop)
+        #await dbUser.set_now_depozit(gift_user.user_id, 0, loop)
 
     if int(planet[0]) > 0:
         amount = await dbUser.get_amount_gift_money(user_id, loop)
@@ -205,15 +207,18 @@ async def gift(bot, user: UserDB, loop):
     sum_gift = sums[text_planet[0]]
     path += f"{text_planet[1]}/Поздравляем. {text_planet[1]}.png"
 
-    await dbUser.add_money(user.user_id, (sum_add - out_money[text_planet[0]]), loop)
-    await dbUser.add_gift_money(user.user_id, out_money[text_planet[0]], loop)
-    await dbUser.add_amount_gift_money(user.user_id, (sum_add - out_money[text_planet[0]] - sum_gift), loop)
-    await dbUser.change_first_dep(user.user_id, 0, loop)
+    await dbUser.gift(user.user_id, (sum_add - out_money[text_planet[0]]), out_money[text_planet[0]],
+                      (sum_add - out_money[text_planet[0]] - sum_gift), loop)
+    #await dbUser.add_money(user.user_id, (sum_add - out_money[text_planet[0]]), loop)
+    #await dbUser.add_gift_money(user.user_id, out_money[text_planet[0]], loop)
+    #await dbUser.add_amount_gift_money(user.user_id, (sum_add - out_money[text_planet[0]] - sum_gift), loop)
+    #await dbUser.change_first_dep(user.user_id, 0, loop)
 
     now_dep = await dbUser.get_now_depozit(user.user_id, loop)
     if now_dep > 0:
-        await dbUser.add_amount_gift_money(user.user_id, now_dep, loop)
-        await dbUser.remove_now_depozit(user.user_id, now_dep, loop)
+        await dbUser.reset_now_dep_for_new_planet(user.user_id, now_dep, loop)
+        # await dbUser.add_amount_gift_money(user.user_id, now_dep, loop)
+        # await dbUser.remove_now_depozit(user.user_id, now_dep, loop)
 
     text = f"Поздравляем! 🎉 вы теперь на планете {text_planet[1]}! 🙌\n\n" \
            f"👩‍🚀 На ваш депозит было подарено  🎁 +{sum_add} RUB, " \
