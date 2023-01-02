@@ -13,7 +13,7 @@ planets = ["Меркурий", "Венера", "Земля", "Марс", "Юпи
 money_add = [25_000, 75_000, 250_000, 1_000_000, 4_200_000, 12_000_000]
 sums = [5000, 15_000, 50_000, 200_000, 800_000, 3_000_000]
 out_money = [10_000, 25_000, 50_000, 200_000, 1_000_000, 3_000_000]
-count_ref = [0, 2, 6, 12, 20, 54]
+count_ref = [0, 2, 4, 8, 16, 32]
 
 
 def get_photo(planet):
@@ -60,9 +60,17 @@ async def get_launch(bot, user_id, loop):
     if status[0] == 1:
         text_status = " ✅"
 
+    c_ref = count_ref[int(planet[0])] - int(await dbUser.get_count_ref(user_id, loop))
+    c_ref_op = await dbUser.get_count_ref(user_id, loop)
     if await dbUser.get_count_ref(user_id, loop) < count_ref[int(planet[0])]:
-        active_text = f"\n❗ Чтобы попасть в очередь вам нужно пригласить еще " \
-                      f"{count_ref[int(planet[0])] - int(await dbUser.get_count_ref(user_id, loop))} чел.❗ \n"
+        if c_ref_op == 0:
+            active_text = f"\n❗ Чтобы попасть в очередь на планету {text_planet[1]} вам нужно пригласить " \
+                         f"{c_ref} чел." \
+                         f" или пополнить депозит на {c_ref * 10_000} RUB ❗\n"
+        else:
+            active_text = f"\n❗ Чтобы попасть в очередь на планету {text_planet[1]} вам нужно пригласить еще " \
+                      f"{c_ref} чел." \
+                      f" или пополнить депозит на {c_ref * 10_000} RUB ❗\n"
 
     if level == 1 and status[0] == 0:
         path = first_path + f"{text_planet[1]}/В ожидании ({text_planet[1].lower()}).png"
@@ -102,15 +110,11 @@ async def get_launch(bot, user_id, loop):
         text_plan = "🎆 Поздравляем, вы долетели до Юпитера! Ваш полет завершен! 🎆"
 
     cd = await dbUser.get_amount_gift_money(user_id, loop)
-    dep = await dbUser.get_deposit(user_id, loop)
-    ref = await dbUser.get_count_ref(user_id, loop) * 5000
-    ref_money = await dbUser.get_percent_ref_money(user_id, loop)
-    reinv = await dbUser.get_reinvest(user_id, loop)
 
     text = f"📆 Профиль создан: {await dbUser.get_date(user_id, loop)}\n" \
         f"🤖 Ваш ID: {user_id}\n\n"\
         f"👩‍🚀 Астронавт: {await dbUser.get_name(user_id, loop)}\n"\
-        f"💰 Общий депозит: {int(cd + dep + ref + ref_money + reinv)} RUB\n"\
+        f"🎁 Системы дарения: {int(cd)} RUB\n"\
         f"{text_plan}\n"\
         f"👥 Лично приглашенных: {await dbUser.get_count_ref(user_id, loop)} чел.\n"\
         f"🚀 Статус: {level_text} {text_status} {more_text}\n {active_text}"
@@ -208,7 +212,7 @@ async def gift(bot, user: UserDB, loop):
     path += f"{text_planet[1]}/Поздравляем. {text_planet[1]}.png"
 
     await dbUser.gift(user.user_id, (sum_add - out_money[text_planet[0]]), out_money[text_planet[0]],
-                      (sum_add - out_money[text_planet[0]] - sum_gift), loop)
+                      (sum_add - out_money[text_planet[0]] - sum_gift), sum_gift * 4, loop)
     #await dbUser.add_money(user.user_id, (sum_add - out_money[text_planet[0]]), loop)
     #await dbUser.add_gift_money(user.user_id, out_money[text_planet[0]], loop)
     #await dbUser.add_amount_gift_money(user.user_id, (sum_add - out_money[text_planet[0]] - sum_gift), loop)

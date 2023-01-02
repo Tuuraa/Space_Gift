@@ -88,10 +88,11 @@ def get_gift():
 
 
 def get_crypt_types():
-    return types.InlineKeyboardMarkup().add(types.InlineKeyboardButton("BTC", callback_data="btc_trans"),
-                                            types.InlineKeyboardButton("LTC", callback_data="ltc_trans")).add(
-                                            types.InlineKeyboardButton("ETH", callback_data="eth_trans"),
-                                            types.InlineKeyboardButton("USDT", callback_data="usdt_trans"))
+    return types.InlineKeyboardMarkup()\
+        .add(types.InlineKeyboardButton("BTC", callback_data="btc_trans"),
+                types.InlineKeyboardButton("LTC", callback_data="ltc_trans")).add(
+                types.InlineKeyboardButton("ETH", callback_data="eth_trans"),
+                types.InlineKeyboardButton("USDT", callback_data="usdt_trans"))
 
 
 async def banks_payment():
@@ -119,8 +120,8 @@ def get_about_project():
     )
 
     reply.row(
-        types.KeyboardButton("🎁 Системе дарения"),
-        types.KeyboardButton("🤖 Системе клонов")
+        types.KeyboardButton("🎁 Система дарения"),
+        types.KeyboardButton("🤖 Система клонов")
     )
 
     reply.row(
@@ -130,7 +131,7 @@ def get_about_project():
 
     reply.row(
         types.KeyboardButton("💰 Что такое арбитраж"),
-        types.KeyboardButton("👥 Условия за сетевиков")
+        types.KeyboardButton("👥 Условия для сетевиков")
     )
 
     #reply.row(
@@ -151,7 +152,7 @@ def get_tools():
         types.KeyboardButton("👥 Реферальная ссылка"),
         types.KeyboardButton("📄 Презентация"),
         types.KeyboardButton("⬅ Вернуться")
-    )#.add().row("Тестовое пополнение", "Удалить аккаунт")
+    ).add().row("Тестовое пополнение", "Удалить аккаунт")
 
 
 def get_link_to_space_money():

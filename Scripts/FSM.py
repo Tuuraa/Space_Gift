@@ -48,3 +48,7 @@ class SendGiftFSM(StatesGroup):
 
 class UserCodeFSM(StatesGroup):
     code = State()
+
+
+class ReinvestFSM(StatesGroup):
+    amount = State()

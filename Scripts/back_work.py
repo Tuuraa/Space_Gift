@@ -89,6 +89,7 @@ async def worker(loop):
                                     await dbUser.add_money_and_pecr_ref_money(int(referrer_id), dep, loop)
                                     #await dbUser.add_money(int(referrer_id), dep, loop)
                                     #await dbUser.set_percent_ref_money(int(referrer_id), dep, loop)
+
                                     await send_message_safe(
                                         bot,
                                         referrer_id,

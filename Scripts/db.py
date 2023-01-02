@@ -144,9 +144,6 @@ class ManagerUsersDataBase:
     async def add_money_ref(self, user_id, ref_id, money, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
-            await cursor.execute(
-                "UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` + %s WHERE `user_id` = %s",
-                (money, ref_id,))
             await cursor.execute("UPDATE `users` SET money = money + %s WHERE user_id = %s", (money, ref_id,))
             await cursor.execute("update `users` set `refgift` = 1 where user_id = %s",
                                  (user_id,))
@@ -167,7 +164,7 @@ class ManagerUsersDataBase:
         async with connection.cursor() as cursor:
             await cursor.execute("UPDATE `users` SET `step` = 1 WHERE user_id = %s", (user_id,))
             await cursor.execute("UPDATE `users` SET `status` = 0 WHERE `user_id` = %s", (user_id,))
-            await cursor.execute("UPDATE `users` SET `gift_value` = `gift_value` + 1 WHERE `user_id` = %s", (user_id,))
+            await cursor.execute("UPDATE `users` SET `planet` = `planet` + 1 WHERE `user_id` = %s", (user_id,))
 
             await connection.commit()
 
@@ -178,9 +175,11 @@ class ManagerUsersDataBase:
             await cursor.execute("UPDATE `users` SET `now_depozit` =  %s WHERE user_id = %s", (money, user_id,))
             await connection.commit()
 
-    async def gift(self, user_id, money1, money2, money3, loop):
+    async def gift(self, user_id, money1, money2, money3, money4, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
+            await cursor.execute('UPDATE `users` SET `amount_gift_money` = `amount_gift_money` - %s '
+                                 'WHERE `user_id` = %s', (money4, user_id,))
             await cursor.execute("UPDATE `users` SET money = money + %s WHERE user_id = %s", (money1, user_id,))
             await cursor.execute("UPDATE `users` SET `gift_money` =  `gift_money` + %s WHERE `user_id` = %s",
                                  (money2, user_id,))

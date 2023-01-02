@@ -52,6 +52,7 @@ async def worker_clones(loop):
                         if int((await dbUser.get_planet(active_user.user_id, loop))[0]) == 0:
                             if await dbClones.get_count_clones(loop) > 0:
                                 if int(await dbUser.get_step(active_user.user_id, loop)) == 4:
+                                    await dbUser.add_amount_gift_money(active_user.user_id, 5000, loop)
                                     await send_message_safe(
                                         bot,
                                         active_user.user_id,
@@ -71,6 +72,7 @@ async def worker_clones(loop):
                                     await dbUser.update_step(active_user.user_id, loop)
                                     ind = clones_act[0][0]
                                     await dbClones.reset_clone(ind, loop)
+                                    await dbUser.add_amount_gift_money(active_user.user_id, 5000, loop)
                                     await send_message_safe(
                                         bot,
                                         active_user.user_id,

@@ -25,7 +25,7 @@ PATH = 'C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot'
 
 HOST = "localhost"
 USERS = "root"
-PASSWORD = '5377'#"6CHWb6QmNUy9bLuX"
+PASSWORD = "6CHWb6QmNUy9bLuX"
 DB_NAME = "yougiftdb"
 
 COMMISSION = 0.2
