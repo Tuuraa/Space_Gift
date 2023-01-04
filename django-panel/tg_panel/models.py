@@ -13,9 +13,13 @@ class Clones(models.Model):
         db_table = 'clones'
 
 
-STATUSCHOISES = (
-    ('FALSE', 'Не актив'),
-    ('TRUE', 'Актив'),
+STATUS_CHOICES = (
+    ('WAIT_PAYMENT_TYPE', '⏳ В ожидании способа оплаты'),
+    ('CANCELED', '⛔️ Отменен'),
+    ('WAIT_PAYMENT', '⏳ В ожидании оплаты'),
+    ('SUCCESSFULLY_PAYED', '⏳ Успешно оплачено, ожидайте выплату'),
+    ('OPERATION_COMPLETED', '✅ Операция проведена'),
+    ('OPERATION_ERROR', '⚠️ Ошибка при выполнении операции')
 )
 
 BOOLCHOISES = (
@@ -29,7 +33,7 @@ class CryptPay(models.Model):
     date = models.DateField(verbose_name='Дата', blank=True, null=True)
     pay_type = models.TextField(verbose_name='Тип криптовалюты', blank=True, null=True)  
     cancel_id = models.TextField(verbose_name='ID отмены', blank=True, null=True)
-    status = models.TextField(verbose_name='Статус', choices=STATUSCHOISES, default='FALSE')
+    status = models.TextField(verbose_name='Статус', choices=STATUS_CHOICES, default='FALSE')
     amount_rub = models.DecimalField(verbose_name='Сумма в рублях', max_digits=10, decimal_places=2, blank=True, null=True)
 
     class Meta:
@@ -55,7 +59,7 @@ class Pay(models.Model):
     pay_type = models.TextField(verbose_name='Тип')
     user_id = models.IntegerField(verbose_name='ID пользователя')
     cancel_id = models.IntegerField(verbose_name='ID отмены')
-    status = models.TextField(verbose_name='Статус', choices=STATUSCHOISES, default='FALSE')
+    status = models.TextField(verbose_name='Статус', choices=STATUS_CHOICES, default='FALSE')
 
     class Meta:
         verbose_name = 'Пополнение'

@@ -230,7 +230,7 @@ class ManagerUsersDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("SELECT `referrer_id` FROM `users` WHERE `user_id` = %s", (user_id,))
-            result = cursor.fetchall()[0][0]
+            result = (await cursor.fetchall())[0][0]
             return result
 
     async def get_ref(self, user_id, loop):
@@ -340,7 +340,7 @@ class ManagerUsersDataBase:
             await cursor.execute(
                 "UPDATE `users` SET `depozit` =  `depozit` + %s WHERE `user_id` = %s",
                 (money, user_id,))
-            await cursor.execute("UPDATE `users` SET `money` = money = %s WHERE user_id = %s", (user_id,))
+            await cursor.execute("UPDATE `users` SET `money` = money = %s WHERE user_id = %s", (money, user_id,))
             await connection.commit()
 
     async def add_now_dep(self, user_id, money, loop):

@@ -319,14 +319,14 @@ async def link_to_space_money(callback: types.CallbackQuery):
                              parse_mode="HTML", reply_markup=inline_keybords.get_link_space_money())
 
 
-@dp.message_handler(text="🎁 Системе дарения")
+@dp.message_handler(text="🎁 Система дарения")
 async def about_space_gift(message: types.Message):
     with open(PATH + "/Data/system_gift.txt", 'r', encoding="utf-8") as file:
         text = file.read()
         await message.answer(text + '<a href="https://i.ibb.co/HxQPmC9/gift.png">.</a>', parse_mode='HTML')
 
 
-@dp.message_handler(text="🤖 Системе клонов")
+@dp.message_handler(text="🤖 Система клонов")
 async def about_space_gift(message: types.Message):
     with open(PATH + "/Data/system_clones.txt", 'r', encoding="utf-8") as file:
         text = file.read()
@@ -350,7 +350,7 @@ async def about_space_gift(message: types.Message):
         await message.answer(text + '<a href="https://i.ibb.co/R6XB6dM/gift-of-ref.png">.</a>', parse_mode="HTML")
 
 
-@dp.message_handler(text="👥 Условия за сетевиков")
+@dp.message_handler(text="👥 Условия для сетевиков")
 async def about_space_gift(message: types.Message):
     with open(PATH + "/Data/cond_for_set.txt", 'r', encoding="utf-8") as file:
         text = file.read()
@@ -385,7 +385,7 @@ async def invest(message: types.Message):
 async def support(message: types.Message):
     await message.answer("По любым вопросам пишите @smfadmin \nОтветит в течении часа!")
 
-
+'''
 @dp.message_handler(lambda mes: mes.text == "Тестовые клоны")
 async def TestClones(message: types.Message):
     await message.answer("Создано 20 клонов")
@@ -399,7 +399,7 @@ async def TestPay(message: types.Message):
         #await db.set_now_depozit(message.from_user.id, 5000, loop)
         await db.add_depozit(message.from_user.id, 5000, loop)
         await message.answer("Баланс пополнен")
-
+'''
 
 @dp.callback_query_handler(text="system_clones")
 async def system_clones(callback: types.CallbackQuery):
@@ -412,12 +412,12 @@ async def system_clones(callback: types.CallbackQuery):
             text + '<a href="https://i.ibb.co/wYdbyyt/system-clones.png">.</a>', parse_mode="HTML"
         )
 
-
+'''
 @dp.message_handler(lambda mes: mes.text == "Удалить аккаунт")
 async def deleteacc(message: types.Message):
     await message.answer("Аккаунт удален, перезапустите бота \n/start")
     await db.delete_acc(message.from_user.id, loop)
-
+'''
 
 @dp.callback_query_handler(text='reinvest')
 async def reinvest(callback: types.CallbackQuery):
@@ -459,6 +459,13 @@ async def reinv_amount(message: types.Message, state: FSMContext):
     if not message.text.isdigit():
         await message.answer("Введите правильную сумму")
         return
+
+    gift_money = await db.get_gift_money(message.from_user.id, loop)
+    print(gift_money, message.text)
+    if int(message.text) > int(gift_money):
+        await message.answer(f"Введите правильную сумму. Доступно: {gift_money} руб")
+        return
+
     gift_money = int(message.text)
 
     await db.add_reinvest(message.from_user.id, gift_money, loop)
@@ -513,7 +520,6 @@ async def wallet(message: types.Message):
 
             text = f"🤖 Ваш ID: {message.from_user.id}\n" \
                    f"📆 Профиль создан: {date}\n" \
-                   f"🚀 Статус: {level_text} {text_status}\n" \
                    f"🙋‍♂ Лично приглашенные: {await db.get_count_ref(message.from_user.id, loop)}\n" \
                    "Ваш депозит: 💰👇\n" \
                    "——————————————————\n"\
@@ -1035,7 +1041,8 @@ async def get_amount(message: types.Message, state: FSMContext):
         NUMBER_PAY += 1
         await message.answer(
             f"☑️Заявка на пополнение №{int(await dbPay.get_count_credit(loop)) + 1} успешно создана\n\n"
-            f"Сумма к оплате: <b>{amount} RUB</b>\n\n"
+            f"💵 Сумма к оплате: 👉 <b>{amount} RUB 🔥</b>\n\n"
+            f"❗️Внимание🔥 перевод нужно совершить точно с комиссией, иначе деньги не зачисляются❗️\n\n"
             f"💳 Реквизиты для оплаты:",
             parse_mode='HTML'
         )
@@ -1362,6 +1369,12 @@ async def withdraw_amount(message: types.Message, state: FSMContext):
         if int(message.text) < 1000:
             await message.answer("Слишком маленькая сумма")
             return
+        money = int(await db.get_gift_money(message.from_user.id, loop))
+
+        if int(message.text) > money:
+            await message.answer(f"Не достаточно денег на счету. Доступно: {money} руб")
+            return
+
         async with state.proxy() as data:
             data["WITHDRAW_AMOUNT"] = int(message.text)
         await message.answer(

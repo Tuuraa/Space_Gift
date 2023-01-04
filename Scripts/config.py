@@ -21,7 +21,7 @@ domain_pay = "orionbtc.xyz"
 NUMBER_PAY = 0
 ADMINS = [855151774]
 
-PATH = 'C:\\Users\\turap\\OneDrive\\Рабочий стол\\DonationBot'
+PATH = '/opt/Space_Gift'
 
 HOST = "localhost"
 USERS = "root"

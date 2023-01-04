@@ -55,7 +55,7 @@ async def worker(loop):
                 user_data = await dbPay.get_data(user[0], loop)
                 user_data = cancel_unnecessary(user_data)
                 for pay in user_data:
-
+                    print(pay)
                     if await Payment.get_order(pay[0]):
 
                         status_payment = await Payment.status_requets(pay[0])
@@ -81,7 +81,7 @@ async def worker(loop):
                                 # Оповещение реферала
                                 referrer_id = await dbUser.get_referrer_of_user(user[0], loop)
                                 status = await dbUser.get_status(user[0], loop)
-                                if referrer_id != "None" and status[0] == 1:
+                                if referrer_id is not None and status[0] == 1:
                                     dep = pay[1] * .1
                                     utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                                     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
@@ -187,7 +187,7 @@ async def worker(loop):
             config = db.ConfigDBManager().get()
             await bot.send_message(
                 config.errors_group_id,
-                f'{exc_type}, {exc_obj}, {exc_tb} from back_works'
+                f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from back_works'
             )
 
         await asyncio.sleep(30)

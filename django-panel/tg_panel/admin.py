@@ -24,7 +24,7 @@ class TgUserAdmin(admin.ModelAdmin):
     search_fields = ('user_id', 'name')
     list_filter = ('name', 'user_id', 'referrer_id')
     list_display = ('name', 'depozit', 'get_widhdraws', 'get_referrer', 'stats_link', 'count_ref')
-    readonly_fields = ('user_id', 'name', 'date', 'money', 'date_now', 'link_name', 'gift_value', 'now_depozit', 'first_dep', 'count_ref')
+    readonly_fields = ('user_id', 'name', 'date', 'money', 'date_now', 'link_name', 'gift_value', 'now_depozit', 'first_dep')
     exclude = ('last_withd', 'jump', 'gift_value', 'now_depozit')
     
     def get_widhdraws(self, obj):
@@ -52,7 +52,7 @@ class TgUserAdmin(admin.ModelAdmin):
 
 
 class PayAdmin(admin.ModelAdmin):
-    search_fields = ('pay_id', 'pay_type', 'date')
+    search_fields = ('pay_id', 'pay_type', 'date', 'user_id')
     list_display = ('pay_id', 'get_pay_amount', 'date', 'pay_type', 'user_id', 'cancel_id', 'status')
     readonly_fields = ('pay_id', 'get_pay_amount', 'date', 'pay_type', 'user_id', 'cancel_id')
     exclude = ('pay_amount', )
