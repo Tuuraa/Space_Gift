@@ -84,7 +84,7 @@ class Transaction(models.Model):
 
 class TgUser(models.Model):
     user_id = models.IntegerField(verbose_name='ID пользователя', unique=True)
-    referrer_id = models.IntegerField(verbose_name='ID реферала', blank=True, null=True)
+    referrer_id = models.TextField(verbose_name='ID реферала', blank=True, null=True)
     name = models.TextField(verbose_name='Имя пользователя')
     date = models.DateField(verbose_name='Дата', blank=True, null=True)
     money = models.IntegerField(verbose_name='Кошелек', blank=True, null=True)
