@@ -135,6 +135,18 @@ class ManagerUsersDataBase:
 
             await connection.commit()
 
+    async def activate_date(self, user_id, date, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET `activate_date` = %s WHERE user_id = %s", (date, user_id,))
+            await connection.commit()
+
+    async def reset_activate_date(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET `activate_date` = NULL WHERE user_id = %s", (user_id,))
+            await connection.commit()
+
     async def add_gift_space_money(self, user_id, money, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:

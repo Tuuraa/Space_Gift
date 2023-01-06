@@ -11,7 +11,7 @@ class User:
 
 
 class UserDB:
-    def __init__(self, name, link, user_id, money, depozit, planet, step, status, count_ref, active, jump):
+    def __init__(self, name, link, user_id, money, depozit, planet, step, status, count_ref, active, jump, activate_date):
         self.name = name
         self.link = link
         self.user_id = user_id
@@ -23,3 +23,4 @@ class UserDB:
         self.count_ref = count_ref
         self.active = active
         self.jump = jump
+        self.activate_date = activate_date

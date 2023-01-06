@@ -38,8 +38,10 @@ async def worker_percent(loop):
             for user in users:
                 date = str(await dbUser.get_date_now(user[0], loop))
                 dt_to_datetime = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+
                 utc_now = pytz.utc.localize(datetime.datetime.utcnow())
-                date_time_now = datetime.datetime.strptime(str(utc_now.astimezone(pytz.timezone("UTC")))[:-13], '%Y-%m-%d %H:%M:%S')
+                date_time_now = datetime.datetime\
+                    .strptime(str(utc_now.astimezone(pytz.timezone("UTC")))[:-13], '%Y-%m-%d %H:%M:%S')
 
                 if (date_time_now - dt_to_datetime).days >= 1:
                     status = await dbUser.get_status(user[0], loop)
@@ -67,7 +69,7 @@ async def worker_percent(loop):
             for pay in pays_db:
                 utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                 date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
-                status = await dbPay.get_status(pay[4], loop)
+
                 if (datetime.datetime.strptime(str(date_time_now)[:-13], '%Y-%m-%d %H:%M:%S') -
                        datetime.datetime.strptime(str(pay[2]), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1 and \
                         (await dbPay.get_status(pay[4], loop)) == "WAIT_PAYMENT":
@@ -104,4 +106,4 @@ async def worker_percent(loop):
                 f'{exc_type}, {exc_obj}, {exc_tb} from Percent'
             )
 
-        await asyncio.sleep(30)
+        await asyncio.sleep(20)

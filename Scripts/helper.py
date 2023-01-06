@@ -32,7 +32,8 @@ def get_users(users: list):
     result = []
 
     for user in users:
-        result.append(UserDB(user[3], user[7], user[1], user[5], user[8], user[11], user[12], user[14], user[15], user[16], user[20]))
+        result.append(UserDB(user[3], user[7], user[1], user[5], user[8], user[11], user[12], user[14], user[15],
+                             user[16], user[20], user[26]))
     return result
 
 
@@ -81,6 +82,10 @@ def clear_none(users: list):
         if user[0] is not None:
             result.append(user)
     return result
+
+
+def get_max_step(users: list):
+    return [user for user in users if user.ste]
 
 
 def get_have_jump_users(users: list):
