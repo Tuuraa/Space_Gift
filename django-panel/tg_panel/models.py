@@ -29,9 +29,9 @@ BOOLCHOISES = (
 
 class CryptPay(models.Model):
     amount = models.DecimalField(verbose_name='Сумма', max_digits=10, decimal_places=2, blank=True, null=True)
-    user_id = models.IntegerField(verbose_name='ID пользователя', blank=True, null=True)
+    user_id = models.TextField(verbose_name='ID пользователя', blank=True, null=True)
     date = models.DateField(verbose_name='Дата', blank=True, null=True)
-    pay_type = models.TextField(verbose_name='Тип криптовалюты', blank=True, null=True)  
+    pay_type = models.TextField(verbose_name='Тип криптовалюты', blank=True, null=True)
     cancel_id = models.TextField(verbose_name='ID отмены', blank=True, null=True)
     status = models.TextField(verbose_name='Статус', choices=STATUS_CHOICES, default='FALSE')
     amount_rub = models.DecimalField(verbose_name='Сумма в рублях', max_digits=10, decimal_places=2, blank=True, null=True)
@@ -57,7 +57,7 @@ class Pay(models.Model):
     pay_amount = models.IntegerField(verbose_name='Сумма')
     date = models.DateField(verbose_name='Дата')
     pay_type = models.TextField(verbose_name='Тип')
-    user_id = models.IntegerField(verbose_name='ID пользователя')
+    user_id = models.TextField(verbose_name='ID пользователя')
     cancel_id = models.IntegerField(verbose_name='ID отмены')
     status = models.TextField(verbose_name='Статус', choices=STATUS_CHOICES, default='FALSE')
 
@@ -83,7 +83,7 @@ class Transaction(models.Model):
 
 
 class TgUser(models.Model):
-    user_id = models.IntegerField(verbose_name='ID пользователя', unique=True)
+    user_id = models.TextField(verbose_name='ID пользователя', unique=True)
     referrer_id = models.TextField(verbose_name='ID реферала', blank=True, null=True)
     name = models.TextField(verbose_name='Имя пользователя')
     date = models.DateField(verbose_name='Дата', blank=True, null=True)
@@ -116,9 +116,9 @@ class TgUser(models.Model):
 
 
 WIDTHDRAW_CHOISES = (
-    ('CANCEL', 'Отмена'),
-    ('WAIT', 'В обработке'),
-    ('GOOD', 'Принято'),
+    ('CANCEL', 'Отменена'),
+    ('WAIT', 'В ожидании оплаты'),
+    ('GOOD', 'Операция проведена'),
 )
 
 
@@ -127,7 +127,7 @@ class Withdraw(models.Model):
     type = models.TextField(verbose_name='Тип', )
     amount = models.IntegerField(verbose_name='Сумма', )
     data = models.TextField(verbose_name='Доп. данные', )
-    user_id = models.IntegerField(verbose_name='ID пользователя', )
+    user_id = models.TextField(verbose_name='ID пользователя', )
     date = models.DateTimeField(verbose_name='Дата', )
     status = models.CharField(verbose_name='Статус', max_length=45, choices=WIDTHDRAW_CHOISES, default='WAIT')
     amount_commission = models.DecimalField(verbose_name='Сумма с комиссией', max_digits=10, decimal_places=2, blank=True, null=True)
@@ -144,8 +144,12 @@ class Withdraw(models.Model):
 @receiver(signals.post_save, sender=Withdraw)
 def send_withdraw_status_to_user(sender, instance, created, *args,  **kwargs):
     if instance.status != 'WAIT':
-        bot_token = ApiTokens.objects.get(title='api_bot')
-        tg_panel.utils.tg_send_message(instance.user_id, bot_token.token, instance.status)
+        bot_token = ApiTokens.objects.get(api='bot_api')
+        tg_panel.utils.tg_send_message(instance, bot_token.title)
+        if instance.status == 'CANCEL':
+            current_user = TgUser.objects.get(user_id=instance.user_id)
+            current_user.gift_money += instance.amount
+            current_user.save()
 
 
 
@@ -156,6 +160,7 @@ class ApiTokens(models.Model):
     class Meta:
         verbose_name = 'Токен'
         verbose_name_plural = 'Токены'
+        db_table = 'tokens'
 
 
 class Statistic(TgUser):
@@ -175,8 +180,8 @@ class AllStats(TgUser):
 
 
 class RefMoney(models.Model):
-    user_id = models.IntegerField(verbose_name='ID пользователя', )
-    ref_id = models.IntegerField(verbose_name='ID реферала', )
+    user_id = models.TextField(verbose_name='ID пользователя', )
+    ref_id = models.TextField(verbose_name='ID реферала', )
     money = models.DecimalField(verbose_name='Сумма', max_digits=10, decimal_places=2)
     date = models.DateTimeField(verbose_name='Дата', )
     class Meta:
