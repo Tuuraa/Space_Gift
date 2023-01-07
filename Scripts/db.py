@@ -865,7 +865,7 @@ class ManagerWithDrawDataBase:
             await cursor.execute("INSERT INTO `withdraw` (`card`, `data`, `type`, `amount`, `amount_crypt`, "
                                  "`amount_commission`,`user_id`, `date`, `status`, `type_crypt`) VALUES (%s, %s, %s, %s, "
                                  "%s, %s,  %s, %s, %s, %s)", (card, data, type, amount, amount_crypt,
-                                                              amount_commission, user_id, date, 'В ожидании',
+                                                              amount_commission, user_id, date, 'WAIT',
                                                               type_crypt,))
             await connection.commit()
 
@@ -874,7 +874,7 @@ class ManagerWithDrawDataBase:
         async with connection.cursor() as cursor:
             await cursor.execute(
                 "INSERT INTO `withdraw` (`card`, `data`, `type`, `amount`, `amount_commission`, `user_id`, `date`, `status`) VALUES (%s, %s, %s, %s, "
-                "%s, %s, %s, %s)", (card, data, type, amount, amount_commission, user_id, date, 'В ожидании',))
+                "%s, %s, %s, %s)", (card, data, type, amount, amount_commission, user_id, date, 'WAIT',))
             await connection.commit()
 
     async def create_request_crypt_percent(self, card, data, type, amount, amount_crypt, amount_commission, user_id,
@@ -884,7 +884,7 @@ class ManagerWithDrawDataBase:
             await cursor.execute("INSERT INTO `withdraw_wallet` (`card`, `data`, `type`, `amount`, `amount_crypt`, "
                                  "`amount_commission`,`user_id`, `date`, `status`, `type_crypt`) VALUES (%s, %s, %s, %s, "
                                  "%s, %s,  %s, %s, %s, %s)", (card, data, type, amount, amount_crypt,
-                                                              amount_commission, user_id, date, 'В ожидании',
+                                                              amount_commission, user_id, date, 'WAIT',
                                                               type_crypt,))
             await connection.commit()
 
@@ -893,7 +893,7 @@ class ManagerWithDrawDataBase:
         async with connection.cursor() as cursor:
             await cursor.execute(
                 "INSERT INTO `withdraw_wallet` (`card`, `data`, `type`, `amount`, `amount_commission`, `user_id`, `date`, `status`) VALUES (%s, %s, %s, %s, "
-                "%s, %s, %s, %s)", (card, data, type, amount, amount_commission, user_id, date, 'В ожидании',))
+                "%s, %s, %s, %s)", (card, data, type, amount, amount_commission, user_id, date, 'WAIT',))
             await connection.commit()
 
     async def delete_request(self, user_id, loop):

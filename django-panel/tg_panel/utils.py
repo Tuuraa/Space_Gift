@@ -6,11 +6,22 @@ from django.db.models import Sum
 import tg_panel.models as tg_models
 
 
-def tg_send_message(chat_id, token, status):
-    requests.post(
-        url='https://api.telegram.org/bot{0}/sendMessage'.format(token),
-        data={'chat_id': chat_id, 'text': f'Статус вашей транзакции: {status}'}
-    )
+def tg_send_message(withdraw, token):
+
+    if withdraw.status == 'CANCEL':
+        text = f"⛔️ Ваша заявка на вывод №{withdraw.id}, на сумму {withdraw.amount} руб отменена администратором. " \
+               f"Для подробной информации свяжитесь с @SMFadmin"
+    elif withdraw.status == 'GOOD':
+        text = f"✅ Ваша заявка на вывод №{withdraw.id}, на сумму {withdraw.amount} руб успешно обработана"
+    else:
+        return
+    try:
+        requests.post(
+            url='https://api.telegram.org/bot{0}/sendMessage'.format(token),
+            data={'chat_id': withdraw.user_id, 'text': text}
+        )
+    except Exception:
+        pass
 
 
 def get_statistic(user_pk, start_time, end_time):
