@@ -81,7 +81,7 @@ async def worker(loop):
                                 # Оповещение реферала
                                 referrer_id = await dbUser.get_referrer_of_user(user[0], loop)
                                 status = await dbUser.get_status(user[0], loop)
-                                if referrer_id is not None and status[0] == 1:
+                                if referrer_id and status[0] == 1:
                                     dep = pay[1] * .1
                                     utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                                     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
