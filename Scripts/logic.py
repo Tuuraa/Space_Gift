@@ -139,12 +139,16 @@ async def get_user_on_merk(planet, user_id, loop):
 
     active_users = helper.get_active_status_users(users_on_planet, int((await dbUser.get_planet(user_id, loop))[0]))
 
-    #gifts_users = helper.active_users(active_users)
-    active_users.sort(key=lambda sort: sort.activate_date)
-    if len(active_users) > 0:
-        return active_users[0]
+    max_step_user = max(active_users, key=lambda sort: sort.step)
+
+    if int(max_step_user.step) == 1:
+        active_users.sort(key=lambda sort: sort.activate_date)
+        if len(active_users) > 0:
+            return active_users[0]
+        else:
+            return None
     else:
-        return None
+        return max_step_user
 
 
 async def get_user_on_planet(planet, user_id, loop):
