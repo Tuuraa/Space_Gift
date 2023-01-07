@@ -41,7 +41,7 @@ async def worker_clones(loop):
         try:
             start_program_time = time.time()
             await clones.update_active_user(loop)
-            users = helper.get_users((await dbUser.get_users_on_planet(0, loop)))
+            users = await helper.get_users((await dbUser.get_users_on_planet(0, loop)), loop)
             status_active_users = helper.get_active_status_users(users, 0)
             active_user: UserDB = await clones.get_active_user(status_active_users)
 

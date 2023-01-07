@@ -28,11 +28,12 @@ def cancel_unnecessary(users: list):
     return temp_list
 
 
-def get_users(users: list):
+async def get_users(users: list, loop):
     result = []
 
     for user in users:
-        result.append(UserDB(user[3], user[7], user[1], user[5], user[8], user[11], user[12], user[14], user[15],
+        count_ref = await dbUser.get_count_ref_wallet(user[1], loop)
+        result.append(UserDB(user[3], user[7], user[1], user[5], user[8], user[11], user[12], user[14], count_ref,
                              user[16], user[20], user[26]))
     return result
 

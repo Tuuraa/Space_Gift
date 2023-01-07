@@ -73,8 +73,11 @@ async def worker_percent(loop):
                 if (datetime.datetime.strptime(str(date_time_now)[:-13], '%Y-%m-%d %H:%M:%S') -
                        datetime.datetime.strptime(str(pay[2]), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1 and \
                         (await dbPay.get_status(pay[4], loop)) == "WAIT_PAYMENT":
+                    try:
+                        await bot.delete_message(pay[1], pay[4])
+                    except:
+                        pass
 
-                    await bot.delete_message(pay[1], pay[4])
                     await send_message_safe(
                         bot,
                         pay[1],

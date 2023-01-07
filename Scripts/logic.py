@@ -60,16 +60,16 @@ async def get_launch(bot, user_id, loop):
     if status[0] == 1:
         text_status = " ✅"
 
-    c_ref = count_ref[int(planet[0])] - int(await dbUser.get_count_ref(user_id, loop))
-    c_ref_op = await dbUser.get_count_ref(user_id, loop)
-    if await dbUser.get_count_ref(user_id, loop) < count_ref[int(planet[0])]:
+    c_ref = count_ref[int(planet[0])] - int(await dbUser.get_count_ref_wallet(user_id, loop))
+    c_ref_op = await dbUser.get_count_ref_wallet(user_id, loop)
+    if await dbUser.get_count_ref_wallet(user_id, loop) < count_ref[int(planet[0])]:
         if c_ref_op == 0:
             active_text = f"\n❗ Чтобы попасть в очередь на планету {text_planet[1]} вам нужно пригласить " \
-                         f"{c_ref} чел." \
+                         f"{c_ref} активных чел." \
                          f" или пополнить депозит на {c_ref * 10_000} RUB ❗\n"
         else:
             active_text = f"\n❗ Чтобы попасть в очередь на планету {text_planet[1]} вам нужно пригласить еще " \
-                      f"{c_ref} чел." \
+                      f"{c_ref} активных чел." \
                       f" или пополнить депозит на {c_ref * 10_000} RUB ❗\n"
 
     if level == 1 and status[0] == 0:
@@ -135,20 +135,22 @@ async def get_launch(bot, user_id, loop):
 
 async def get_user_on_merk(planet, user_id, loop):
     users = await dbUser.get_users_on_planet(planet, loop)
-    users_on_planet = helper.get_users(users)
+    users_on_planet = await helper.get_users(users, loop)
 
     active_users = helper.get_active_status_users(users_on_planet, int((await dbUser.get_planet(user_id, loop))[0]))
 
-    max_step_user = max(active_users, key=lambda sort: sort.step)
-
-    if int(max_step_user.step) == 1:
-        active_users.sort(key=lambda sort: sort.activate_date)
-        if len(active_users) > 0:
-            return active_users[0]
+    if len(active_users) > 0:
+        max_step_user = max(active_users, key=lambda sort: sort.step)
+        if int(max_step_user.step) == 1:
+            active_users.sort(key=lambda sort: sort.activate_date)
+            if len(active_users) > 0:
+                return active_users[0]
+            else:
+                return None
         else:
-            return None
+            return max_step_user
     else:
-        return max_step_user
+        return None
 
 
 async def get_user_on_planet(planet, user_id, loop):
@@ -157,31 +159,33 @@ async def get_user_on_planet(planet, user_id, loop):
         return await get_user_on_merk(planet, user_id, loop)
 
     users = await dbUser.get_users_on_planet(planet, loop)
-    users_on_planet = helper.get_users(users)
+    users_on_planet = await helper.get_users(users, loop)
     active_users = helper.get_active_status_users(users_on_planet, int((await dbUser.get_planet(user_id, loop))[0]))
 
-    max_step_user = max(active_users, key=lambda sort: sort.step)
+    if len(active_users) > 0:
+        max_step_user = max(active_users, key=lambda sort: sort.step)
+        if int(max_step_user.step) == 1:
+            gifts_users = helper.active_users(active_users)
 
-    if int(max_step_user.step) == 1:
-        gifts_users = helper.active_users(active_users)
+            if len(active_users) > 0:
+                gifts_users.sort(key=lambda sort: sort.count_ref, reverse=1)
+                active_users.sort(key=lambda sort: sort.count_ref, reverse=1)
 
-        if len(active_users) > 0:
-            gifts_users.sort(key=lambda sort: sort.count_ref, reverse=1)
-            active_users.sort(key=lambda sort: sort.count_ref, reverse=1)
-
-            active_user = active_users[0]
-            active = await dbUser.get_active(active_user.user_id, loop)
-            if active != 1:
-                await dbUser.update_active(active_users[0].user_id, loop)
-            if len(gifts_users) > 0:
-                for user in gifts_users:
-                    if user.user_id != active_user.user_id:
-                        await dbUser.reset_active(user.user_id, loop)
-            return active_users[0]
+                active_user = active_users[0]
+                active = await dbUser.get_active(active_user.user_id, loop)
+                if active != 1:
+                    await dbUser.update_active(active_users[0].user_id, loop)
+                if len(gifts_users) > 0:
+                    for user in gifts_users:
+                        if user.user_id != active_user.user_id:
+                            await dbUser.reset_active(user.user_id, loop)
+                return active_users[0]
+            else:
+                return None
         else:
-            return None
+            return max_step_user
     else:
-        return max_step_user
+        return None
 
 
 async def get_gift(user_id, gift_user: UserDB, loop):
@@ -269,7 +273,7 @@ async def gift(bot, user: UserDB, loop):
 
 async def get_queue(planet, user_id, loop):
     users = await dbUser.get_users_on_planet(planet, loop)
-    users_on_planet = helper.get_users(users)
+    users_on_planet = await helper.get_users(users, loop)
     active_users = helper.get_active_status_users(users_on_planet, int((await dbUser.get_planet(user_id, loop))[0]))
 
     if len(active_users) > 0:
@@ -285,7 +289,7 @@ async def get_queue(planet, user_id, loop):
 
 async def check_active(planet, user_id, loop):
     users = await dbUser.get_users_on_planet(planet, loop)
-    users_on_planet = helper.get_users(users)
+    users_on_planet = await helper.get_users(users, loop)
     active_users = helper.get_active_status_users(users_on_planet, int((await dbUser.get_planet(user_id, loop))[0]))
     gifts_users = helper.active_users(active_users)
 

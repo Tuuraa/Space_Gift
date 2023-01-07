@@ -356,9 +356,10 @@ class ManagerUsersDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute(
-                "UPDATE `users` SET `depozit` =  `depozit` + %s WHERE `user_id` = %s",
-                (money, user_id,))
+                "UPDATE `users` SET `depozit` =  `depozit` + %s WHERE `user_id` = %s", (money, user_id,))
             await cursor.execute("UPDATE `users` SET `money` = money = %s WHERE user_id = %s", (money, user_id,))
+            await cursor.execute("UPDATE `users` SET `remove_dep` = `remove_dep` + %s WHERE `user_id` = %s",
+                                 (money, user_id))
             await connection.commit()
 
     async def add_now_dep(self, user_id, money, loop):
@@ -530,6 +531,14 @@ class ManagerUsersDataBase:
         async with connection.cursor() as cursor:
             await cursor.execute(
                 "UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` - %s WHERE `user_id` = %s",
+                (money, user_id,))
+            await connection.commit()
+
+    async def add_remove_dep(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute(
+                "UPDATE `users` SET `remove_dep` = `remove_dep` + %s WHERE `user_id` = %s",
                 (money, user_id,))
             await connection.commit()
 

@@ -165,9 +165,13 @@ async def code(message: types.Message, state: FSMContext):
                           last_withd=date_time_now, code=message.text)
         if login_user.referrer_id is not None:
             await db.update_count_ref(login_user.referrer_id, loop)
+            if message.from_user.username is None:
+                nick = f"{message.from_user.first_name} ({message.from_user.id})"
+            else:
+                nick = f'@{message.from_user.username}'
             await bot.send_message(
                 login_user.referrer_id,
-                f"По вашей реферальной ссылке зарегистрировался @{message.from_user.username}"
+                f"По вашей реферальной ссылке зарегистрировался {nick}"
             )
 
         with open(PATH + "/img/login_done.png", 'rb') as file:
@@ -243,7 +247,7 @@ async def read_numb(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == "👥 Реферальная ссылка")
 async def ref(message: types.Message):
-    count = await db.count_referrer(message.from_user.id, loop)
+    count = await db.get_count_ref(message.from_user.id, loop)
     text = f"🤖 Ваш ID: {message.from_user.id}\n" \
            f"👥 Партнеров: {count} чел.\n\n" \
            f"Ваша реферальная ссылка:\nhttps://t.me/{NAME_BOT}?start={message.from_user.id}\n"
@@ -416,12 +420,12 @@ async def system_clones(callback: types.CallbackQuery):
         )
 
 
-'''
+
 @dp.message_handler(lambda mes: mes.text == "Удалить аккаунт")
 async def deleteacc(message: types.Message):
     await message.answer("Аккаунт удален, перезапустите бота \n/start")
     await db.delete_acc(message.from_user.id, loop)
-'''
+
 
 
 @dp.callback_query_handler(text='reinvest')
@@ -540,7 +544,7 @@ async def wallet(message: types.Message):
                    f"🎁 Системы дарения - {int(cd)}₽\n" \
                    f"💸 Вы инвестировали - {int(dep)}₽\n" \
                    f"🤑 За приглашения - {int(ref)}₽\n" \
-                   f"🤑 За инвистиции реферала - {int(ref_money)}₽\n" \
+                   f"🤑 За инвестиции реферала - {int(ref_money)}₽\n" \
                    f"🪙 Вы реинвестировали - {int(reinv)}₽\n" \
                    "——————————————————\n" \
                    f"💵 Общий депозит: {int(cd + dep + ref + ref_money + reinv)}₽\n" \
@@ -1151,8 +1155,8 @@ async def calc(message: types.Message, state: FSMContext):
         else:
             await message.answer("🚫 Это не число, введите корректную сумму!")
             return
-    if int(message.text) > 5_000_000:
-        await message.answer("Введите сумму до 5 млн.")
+    if int(message.text) > 12_000_000:
+        await message.answer("Введите сумму до 12 млн.")
         return
     async with state.proxy() as data:
         data["COUNT_REFERRER"] = int(message.text)
@@ -1359,7 +1363,7 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
             )
         await message.answer(
             "Заявка на вывод средств успешно отправлена, ожидайте подтверждение "
-            "отправки средств администраторомв течении 24 часов вам придут деньги на "
+            "отправки средств администратором в течении 24 часов вам придут деньги на "
             "ваши реквизиты",
             reply_markup=inline_keybords.profile_markup()
         )
@@ -1445,7 +1449,7 @@ async def number_card(message: types.Message, state: FSMContext):
             )
         await message.answer(
             "Заявка на вывод средств успешно отправлена, ожидайте подтверждение "
-            "отправки средств администраторомв течении 24 часов вам придут деньги на "
+            "отправки средств администратором в течении 24 часов вам придут деньги на "
             "ваши реквизиты",
             reply_markup=inline_keybords.profile_markup()
         )

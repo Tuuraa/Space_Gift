@@ -22,7 +22,7 @@ async def get_active_user(users: list):
 
 async def update_active_user(loop):
     users = await dbUser.get_users_on_planet(0, loop)
-    users_on_planet = helper.get_users(users)
+    users_on_planet = await helper.get_users(users, loop)
     active_users = helper.get_active_status_users(users_on_planet, 0)
 
     gifts_users = helper.active_users(active_users)
