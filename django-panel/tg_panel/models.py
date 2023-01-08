@@ -104,6 +104,7 @@ class TgUser(models.Model):
     ref_money = models.IntegerField(verbose_name='Деньги с рефералов', blank=True, null=True)
     jump = models.BooleanField(blank=True, null=True)
     last_withd = models.DateTimeField(blank=True, null=True, auto_now=False, auto_now_add=False)
+    activate_ref_count = models.IntegerField(verbose_name='Активные рефералы', blank=True, null=True)
 
     def __str__(self):
         return self.name
