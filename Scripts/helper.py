@@ -11,7 +11,7 @@ dbUser = ManagerUsersDataBase()
 async def create_ref(amount, user_id, loop):
     count = int(amount/10_000)
     for i in range(count):
-        await dbUser.update_count_ref(user_id, loop)
+        await dbUser.update_activate_count_ref(user_id, loop)
 
 
 def clear_repeat(users: list):
