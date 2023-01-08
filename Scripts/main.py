@@ -1711,21 +1711,22 @@ async def change_type_res(message: types.Message):
 
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     # asyncio.run_coroutine_threadsafe(worker(bot, loop), loop)
     # asyncio.run_coroutine_threadsafe(worker_percent(bot, loop), loop)
     # asyncio.run_coroutine_threadsafe(worker_clones(bot, loop), loop)
     # asyncio.run_coroutine_threadsafe(worker_jumps(bot, loop), loop)
-    loops = [asyncio.new_event_loop() for i in range(0, 4)]
+    #loops = [asyncio.get_event_loop() for i in range(0, 1)]
 
+    '''
     thread = threading.Thread(target=loops[0].run_forever)
     thread.start()
     asyncio.run_coroutine_threadsafe(worker(loops[0]), loops[0])
-
-    thread = threading.Thread(target=loops[1].run_forever)
+    '''
+    thread = threading.Thread(target=loop.run_forever)
     thread.start()
-    asyncio.run_coroutine_threadsafe(worker_percent(loops[1]), loops[1])
-
+    asyncio.run_coroutine_threadsafe(worker_percent(loop), loop)
+    '''
     thread = threading.Thread(target=loops[2].run_forever)
     thread.start()
     asyncio.run_coroutine_threadsafe(worker_clones(loops[2]), loops[2])
@@ -1733,5 +1734,5 @@ if __name__ == '__main__':
     thread = threading.Thread(target=loops[3].run_forever)
     thread.start()
     asyncio.run_coroutine_threadsafe(worker_jumps(loops[3]), loops[3])
-
-    executor.start_polling(dp, skip_updates=True)
+    '''
+    #executor.start_polling(dp, skip_updates=True)

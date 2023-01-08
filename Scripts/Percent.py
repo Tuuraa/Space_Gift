@@ -36,7 +36,7 @@ async def worker_percent(loop):
             users = clear_none(await dbUser.get_users(loop))
 
             for user in users:
-                date = await dbUser.get_date_now(user[0], loop)
+                date = (await dbUser.get_date_now(user[0], loop)).astimezone(pytz.timezone("UTC"))
 
                 utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                 date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
@@ -45,10 +45,7 @@ async def worker_percent(loop):
                     status = await dbUser.get_status(user[0], loop)
                     planet = await dbUser.get_planet(user[0], loop)
 
-                    if status == 1 or int(planet[0]) > 0:
-                        utc_now = pytz.utc.localize(datetime.datetime.utcnow())
-                        date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
-
+                    if status[0] == 1 or int(planet[0]) > 0:
                         await dbUser.set_new_date(user[0], date_time_now, loop)
                         cd = float(await dbUser.get_amount_gift_money(user[0], loop))
                         dep = float(await dbUser.get_deposit(user[0], loop))
@@ -101,6 +98,7 @@ async def worker_percent(loop):
 
         except Exception:
             exc_type, exc_obj, exc_tb = sys.exc_info()
+            print(f'{exc_type}, {exc_obj}, {exc_tb} from Percent')
             config = db.ConfigDBManager().get()
             await bot.send_message(
                 config.errors_group_id,
