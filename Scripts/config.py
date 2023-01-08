@@ -21,7 +21,7 @@ domain_pay = "orionbtc.xyz"
 NUMBER_PAY = 0
 ADMINS = [855151774]
 
-PATH = 'opt'
+PATH = '/opt/Space_Gift'
 
 HOST = "localhost"
 USERS = "root"

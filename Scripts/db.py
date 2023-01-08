@@ -242,7 +242,7 @@ class ManagerUsersDataBase:
     async def set_new_date(self, user_id, date: datetime, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
-            await cursor.execute("UPDATE `users` SET date_now =  %s WHERE user_id = %s", (date, user_id,))
+            await cursor.execute("UPDATE `users` SET date_now = %s WHERE user_id = %s", (date, user_id,))
             await connection.commit()
 
     async def get_referrer_of_user(self, user_id, loop):

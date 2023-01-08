@@ -132,7 +132,7 @@ async def worker(loop):
                             amount_rub = await dbPay.get_amount_rub_crypt(pay[4], loop)
                             await dbUser.add_money_and_dep(pay[1], amount_rub, loop)
                             #await dbUser.add_money(pay[1], amount_rub, loop)
-                            #await dbUser.add_depozit(pay[1], amount_rub, loop)
+                            #await dbUser.a dd_depozit(pay[1], amount_rub, loop)
                             #await dbUser.add_gift_money(pay[1], amount_rub, loop)
 
                             if float(pay[6]) <= 5000:

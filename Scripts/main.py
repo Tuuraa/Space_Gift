@@ -537,7 +537,8 @@ async def wallet(message: types.Message):
             text = f"🤖 Ваш ID: {message.from_user.id}\n" \
                    f"📆 Профиль создан: {date}\n" \
                    f"🚀 Статус: {level_text} {text_status}\n" \
-                   f"🙋‍♂ Лично приглашенные: {await db.get_count_ref(message.from_user.id, loop)}\n" \
+                   f"🙋‍♂ Лично приглашенные: {await db.get_count_ref(message.from_user.id, loop)} " \
+                   f"({ await db.get_activate_count_ref(message.from_user.id, loop)})\n" \
                    "Ваш депозит: 💰👇\n" \
                    "——————————————————\n" \
                    f"🎁 Системы дарения - {int(cd)}₽\n" \

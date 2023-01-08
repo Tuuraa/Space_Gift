@@ -155,37 +155,37 @@ async def get_user_on_merk(planet, user_id, loop):
 
 async def get_user_on_planet(planet, user_id, loop):
 
-    if int(planet[0]) == 0:
-        return await get_user_on_merk(planet, user_id, loop)
+    # if int(planet[0]) == 0:
+    return await get_user_on_merk(planet, user_id, loop)
 
-    users = await dbUser.get_users_on_planet(planet, loop)
-    users_on_planet = await helper.get_users(users, loop)
-    active_users = helper.get_active_status_users(users_on_planet, int((await dbUser.get_planet(user_id, loop))[0]))
-
-    if len(active_users) > 0:
-        max_step_user = max(active_users, key=lambda sort: sort.step)
-        if int(max_step_user.step) == 1:
-            gifts_users = helper.active_users(active_users)
-
-            if len(active_users) > 0:
-                gifts_users.sort(key=lambda sort: sort.count_ref, reverse=1)
-                active_users.sort(key=lambda sort: sort.count_ref, reverse=1)
-
-                active_user = active_users[0]
-                active = await dbUser.get_active(active_user.user_id, loop)
-                if active != 1:
-                    await dbUser.update_active(active_users[0].user_id, loop)
-                if len(gifts_users) > 0:
-                    for user in gifts_users:
-                        if user.user_id != active_user.user_id:
-                            await dbUser.reset_active(user.user_id, loop)
-                return active_users[0]
-            else:
-                return None
-        else:
-            return max_step_user
-    else:
-        return None
+    # users = await dbUser.get_users_on_planet(planet, loop)
+    # users_on_planet = await helper.get_users(users, loop)
+    # active_users = helper.get_active_status_users(users_on_planet, int((await dbUser.get_planet(user_id, loop))[0]))
+    #
+    # if len(active_users) > 0:
+    #     max_step_user = max(active_users, key=lambda sort: sort.step)
+    #     if int(max_step_user.step) == 1:
+    #         gifts_users = helper.active_users(active_users)
+    #
+    #         if len(active_users) > 0:
+    #             gifts_users.sort(key=lambda sort: sort.count_ref, reverse=1)
+    #             active_users.sort(key=lambda sort: sort.count_ref, reverse=1)
+    #
+    #             active_user = active_users[0]
+    #             active = await dbUser.get_active(active_user.user_id, loop)
+    #             if active != 1:
+    #                 await dbUser.update_active(active_users[0].user_id, loop)
+    #             if len(gifts_users) > 0:
+    #                 for user in gifts_users:
+    #                     if user.user_id != active_user.user_id:
+    #                         await dbUser.reset_active(user.user_id, loop)
+    #             return active_users[0]
+    #         else:
+    #             return None
+    #     else:
+    #         return max_step_user
+    # else:
+    #     return None
 
 
 async def get_gift(user_id, gift_user: UserDB, loop):
