@@ -164,6 +164,8 @@ class ManagerUsersDataBase:
             await cursor.execute("UPDATE `users` SET money = money + %s WHERE user_id = %s", (money, ref_id,))
             await cursor.execute("update `users` set `refgift` = 1 where user_id = %s",
                                  (user_id,))
+            await cursor.execute(
+                "UPDATE `users` SET `activate_ref_count` = `activate_ref_count` + 1 WHERE `user_id` = %s", (user_id,))
             await connection.commit()
 
     async def reset_now_dep_for_new_planet(self, user_id, money, loop):
@@ -478,6 +480,19 @@ class ManagerUsersDataBase:
         async with connection.cursor() as cursor:
             await cursor.execute("UPDATE `users` SET `block_user_id` = %s WHERE `user_id` = %s", (block_id, user_id))
             await connection.commit()
+
+    async def update_activate_count_ref(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET `activate_ref_count` = `activate_ref_count` + 1 WHERE `user_id` = %s", (user_id,))
+            await connection.commit()
+
+    async def get_activate_count_ref(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("SELECT `activate_ref_count` FROM `users` WHERE `user_id` = %s", (user_id,))
+            result = (await cursor.fetchall())[0][0]
+            return result
 
     async def update_count_ref(self, user_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)

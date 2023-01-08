@@ -427,7 +427,6 @@ async def deleteacc(message: types.Message):
     await db.delete_acc(message.from_user.id, loop)
 
 
-
 @dp.callback_query_handler(text='reinvest')
 async def reinvest(callback: types.CallbackQuery):
     async with lock:
@@ -530,7 +529,7 @@ async def wallet(message: types.Message):
 
             cd = await db.get_amount_gift_money(message.from_user.id, loop)
             dep = await db.get_deposit(message.from_user.id, loop)
-            ref = await db.get_count_ref_wallet(message.from_user.id, loop) * 5000
+            ref = await db.get_activate_count_ref(message.from_user.id, loop) * 5000
             ref_money = await db.get_percent_ref_money(message.from_user.id, loop)
             reinv = await db.get_reinvest(message.from_user.id, loop)
             date = await db.get_date(message.chat.id, loop)
@@ -607,8 +606,10 @@ async def inform_pers_ok(callback: types.CallbackQuery):
 async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: UserDB = None, answer=None):
     data = await state.get_data()
     if not data or len(data) == 0:
-        await bot.send_message(callback.from_user.id,
-                               "Вы не сделали никому подарок, чтобы  его сделать нажмите на 🎁 Сделать подарок")
+        await bot.send_message(
+            callback.from_user.id,
+            "Вы не сделали никому подарок, чтобы  его сделать нажмите на 🎁 Сделать подарок"
+        )
         return
 
     id = data.get("WHOM")

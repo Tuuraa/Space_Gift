@@ -60,9 +60,9 @@ async def get_launch(bot, user_id, loop):
     if status[0] == 1:
         text_status = " ✅"
 
-    c_ref = count_ref[int(planet[0])] - int(await dbUser.get_count_ref_wallet(user_id, loop))
-    c_ref_op = await dbUser.get_count_ref_wallet(user_id, loop)
-    if await dbUser.get_count_ref_wallet(user_id, loop) < count_ref[int(planet[0])]:
+    c_ref = count_ref[int(planet[0])] - int(await dbUser.get_activate_count_ref(user_id, loop))
+    c_ref_op = await dbUser.get_activate_count_ref(user_id, loop)
+    if await dbUser.get_activate_count_ref(user_id, loop) < count_ref[int(planet[0])]:
         if c_ref_op == 0:
             active_text = f"\n❗ Чтобы попасть в очередь на планету {text_planet[1]} вам нужно пригласить " \
                          f"{c_ref} активных чел." \
