@@ -25,7 +25,7 @@ PATH = '/opt/Space_Gift'
 
 HOST = "localhost"
 USERS = "root"
-PASSWORD = "6CHWb6QmNUy9bLuX"
+PASSWORD = "vlad1550vlad1550"
 DB_NAME = "yougiftdb"
 
 COMMISSION = 0.2

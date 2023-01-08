@@ -36,14 +36,12 @@ async def worker_percent(loop):
             users = clear_none(await dbUser.get_users(loop))
 
             for user in users:
-                date = str(await dbUser.get_date_now(user[0], loop))
-                dt_to_datetime = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+                date = await dbUser.get_date_now(user[0], loop)
 
                 utc_now = pytz.utc.localize(datetime.datetime.utcnow())
-                date_time_now = datetime.datetime\
-                    .strptime(str(utc_now.astimezone(pytz.timezone("UTC")))[:-13], '%Y-%m-%d %H:%M:%S')
+                date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
-                if (date_time_now - dt_to_datetime).days >= 1:
+                if (date_time_now - date).days >= 1:
                     status = await dbUser.get_status(user[0], loop)
                     planet = await dbUser.get_planet(user[0], loop)
 

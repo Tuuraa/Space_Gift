@@ -21,7 +21,7 @@ async def main(loop):
             await cursor.execute('update `users` set `activate_ref_count` = %s where '
                                  '`user_id` = %s', (result, user, ))
             await cursor.execute('update `users` set `activate_date` = %s where '
-                                 '`user_id` = %s', (date_time_now, user,))
+                                 '`user_id` = %s and status = 1', (date_time_now, user,))
             await connection.commit()
 
         for id in ids:

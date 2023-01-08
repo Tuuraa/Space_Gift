@@ -116,7 +116,7 @@ async def get_launch(bot, user_id, loop):
         f"👩‍🚀 Астронавт: {await dbUser.get_name(user_id, loop)}\n"\
         f"🎁 Системы дарения: {int(cd)} RUB\n"\
         f"{text_plan}\n"\
-        f"👥 Лично приглашенных: {await dbUser.get_count_ref(user_id, loop)} чел.\n"\
+        f"👥 Лично приглашенных: {await dbUser.get_count_ref(user_id, loop)} чел. ({await dbUser.get_activate_count_ref(user_id, loop)}).\n"\
         f"🚀 Статус: {level_text} {text_status} {more_text}\n {active_text}"
 
     if status[0] == 0:

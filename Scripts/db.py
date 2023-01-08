@@ -1,3 +1,5 @@
+import asyncio
+
 import aiomysql
 from pymysql import connect
 from datetime import datetime
