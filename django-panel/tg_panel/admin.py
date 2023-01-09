@@ -5,13 +5,26 @@ from django.utils.safestring import mark_safe
 from django.db.models import Sum
 from jet.filters import DateRangeFilter
 
-from .models import TgUser, Pay, CryptPay, Transaction, Withdraw, ApiTokens, Statistic, AllStats
+from .models import TgUser, Pay, CryptPay, Transaction, Withdraw, ApiTokens, Statistic, AllStats, Post
 from .forms import PeriodDateTimePicker
 
-import tg_panel.utils
+from . import utils
 
 from datetime import datetime, date, timedelta, timezone
 
+
+HTML_TAGS = '''
+</br>
+Доступные html теги:</br>
+</br>
+&lt;b&gt;bold&lt;/b&gt;, &lt;strong&gt;bold&lt;/strong&gt; - <b>жирный текст</b></br>
+&lt;i&gt;italic&lt;/i&gt;, &lt;em&gt;italic&lt;/em&gt; - <b>курсив</b></br>
+&lt;a href="http://www.example.com/"&gt;inline URL&lt;/a&gt; - <b>ссылка</b></br>
+&lt;a href="tg://user?id=123456789"&gt;inline mention of a user&lt;/a&gt; - <b>упоминание пользователя</b></br>
+&lt;code&gt;inline fixed-width code&lt;/code&gt; - <b>код</b></br>
+&lt;pre&gt;pre-formatted fixed-width code block&lt;/pre&gt; - <b>блок кода</b></br>
+</br>
+'''
 
 STANDART_DATE_PICKER = {
     'day': lambda: (datetime.now(timezone.utc) - timedelta(days=1)),
@@ -88,20 +101,45 @@ class CryptPayAdmin(admin.ModelAdmin):
 
 
 class WithdrawAdmin(admin.ModelAdmin):
+
+    def user_link(self):
+        user = TgUser.objects.filter(user_id=self.user_id).first()
+        if user.link_name is not None:
+            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
+        else:
+            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
+    user_link.short_description = 'Пользователь'
+
+    def has_change_permission(self, request, obj=None):
+        if obj is None:
+            return True
+
+        return obj.status == 'WAIT'
+
+    def save_model(self, request, obj, form, change):
+        user = TgUser.objects.filter(user_id=obj.user_id).first()
+
+        if obj.status == 'CANCEL':
+            user.gift_money += obj.amount
+            user.save()
+
+        super().save_model(request, obj, form, change)
+
+        bot_token = ApiTokens.objects.get(api='bot_api')
+        utils.tg_send_message(obj, bot_token.title)
+
+    def sum(self):
+        if self.type == 'crypt':
+            return f'{self.amount_crypt} {self.type_crypt}'
+        elif self.type == 'bank':
+            return f'{int(self.amount_commission)} RUB'
+    sum.short_description = 'Сумма с комиссией'
+
     search_fields = ('user_id',)
-    readonly_fields = ('card', 'type', 'get_amount', 'data', 'user_id', 'date', 'amount_commission', 'amount_crypt', 'type_crypt')
-    list_display = ('user_id', 'get_amount', 'card', 'type', 'data', 'status')
+    readonly_fields = ('card', 'type', 'data', 'user_id', 'date', 'amount_commission', 'amount_crypt','type_crypt')
+    list_display = ('id', user_link, sum, 'card', 'type', 'data', 'status')
     list_filter = ('user_id', 'amount', 'card', 'type', 'data', ('date', DateRangeFilter),)
-    list_editable = ('status',)
     exclude = ('amount',)
-
-    def get_amount(self, obj):
-        return format_html(str(obj.amount) + ' Руб.')
-
-    get_amount.short_description = 'Сумма'
-
-    def get_rangefilter_created_at_default(self, request):
-        return (datetime.date.today, datetime.date.today)
 
 
 class TokenAdmin(admin.ModelAdmin):
@@ -110,8 +148,9 @@ class TokenAdmin(admin.ModelAdmin):
 
 class StatAdmin(admin.ModelAdmin):
     change_form_template = 'admin/statis_view.html'
-    def change_view(self, request, object_id, form_url = "", extra_context=None):
-        start_date_filter , end_date_filter = None, None
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        start_date_filter, end_date_filter = None, None
 
         if request.GET.get('start_time') and not request.GET.get('standart_period'):
             start_date = datetime.strptime(request.GET['start_date'], "%Y-%m-%d")
@@ -126,7 +165,7 @@ class StatAdmin(admin.ModelAdmin):
             end_date_filter = datetime.now(timezone.utc)
             start_date_filter = STANDART_DATE_PICKER[request.GET['standart_period']]()
 
-        context = tg_panel.utils.get_statistic(object_id, start_date_filter, end_date_filter)
+        context = utils.get_statistic(object_id, start_date_filter, end_date_filter)
 
         if start_date_filter is None:
             start_date_filter = datetime.now(timezone.utc)
@@ -146,9 +185,10 @@ class StatAdmin(admin.ModelAdmin):
 
 class AllStatsAdmin(admin.ModelAdmin):
     change_list_template = 'admin/user_summary_change_list.html'
+
     def changelist_view(self, request, extra_context=None):
         print(request.POST)
-        start_date_filter , end_date_filter = None, None
+        start_date_filter, end_date_filter = None, None
 
         if request.POST.get('start_time') and not request.POST.get('standart_period'):
             start_date = datetime.strptime(request.POST['start_date'], "%Y-%m-%d")
@@ -163,7 +203,7 @@ class AllStatsAdmin(admin.ModelAdmin):
             end_date_filter = datetime.now(timezone.utc)
             start_date_filter = STANDART_DATE_PICKER[request.POST['standart_period']]()
 
-        context = tg_panel.utils.get_all_stats(start_date_filter, end_date_filter)
+        context = utils.get_all_stats(start_date_filter, end_date_filter)
         
         if start_date_filter is None:
             start_date_filter = datetime.now(timezone.utc)
@@ -180,6 +220,86 @@ class AllStatsAdmin(admin.ModelAdmin):
         return super().changelist_view(request, extra_context=context)
 
 
+class PostAdmin(admin.ModelAdmin):
+    list_display = ['created', 'status', 'amount_of_receivers', 'photo', 'message', 'html_button']
+    list_display_links = ['created']
+
+    search_fields = ['message', 'button_text', 'button_url']
+    list_filter = ['status']
+
+    list_per_page = 10
+
+    def html_button(self, obj):
+        if obj.button_text and obj.button_url:
+            return format_html(f'<a href="{obj.button_url}" target="_blank">{obj.button_text}</a>')
+        else:
+            return ''
+    html_button.short_description = 'Кнопка'
+
+    def get_fieldsets(self, request, obj=None):
+        base_fieldsets = [
+            (
+                'Сообщение',
+                {
+                    'fields': [
+                        'photo',
+                        'message',
+                        ('button_text', 'button_url'),
+                    ],
+                    'description': HTML_TAGS
+                }
+            ),
+            (
+                'Откладывание поста',
+                {
+                    'fields': [
+                        'postpone',
+                        'postpone_time',
+                    ]
+                }
+            ),
+        ]
+
+        if not obj:
+            return base_fieldsets
+        else:
+            return [
+                (
+                    'Общая информация',
+                    {
+                        'fields': [
+                            'created',
+                            'status'
+                        ] + (
+                            ['amount_of_receivers'] if obj.status == 'done' else []
+                        )
+                    }
+                ),
+            ] + base_fieldsets
+
+    def get_readonly_fields(self, request, obj=None):
+        return ['created', 'status', 'amount_of_receivers']
+
+    def has_change_permission(self, request, obj=None):
+        return (obj is None) or (obj.status in ['postponed'])
+
+    def has_delete_permission(self, request, obj=None):
+        return (obj is None) or (obj.status in ['postponed', 'queue', 'done'])
+
+    def add_view(self, request, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['show_save_and_continue'] = False
+
+        return super().add_view(request, form_url, extra_context)
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['show_save_and_continue'] = False
+
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    class Media:
+        js = ('admin/js/post.js',)
 
 
 admin.site.register(TgUser, TgUserAdmin)
@@ -190,3 +310,4 @@ admin.site.register(ApiTokens, TokenAdmin)
 admin.site.unregister(Group)
 admin.site.register(Statistic, StatAdmin)
 admin.site.register(AllStats, AllStatsAdmin)
+admin.site.register(Post, PostAdmin)

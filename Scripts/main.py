@@ -26,6 +26,7 @@ import inline_keybords
 import logic
 import clones
 
+loop = asyncio.new_event_loop()
 lock = asyncio.Lock()
 
 PATH = config.PATH
@@ -33,10 +34,11 @@ PATH = config.PATH
 configCl = ConfigDBManager.get()
 
 API_TOKEN = configCl.api_bot  # Считывание токена
-NAME_BOT = config.name_bot  # Считывание имени бота
+bot = Bot(token=API_TOKEN)
+
+NAME_BOT = loop  # Считывание имени бота
 NUMBER_PAY = config.NUMBER_PAY
 
-bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 db = ManagerUsersDataBase()
@@ -247,16 +249,38 @@ async def read_numb(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == "👥 Реферальная ссылка")
 async def ref(message: types.Message):
-    count = await db.get_count_ref(message.from_user.id, loop)
-    text = f"🤖 Ваш ID: {message.from_user.id}\n" \
-           f"👥 Партнеров: {count} чел.\n\n" \
-           f"Ваша реферальная ссылка:\nhttps://t.me/{NAME_BOT}?start={message.from_user.id}\n"
+    total_sum_pay = await dbPay.get_total_topup_sum(loop)
+    total_sum_pay_crypt = await dbPay.get_total_topup_sum_crypt(loop)
+    total_sum = 0
+
+    if total_sum_pay:
+        total_sum += total_sum_pay
+    if total_sum_pay_crypt:
+        total_sum += total_sum_pay_crypt
+
+    all_users = await db.get_users(loop, extended=True)
+    all_count = await dbPay.get_total_topup_users(loop)
+    top_planet = max(int(x[11]) for x in all_users)
+
+    ref_users = list(filter(lambda x: x[2] == str(message.from_user.id), all_users))
+    ref_count = await db.get_count_ref(message.from_user.id, loop)
+    active_ref_count = await db.get_count_active_ref(message.from_user.id, loop)
+    ref_depozits = sum(x[8] for x in ref_users)
+
+    answer_text = f"<b> 🤖 Ваш ID: {message.from_user.id} </b>\n\n" \
+                  f"👥 Всего приглашенных рефералов: <b>{ref_count}</b>\n" \
+                  f"🧑‍💼 Всего активированных рефералов: <b>{active_ref_count}</b>\n" \
+                  f"🌟 Сумма депозитов ваших рефералов: <b>{ref_depozits}</b>\n\n" \
+                  f"✨ Всего людей инвестировали в проект: <b>{all_count}</b>\n" \
+                  f"🎁 Сумма пополнений в проекте: <b>{total_sum:.2f}</b>\n" \
+                  f"{'---' if top_planet == 0 else f'🪐 Лучшая достигнутая планета: <b>{logic.planets[top_planet - 1]}</b>'}\n\n" \
+                  f"Ваша реферальная ссылка:\nhttps://t.me/{NAME_BOT}?start={message.from_user.id}"
 
     with open(PATH + "/img/referrer.png", 'rb') as file:
         await bot.send_photo(
             message.from_user.id,
             photo=file,
-            caption=text,
+            caption=answer_text,
             reply_markup=inline_keybords.get_tools(),
             parse_mode="HTML"
         )
@@ -420,7 +444,6 @@ async def system_clones(callback: types.CallbackQuery):
         )
 
 
-
 @dp.message_handler(lambda mes: mes.text == "Удалить аккаунт")
 async def deleteacc(message: types.Message):
     await message.answer("Аккаунт удален, перезапустите бота \n/start")
@@ -481,14 +504,14 @@ async def reinv_amount(message: types.Message, state: FSMContext):
 
     cd = await db.get_amount_gift_money(message.from_user.id, loop)
     dep = await db.get_deposit(message.from_user.id, loop)
-    ref = await db.get_count_ref(message.from_user.id, loop) * 5000
+    ref = await db.get_activate_count_ref(message.from_user.id, loop) * 5000
     ref_money = await db.get_percent_ref_money(message.from_user.id, loop)
     reinv = await db.get_reinvest(message.from_user.id, loop)
 
     await bot.send_message(
         message.from_user.id,
         f"Вы реинвестировали {round(gift_money, 2)} RUB теперь Ваш "
-        f"общий депозит {cd + dep + ref + ref_money + reinv} RUB"
+        f"общий депозит {int(cd + dep + ref + ref_money + reinv)} RUB"
     )
     await state.reset_state(with_data=True)
 
@@ -1574,7 +1597,7 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
         if data.get("WITHDRAW_TYPE") == 'crypt':
             amount_crypt = int(data.get("WITHDRAW_AMOUNT"))
             curs = float(await coinbase_data.get_kurs(str(data.get("TYPE_CRYPT")).upper()))
-            res = round(amount_crypt / curs, 11)
+            res = round(amount_com / curs, 11)
             await dbWithDraw.create_request_crypt(
                 data_requests["CRYPT_CARD"],
                 data_requests["DATA_USER"],
@@ -1600,7 +1623,7 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
             )
         await message.answer(
             "Заявка на вывод средств успешно отправлена, ожидайте подтверждение "
-            "отправки средств администраторомв течении 24 часов вам придут деньги на "
+            "отправки средств администратором в течении 24 часов вам придут деньги на "
             "ваши реквизиты",
             reply_markup=inline_keybords.profile_markup()
         )
@@ -1711,22 +1734,16 @@ async def change_type_res(message: types.Message):
 
 
 if __name__ == '__main__':
-    loop = asyncio.new_event_loop()
-    # asyncio.run_coroutine_threadsafe(worker(bot, loop), loop)
-    # asyncio.run_coroutine_threadsafe(worker_percent(bot, loop), loop)
-    # asyncio.run_coroutine_threadsafe(worker_clones(bot, loop), loop)
-    # asyncio.run_coroutine_threadsafe(worker_jumps(bot, loop), loop)
-    #loops = [asyncio.get_event_loop() for i in range(0, 1)]
+    loops = [asyncio.new_event_loop() for i in range(0, 4)]
 
-    '''
     thread = threading.Thread(target=loops[0].run_forever)
     thread.start()
     asyncio.run_coroutine_threadsafe(worker(loops[0]), loops[0])
-    '''
-    thread = threading.Thread(target=loop.run_forever)
+
+    thread = threading.Thread(target=loops[1].run_forever)
     thread.start()
-    asyncio.run_coroutine_threadsafe(worker_percent(loop), loop)
-    '''
+    asyncio.run_coroutine_threadsafe(worker_percent(loops[1]), loops[1])
+
     thread = threading.Thread(target=loops[2].run_forever)
     thread.start()
     asyncio.run_coroutine_threadsafe(worker_clones(loops[2]), loops[2])
@@ -1734,5 +1751,5 @@ if __name__ == '__main__':
     thread = threading.Thread(target=loops[3].run_forever)
     thread.start()
     asyncio.run_coroutine_threadsafe(worker_jumps(loops[3]), loops[3])
-    '''
-    #executor.start_polling(dp, skip_updates=True)
+
+    executor.start_polling(dp, skip_updates=True)

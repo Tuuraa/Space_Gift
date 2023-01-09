@@ -21,12 +21,22 @@ domain_pay = "orionbtc.xyz"
 NUMBER_PAY = 0
 ADMINS = [855151774]
 
-PATH = '/opt/Space_Gift'
+DEBUG = True
 
-HOST = "127.0.0.1"
-USERS = "root"
-PASSWORD = "vlad1550vlad1550"
-DB_NAME = "yougiftdb"
+if DEBUG:
+    PATH = '/Users/v_sopin/Documents/GitHub/Space_Gift'
+
+    HOST = "127.0.0.1"
+    USERS = "root"
+    PASSWORD = "vlad1550vlad1550"
+    DB_NAME = "yougiftdb"
+else:
+    PATH = '/opt/Space_Gift'
+
+    HOST = "127.0.0.1"
+    USERS = "root"
+    PASSWORD = "6CHWb6QmNUy9bLuX"
+    DB_NAME = "yougiftdb"
 
 COMMISSION = 0.2
 

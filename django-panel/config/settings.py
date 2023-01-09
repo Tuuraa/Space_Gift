@@ -1,4 +1,5 @@
 import os
+import pymysql
 from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
@@ -61,16 +62,31 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'yougiftdb',
-        'USER': 'root',
-        'PASSWORD': '6CHWb6QmNUy9bLuX',
-        'HOST': 'localhost',
-        'PORT': '3306',
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'yougiftdb',
+            'USER': 'root',
+            'PASSWORD': 'vlad1550vlad1550',
+            'HOST': 'localhost',
+            'PORT': '3306',
+        }
     }
-}
+    BASE_URL = 'http://127.0.0.1:8000'
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'yougiftdb',
+            'USER': 'root',
+            'PASSWORD': '6CHWb6QmNUy9bLuX',
+            'HOST': 'localhost',
+            'PORT': '3306',
+        }
+    }
+    BASE_URL = 'http://135.181.201.63'
+pymysql.install_as_MySQLdb()
 
 
 # Password validation

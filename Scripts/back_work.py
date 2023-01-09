@@ -7,6 +7,7 @@ import coinbase_data
 import time
 
 import db
+import os
 from config import PATH
 
 from db import ManagerPayDataBase, ManagerUsersDataBase, ManagerClonesDataBase, ConfigDBManager
@@ -74,9 +75,6 @@ async def worker(loop):
                         elif status_payment == "OPERATION_COMPLETED":   # Проверка пополнения счета
                                 # Пополнение счетов
                                 await dbUser.add_money_and_dep(user[0], pay[1], loop)
-                                #await dbUser.add_depozit(user[0], pay[1], loop)
-                                #await dbUser.add_money(user[0], pay[1], loop)
-                                #await dbUser.add_gift_money(user[0], pay[1], loop)
 
                                 # Оповещение реферала
                                 referrer_id = await dbUser.get_referrer_of_user(user[0], loop)
@@ -87,8 +85,6 @@ async def worker(loop):
                                     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
                                     await dbUser.insert_ref_money(dep, int(referrer_id), user[0], date_time_now, loop)
                                     await dbUser.add_money_and_pecr_ref_money(int(referrer_id), dep, loop)
-                                    #await dbUser.add_money(int(referrer_id), dep, loop)
-                                    #await dbUser.set_percent_ref_money(int(referrer_id), dep, loop)
 
                                     await send_message_safe(
                                         bot,
@@ -96,7 +92,6 @@ async def worker(loop):
                                         f"Ваш реферал @{await dbUser.get_name(user[0], loop)} "
                                         f"пополнил баланс и вам подарили {dep} RUB."
                                     )
-                                #await bot.delete_message(user[0], pay[5])
 
                                 if pay[1] <= 5000:
                                     with open(PATH + "/img/dep_done.png", 'rb') as file:
@@ -131,9 +126,6 @@ async def worker(loop):
 
                             amount_rub = await dbPay.get_amount_rub_crypt(pay[4], loop)
                             await dbUser.add_money_and_dep(pay[1], amount_rub, loop)
-                            #await dbUser.add_money(pay[1], amount_rub, loop)
-                            #await dbUser.a dd_depozit(pay[1], amount_rub, loop)
-                            #await dbUser.add_gift_money(pay[1], amount_rub, loop)
 
                             if float(pay[6]) <= 5000:
 
@@ -164,8 +156,6 @@ async def worker(loop):
                                 date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
                                 await dbUser.insert_ref_money(dep, referrer_id, pay[1], date_time_now, loop)
                                 await dbUser.add_money_and_pecr_ref_money(int(referrer_id), dep, loop)
-                                #await dbUser.add_money(int(referrer_id), dep, loop)
-                                #await dbUser.add_depozit(int(referrer_id), dep, loop)
 
                                 await send_message_safe(bot, referrer_id,
                                                         f"Ваш реферал {dbUser.get_name(pay[1], loop)} "
@@ -183,7 +173,6 @@ async def worker(loop):
 
         except Exception:
             exc_type, exc_obj, exc_tb = sys.exc_info()
-
             config = db.ConfigDBManager().get()
             await bot.send_message(
                 config.errors_group_id,

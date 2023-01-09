@@ -40,7 +40,9 @@ async def worker_clones(loop):
     while True:
         try:
             start_program_time = time.time()
+            print('TEST')
             await clones.update_active_user(loop)
+
             users = await helper.get_users((await dbUser.get_users_on_planet(0, loop)), loop)
             status_active_users = helper.get_active_status_users(users, 0)
             active_user: UserDB = await clones.get_active_user(status_active_users)
@@ -88,6 +90,7 @@ async def worker_clones(loop):
 
             except Exception:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
+                print(exc_type, exc_obj, exc_tb.tb_lineno)
                 config = db.ConfigDBManager().get()
 
                 await bot.send_message(
@@ -100,11 +103,11 @@ async def worker_clones(loop):
 
         except Exception:
             exc_type, exc_obj, exc_tb = sys.exc_info()
+            print(exc_type, exc_obj, exc_tb.tb_lineno)
             config = db.ConfigDBManager().get()
             await bot.send_message(
                 config.errors_group_id,
                 f'{exc_type}, {exc_obj}, {exc_tb} from back_clones'
             )
-            print(exc_type, exc_obj, exc_tb.tb_lineno)
 
         await asyncio.sleep(20)

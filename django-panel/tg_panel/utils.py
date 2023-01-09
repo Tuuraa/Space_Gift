@@ -9,10 +9,10 @@ import tg_panel.models as tg_models
 def tg_send_message(withdraw, token):
 
     if withdraw.status == 'CANCEL':
-        text = f"⛔️ Ваша заявка на вывод №{withdraw.id}, на сумму {withdraw.amount} руб отменена администратором. " \
+        text = f"⛔️ Ваша заявка на вывод №{withdraw.id} на сумму {int(withdraw.amount)} руб отменена администратором. " \
                f"Для подробной информации свяжитесь с @SMFadmin"
     elif withdraw.status == 'GOOD':
-        text = f"✅ Ваша заявка на вывод №{withdraw.id}, на сумму {withdraw.amount} руб успешно обработана"
+        text = f"✅ Ваша заявка на вывод №{withdraw.id} на сумму {int(withdraw.amount)} руб успешно обработана"
     else:
         return
     try:

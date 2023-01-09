@@ -1,8 +1,11 @@
+import random
+from datetime import datetime
+from string import ascii_lowercase
+from django.core.exceptions import ValidationError
+
 from django.db import models
 from django.db.models import signals
 from django.dispatch import receiver
-
-import tg_panel.utils
 
 
 class Clones(models.Model):
@@ -22,10 +25,16 @@ STATUS_CHOICES = (
     ('OPERATION_ERROR', '⚠️ Ошибка при выполнении операции')
 )
 
+WITHDRAWAL_TYPES = (
+    ('bank', '💳 Рубли на карту'),
+    ('crypt', '🪙 Криптовалюта'),
+)
+
 BOOLCHOISES = (
     (False, 'Не актив'),
     (True, 'Актив'),
 )
+
 
 class CryptPay(models.Model):
     amount = models.DecimalField(verbose_name='Сумма', max_digits=10, decimal_places=2, blank=True, null=True)
@@ -117,15 +126,15 @@ class TgUser(models.Model):
 
 
 WIDTHDRAW_CHOISES = (
-    ('CANCEL', 'Отменена'),
-    ('WAIT', 'В ожидании оплаты'),
-    ('GOOD', 'Операция проведена'),
+    ('CANCEL', '⛔️ Отменен'),
+    ('WAIT', '⏳ В ожидании оплаты'),
+    ('GOOD', '✅ Операция проведена'),
 )
 
 
 class Withdraw(models.Model):
-    card = models.TextField(verbose_name='Карта', )
-    type = models.TextField(verbose_name='Тип', )
+    card = models.TextField(verbose_name='Реквизиты', )
+    type = models.TextField(verbose_name='Тип', choices=WITHDRAWAL_TYPES)
     amount = models.IntegerField(verbose_name='Сумма', )
     data = models.TextField(verbose_name='Доп. данные', )
     user_id = models.TextField(verbose_name='ID пользователя', )
@@ -140,18 +149,6 @@ class Withdraw(models.Model):
         verbose_name_plural = 'Выводы'
         managed = False
         db_table = 'withdraw'
-
-
-@receiver(signals.post_save, sender=Withdraw)
-def send_withdraw_status_to_user(sender, instance, created, *args,  **kwargs):
-    if instance.status != 'WAIT':
-        bot_token = ApiTokens.objects.get(api='bot_api')
-        tg_panel.utils.tg_send_message(instance, bot_token.title)
-        if instance.status == 'CANCEL':
-            current_user = TgUser.objects.get(user_id=instance.user_id)
-            current_user.gift_money += instance.amount
-            current_user.save()
-
 
 
 class ApiTokens(models.Model):
@@ -188,3 +185,99 @@ class RefMoney(models.Model):
     class Meta:
         managed = False
         db_table = 'ref_money'
+
+
+class Photo(models.ImageField):
+    max_size_mb = 20
+
+    def __init__(self, *args, **kwargs):
+        kwargs['upload_to'] = self.get_path
+        kwargs['validators'] = [self.validate_image]
+
+        return super().__init__(*args, **kwargs)
+
+    def get_path(self, instance, filename, length=10):
+        file_format = filename.split('.')[-1].lower()
+
+        filename = ''
+        for index in range(length):
+            filename += random.choice(ascii_lowercase)
+
+        return f'{filename}.{file_format}'
+
+    def validate_image(self, image):
+        image_size_bytes = image.file.size
+        max_size_bytes = self.max_size_mb * 1024 * 1024
+
+        if image_size_bytes > max_size_bytes:
+            raise ValidationError(f'Максимальный размер файла - {self.max_size_mb} МБ')
+
+
+class Post(models.Model):
+    created = models.DateTimeField('Дата создания, UTC',
+        auto_now_add=True
+    )
+    status = models.CharField('Статус',
+        max_length=9,
+        choices=[
+            ('created', 'Создан'),
+            ('postponed', 'Отложен'),
+            ('queue', 'В очереди'),
+            ('process', 'Рассылается'),
+            ('done', 'Разослан')
+        ],
+        default='created'
+    )
+
+    photo = Photo('Изображение до 5МБ',
+        blank=True, null=True
+    )
+
+    message = models.TextField('Форматированный текст, до 1024 символов',
+        max_length=1024
+    )
+    button_text = models.CharField('Текст кнопки',
+        max_length=50, blank=True, null=True
+    )
+    button_url = models.URLField('Ссылка кнопки',
+        blank=True, null=True
+    )
+
+    postpone = models.BooleanField('Отложить',
+        default=False
+    )
+    postpone_time = models.DateTimeField('Время публикации, UTC',
+        default=datetime(2020, 1, 1)
+    )
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            if self.postpone:
+                self.status = 'postponed'
+            else:
+                self.status = 'queue'
+
+        elif self.status == 'postponed' and not self.postpone:
+            self.status = 'queue'
+
+        if not self.button_text or not self.button_url:
+            self.button_text = None
+            self.button_url = None
+
+        super().save(*args, **kwargs)
+
+    amount_of_receivers = models.IntegerField('Количество получателей',
+        blank=True, null=True
+    )
+
+    def __str__(self):
+        time_isoformat = self.created.isoformat(sep=' ', timespec='seconds')
+        time_isoformat = time_isoformat[:time_isoformat.index('+')]
+
+        return time_isoformat
+
+    class Meta:
+        verbose_name = 'рассылка'
+        verbose_name_plural = 'рассылки'
+        managed = False
+        db_table = 'posts'
