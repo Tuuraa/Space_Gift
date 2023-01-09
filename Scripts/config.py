@@ -21,11 +21,13 @@ domain_pay = "orionbtc.xyz"
 NUMBER_PAY = 0
 ADMINS = [855151774]
 
+SUB_GROUP = -1001878641715
+
 PATH = '/opt/Space_Gift'
 
-HOST = "127.0.0.1"
+HOST = "localhost"
 USERS = "root"
-PASSWORD = "vlad1550vlad1550"
+PASSWORD = "6CHWb6QmNUy9bLuX"
 DB_NAME = "yougiftdb"
 
 COMMISSION = 0.2
