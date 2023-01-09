@@ -2,6 +2,7 @@ import asyncio
 import logging
 import os
 import threading
+from utils import is_user_subbed
 
 import pytz
 from aiogram import Bot, types
@@ -52,6 +53,20 @@ now_user: User = None  # Пользователь сейчас, для удоб�
 @dp.message_handler(commands=['start'])  # Обработка команды /start
 async def send_welcome(message: types.Message):
     if message.chat.type == "private":
+        if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
+            keyboard = types.InlineKeyboardMarkup().add(
+                types.InlineKeyboardButton(
+                    text="😇 Подписаться",
+                    url='https://t.me/spacegiftbot',
+                )
+            )
+            return await message.answer(
+                text="*Чтобы пользововаться ботом*, вам нужно подписаться "
+                     "на нашу *официальную группу* https://t.me/spacegiftbot\n\n"
+                     "Чтобы проверить статус подписки, напишите /start",
+                parse_mode='markdown',
+                reply_markup=keyboard,
+            )
 
         if not await db.exists_user(message.from_user.id, loop):
             referrer_id = message.get_args()
@@ -306,6 +321,41 @@ async def about_space_gift(message: types.Message):
     )
 
 
+@dp.message_handler(text="Моя команда")
+async def my_team(message: types.Message):
+    total_sum_pay = await dbPay.get_total_topup_sum(loop)
+    total_sum_pay_crypt = await dbPay.get_total_topup_sum_crypt(loop)
+    total_sum = 0
+
+    if total_sum_pay:
+        total_sum += total_sum_pay
+    if total_sum_pay_crypt:
+        total_sum += total_sum_pay_crypt
+
+    all_users = await db.get_users(loop, extended=True)
+    all_count = await dbPay.get_total_topup_users(loop)
+    top_planet = max(int(x[11]) for x in all_users)
+
+    ref_users = list(filter(lambda x: x[2] == str(message.from_user.id), all_users))
+    active_ref_users = list(filter(lambda x: x[2] == str(message.from_user.id) and x[14] == 1, all_users))
+    ref_count = len(ref_users)
+    active_ref_count = len(active_ref_users)
+    ref_depozits = sum(x[8] for x in ref_users)
+
+    answer_text = f"<b> 🤖 Ваш ID: {message.from_user.id} </b>\n\n" \
+                  f"👥 Всего приглашенных рефералов: <b>{ref_count}</b>\n" \
+                  f"🧑‍💼 Всего активированных рефералов: <b>{active_ref_count}</b>\n" \
+                  f"🌟 Сумма депозитов ваших рефералов: <b>{ref_depozits}</b>\n\n" \
+                  f"✨ Всего людей инвестировали в проект: <b>{all_count}</b>\n" \
+                  f"🎁 Сумма пополнений в проекте: <b>{total_sum:.2f}</b>\n" \
+                  f"{'' if top_planet == 0 else f'🪐 Лучшая достигнутая планета: <b>{logic.planets[top_planet - 1]}</b>'}"
+
+    await message.answer(
+        text=answer_text,
+        parse_mode='html',
+    )
+
+
 @dp.message_handler(text="💫 Инвестиции в Space Money")
 async def about_space_gift(message: types.Message):
     with open(PATH + "/Data/invest_space_money.txt", 'r', encoding="utf-8") as file:
@@ -481,7 +531,7 @@ async def reinv_amount(message: types.Message, state: FSMContext):
 
     cd = await db.get_amount_gift_money(message.from_user.id, loop)
     dep = await db.get_deposit(message.from_user.id, loop)
-    ref = await db.get_count_ref(message.from_user.id, loop) * 5000
+    ref = await db.get_count_ref_wallet(message.from_user.id, loop) * 5000
     ref_money = await db.get_percent_ref_money(message.from_user.id, loop)
     reinv = await db.get_reinvest(message.from_user.id, loop)
 
@@ -1213,7 +1263,7 @@ async def team_handler(message: types.Message):
     all_depozits = sum(x[8] for x in all_users)
     top_planet = max(int(x[11]) for x in all_users)
 
-    ref_users = list(filter(lambda x: x[2] == message.from_user.id, all_users))
+    ref_users = list(filter(lambda x: x[2] == str(message.from_user.id), all_users))
     ref_count = len(ref_users)
     ref_depozits = sum(x[8] for x in ref_users)
 

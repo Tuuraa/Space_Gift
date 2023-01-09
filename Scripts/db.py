@@ -721,6 +721,34 @@ class ManagerUsersDataBase:
 
 
 class ManagerPayDataBase:
+
+    async def get_total_topup_users(self, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute('''
+                SELECT COUNT(DISTINCT(user_id)) FROM (
+                    SELECT user_id FROM yougiftdb.crypt_pay where status='OPERATION_COMPLETED'
+                    UNION
+                    SELECT user_id FROM yougiftdb.pay where status='OPERATION_COMPLETED'
+                ) t;
+            ''')
+            result = (await cursor.fetchone())[0]
+            return result
+
+    async def get_total_topup_sum(self, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("SELECT SUM(`pay_amount`) FROM `pay` where `status`='OPERATION_COMPLETED'")
+            result = (await cursor.fetchone())[0]
+            return result
+
+    async def get_total_topup_sum_crypt(self, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("SELECT SUM(`amount_rub`) FROM `crypt_pay` where `status`='OPERATION_COMPLETED'")
+            result = (await cursor.fetchone())[0]
+            return result
+
     async def create_pay(self, pay_id, pay_type, pay_amount, date, user_id, canc_id, status, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
