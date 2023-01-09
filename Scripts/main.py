@@ -25,6 +25,7 @@ from jump import worker_jumps
 import inline_keybords
 import logic
 import clones
+from utils import is_user_subbed
 
 loop = asyncio.new_event_loop()
 lock = asyncio.Lock()
@@ -54,6 +55,21 @@ now_user: User = None  # Пользователь сейчас, для удоб�
 @dp.message_handler(commands=['start'])  # Обработка команды /start
 async def send_welcome(message: types.Message):
     if message.chat.type == "private":
+
+        if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
+            keyboard = types.InlineKeyboardMarkup().add(
+                types.InlineKeyboardButton(
+                    text="😇 Подписаться",
+                    url='https://t.me/spacegiftbot',
+                )
+            )
+            return await message.answer(
+                text="*Чтобы пользововаться ботом*, вам нужно подписаться "
+                     "на нашу *официальную группу* https://t.me/spacegiftbot\n\n"
+                     "Чтобы проверить статус подписки, напишите /start",
+                parse_mode='markdown',
+                reply_markup=keyboard,
+            )
 
         if not await db.exists_user(message.from_user.id, loop):
             referrer_id = message.get_args()
@@ -883,7 +899,7 @@ async def amount_crypt(message: types.Message, state: FSMContext):
         amount = round(int(message.text) / await coinbase_data.get_kurs(data.get('PAY_TYPE')), 8)
         await message.answer(
             f"☑️Заявка на пополнение №{int(await dbPay.get_count_crypt(loop)) + 1} успешно создана\n\n"
-            f"Сумма к оплате: <b>{amount} RUB</b>",
+            f"Сумма к оплате: <b>{amount} {data.get('PAY_TYPE')}</b>",
             parse_mode="html",
         )
         if pay.get("PAY_TYPE") == "USDT":

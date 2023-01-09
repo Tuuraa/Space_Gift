@@ -21,7 +21,9 @@ domain_pay = "orionbtc.xyz"
 NUMBER_PAY = 0
 ADMINS = [855151774]
 
-DEBUG = True
+SUB_GROUP = -1001878641715
+
+DEBUG = False
 
 if DEBUG:
     PATH = '/Users/v_sopin/Documents/GitHub/Space_Gift'

@@ -17,12 +17,9 @@ class Clones(models.Model):
 
 
 STATUS_CHOICES = (
-    ('WAIT_PAYMENT_TYPE', '⏳ В ожидании способа оплаты'),
     ('CANCELED', '⛔️ Отменен'),
     ('WAIT_PAYMENT', '⏳ В ожидании оплаты'),
-    ('SUCCESSFULLY_PAYED', '⏳ Успешно оплачено, ожидайте выплату'),
     ('OPERATION_COMPLETED', '✅ Операция проведена'),
-    ('OPERATION_ERROR', '⚠️ Ошибка при выполнении операции')
 )
 
 WITHDRAWAL_TYPES = (
@@ -62,7 +59,7 @@ class Helper(models.Model):
 
 
 class Pay(models.Model):
-    pay_id = models.IntegerField(verbose_name='ID')
+    pay_id = models.IntegerField(verbose_name='ID (у нас и в обменнике)')
     pay_amount = models.IntegerField(verbose_name='Сумма')
     date = models.DateField(verbose_name='Дата')
     pay_type = models.TextField(verbose_name='Тип')
@@ -114,6 +111,8 @@ class TgUser(models.Model):
     jump = models.BooleanField(blank=True, null=True)
     last_withd = models.DateTimeField(blank=True, null=True, auto_now=False, auto_now_add=False)
     activate_ref_count = models.IntegerField(verbose_name='Активные рефералы', blank=True, null=True)
+    remove_dep = models.IntegerField(verbose_name='Депозит доступный для вывода', blank=True, null=True, editable=False)
+    percent_ref_money = models.FloatField(blank=True, null=True, editable=False)
 
     def __str__(self):
         return self.name

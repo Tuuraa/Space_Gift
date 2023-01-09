@@ -98,7 +98,7 @@ async def worker(loop):
                                         await send_message_safe(
                                             bot,
                                             user[0],
-                                            f"Платеж {pay[0]} успешно выполнен. Ваш счет пополненен на {pay[1]} руб.",
+                                            f"Платеж {pay[0]} успешно выполнен. Ваш счет пополнен на {pay[1]} руб.",
                                             file
                                         )
                                 else:

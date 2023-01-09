@@ -361,7 +361,7 @@ class ManagerUsersDataBase:
         async with connection.cursor() as cursor:
             await cursor.execute(
                 "UPDATE `users` SET `depozit` =  `depozit` + %s WHERE `user_id` = %s", (money, user_id,))
-            await cursor.execute("UPDATE `users` SET `money` = money = %s WHERE user_id = %s", (money, user_id,))
+            await cursor.execute("UPDATE `users` SET `money` = money + %s WHERE user_id = %s", (money, user_id,))
             await cursor.execute("UPDATE `users` SET `remove_dep` = `remove_dep` + %s WHERE `user_id` = %s",
                                  (money, user_id))
             await connection.commit()

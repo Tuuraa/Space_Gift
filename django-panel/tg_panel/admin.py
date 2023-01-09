@@ -1,3 +1,6 @@
+import pytz
+import telebot
+from decimal import Decimal
 from django.contrib import admin
 from  django.contrib.auth.models  import  Group
 from django.utils.html import format_html
@@ -5,7 +8,7 @@ from django.utils.safestring import mark_safe
 from django.db.models import Sum
 from jet.filters import DateRangeFilter
 
-from .models import TgUser, Pay, CryptPay, Transaction, Withdraw, ApiTokens, Statistic, AllStats, Post
+from .models import TgUser, Pay, CryptPay, Transaction, Withdraw, ApiTokens, Statistic, AllStats, Post, RefMoney, Clones
 from .forms import PeriodDateTimePicker
 
 from . import utils
@@ -31,6 +34,8 @@ STANDART_DATE_PICKER = {
     'week': lambda: (datetime.now(timezone.utc) - timedelta(days=7)),
     'month': lambda: (datetime.now(timezone.utc) - timedelta(days=31)),
 }
+
+bot = telebot.TeleBot(ApiTokens.objects.get(api='bot_api').title)
 
 
 class TgUserAdmin(admin.ModelAdmin):
@@ -65,39 +70,177 @@ class TgUserAdmin(admin.ModelAdmin):
 
 
 class PayAdmin(admin.ModelAdmin):
-    search_fields = ('pay_id', 'pay_type', 'date', 'user_id')
-    list_display = ('pay_id', 'get_pay_amount', 'date', 'pay_type', 'user_id', 'cancel_id', 'status')
+    def user_link(self):
+        user = TgUser.objects.filter(user_id=self.user_id).first()
+        if user.link_name is not None:
+            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
+        else:
+            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
+    user_link.short_description = 'Пользователь'
+
+    search_fields = ('pay_id', 'user_id', 'get_pay_amount')
+    list_display = ('pay_id', user_link, 'get_pay_amount', 'date', 'status')
     readonly_fields = ('pay_id', 'get_pay_amount', 'date', 'pay_type', 'user_id', 'cancel_id')
     exclude = ('pay_amount', )
-    list_editable = ('status',)
-    list_filter = (
-        ('date', DateRangeFilter),
-        'user_id',
-    )
 
     def get_pay_amount(self, obj):
         return format_html(f'{obj.pay_amount} Руб.')
     get_pay_amount.short_description = 'Сумма'
 
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if obj is None:
+            return True
+
+        return obj.status == 'WAIT_PAYMENT'
+
+    def save_model(self, request, obj, form, change):
+        user = TgUser.objects.filter(user_id=obj.user_id).first()
+
+        super().save_model(request, obj, form, change)
+
+        if obj.status == 'CANCELED':
+            bot.send_message(user.user_id, text=f'⛔️ Ваша заявка на пополнение №{obj.pay_id} была отменена администратором', parse_mode='html')
+            return
+        elif obj.status == 'OPERATION_COMPLETED':
+            user.depozit += obj.pay_amount
+            user.money += obj.pay_amount
+            user.money += obj.pay_amount
+
+            user.save()
+
+            if user.referrer_id is not None:
+                ref_user = TgUser.objects.filter(user_id=user.referrer_id).first()
+                if ref_user is not None and ref_user.status == 1:
+                    ref_income = obj.pay_amount * .1
+                    utc_now = pytz.utc.localize(datetime.utcnow())
+                    date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
+
+                    RefMoney.objects.create(user_id=user.user_id, ref_id=ref_user.user_id, money=ref_income, date=date_time_now)
+
+                    ref_user.money += Decimal(ref_income)
+                    ref_user.percent_ref_money += ref_income
+                    ref_user.save()
+
+                    try:
+                        if user.link_name is not None:
+                            user_name = f'@{user.link_name}'
+                        else:
+                            user_name = f'{user.name} ({user.user_id})'
+
+                        bot.send_message(ref_user.user_id, text=f'Ваш реферал {user_name} пополнил баланс и вам подарили {int(ref_income)} RUB', parse_mode='html')
+                    except Exception:
+                        pass
+
+            try:
+                bot.send_message(user.user_id, text=f"Платеж №{obj.pay_id} успешно выполнен. Ваш счет пополнен на {obj.pay_amount} руб.", parse_mode='html')
+            except Exception:
+                pass
+
+            if user.status == 1 or int(user.planet) > 0:
+                clones_count = int(obj.pay_amount / 5000)
+                for clone in range(0, clones_count):
+                    Clones.objects.create(active=True)
+
+                count_ref = int(obj.pay_amount/10_000)
+
+                user.activate_ref_count += count_ref
+                user.count_ref += count_ref
+                user.save()
+
 
 class CryptPayAdmin(admin.ModelAdmin):
-    search_fields = ('pay_id', 'pay_type', 'date')
-    list_display = ('get_amount_rub', 'get_amount','pay_type', 'date', 'user_id', 'cancel_id', 'status')
+    def user_link(self):
+        user = TgUser.objects.filter(user_id=self.user_id).first()
+        if user.link_name is not None:
+            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
+        else:
+            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
+    user_link.short_description = 'Пользователь'
+
+    search_fields = ('id', 'user_id', 'amount_rub')
+    list_display = ('id', user_link, 'get_amount_rub', 'get_amount', 'date', 'status')
     readonly_fields = ('get_amount', 'user_id', 'date', 'pay_type', 'cancel_id', 'get_amount_rub')
     exclude = ('amount', 'amount_rub')
-    list_editable = ('status',)
-    list_filter = (
-        ('date', DateRangeFilter),
-        'user_id',
-    )
 
     def get_amount_rub(self, obj):
-        return format_html(f'{obj.amount_rub} Руб.')
+        return format_html(f'{int(obj.amount_rub)} руб')
     get_amount_rub.short_description = 'Сумма'
 
     def get_amount(self, obj):
         return format_html(f'{obj.amount} {obj.pay_type}')
     get_amount.short_description = 'Сумма в криптовалюте'
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if obj is None:
+            return True
+
+        return obj.status == 'WAIT_PAYMENT'
+
+    def save_model(self, request, obj, form, change):
+        user = TgUser.objects.filter(user_id=obj.user_id).first()
+
+        super().save_model(request, obj, form, change)
+
+        if obj.status == 'CANCELED':
+            bot.send_message(user.user_id, text=f'⛔️ Ваша заявка на пополнение №{obj.id} была отменена администратором', parse_mode='html')
+            return
+        elif obj.status == 'OPERATION_COMPLETED':
+            user.depozit += float(obj.amount_rub)
+            user.money += obj.amount_rub
+            user.money += obj.amount_rub
+
+            user.save()
+
+            if user.referrer_id is not None:
+                ref_user = TgUser.objects.filter(user_id=user.referrer_id).first()
+                if ref_user is not None and ref_user.status == 1:
+                    ref_income = float(obj.amount_rub) * .1
+                    utc_now = pytz.utc.localize(datetime.utcnow())
+                    date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
+
+                    RefMoney.objects.create(user_id=user.user_id, ref_id=ref_user.user_id, money=ref_income, date=date_time_now)
+
+                    ref_user.money += Decimal(ref_income)
+                    ref_user.percent_ref_money += ref_income
+                    ref_user.save()
+
+                    try:
+                        if user.link_name is not None:
+                            user_name = f'@{user.link_name}'
+                        else:
+                            user_name = f'{user.name} ({user.user_id})'
+
+                        bot.send_message(ref_user.user_id, text=f'Ваш реферал {user_name} пополнил баланс и вам подарили {int(ref_income)} RUB', parse_mode='html')
+                    except Exception:
+                        pass
+
+            try:
+                bot.send_message(user.user_id, text=f"Платеж №{obj.id} успешно выполнен. Ваш счет пополнен на {int(obj.amount_rub)} руб.", parse_mode='html')
+            except Exception:
+                pass
+
+            if user.status == 1 or int(user.planet) > 0:
+                clones_count = int(obj.amount_rub / 5000)
+                for clone in range(0, clones_count):
+                    Clones.objects.create(active=True)
+
+                count_ref = int(obj.amount_rub/10_000)
+
+                user.activate_ref_count += count_ref
+                user.count_ref += count_ref
+                user.save()
 
 
 class WithdrawAdmin(admin.ModelAdmin):
