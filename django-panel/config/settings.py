@@ -62,7 +62,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-if not DEBUG:
+if DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
@@ -111,11 +111,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'ru-RU'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 
-USE_I18N = False
+USE_I18N = True
+
+USE_L10N = True
 
 USE_TZ = True
 
@@ -168,3 +170,4 @@ JET_THEMES = [
 ]
 
 JET_SIDE_MENU_COMPACT = False
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
