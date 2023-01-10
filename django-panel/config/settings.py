@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-qsay6%yqmxl4ot)pi6j2t4+_b96vou@j_5yuji)jvb_tt#k3lq'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*',]
 
@@ -62,15 +62,18 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-if not DEBUG:
+if DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'yougiftdb',
             'USER': 'root',
-            'PASSWORD': 'vlad1550vlad1550',
+            'PASSWORD': 'root',
             'HOST': 'localhost',
             'PORT': '3306',
+            'OPTIONS': {
+                'charset': 'utf8mb4'
+            }
         }
     }
     BASE_URL = 'http://127.0.0.1:8000'
@@ -83,6 +86,9 @@ else:
             'PASSWORD': '6CHWb6QmNUy9bLuX',
             'HOST': 'localhost',
             'PORT': '3306',
+            'OPTIONS': {
+                'charset': 'utf8mb4'
+            }
         }
     }
     BASE_URL = 'http://135.181.201.63'
@@ -116,6 +122,8 @@ LANGUAGE_CODE = 'ru'
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
+прошлое 
+USE_L10N = True
 
 USE_TZ = True
 

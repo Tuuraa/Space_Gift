@@ -315,3 +315,21 @@ BACKGROUND LAP PERCENT TIME: 13.949530363082886
 BACKGROUND LAP JUMP TIME: 2.7532787322998047
 BACKGROUND LAP PAY TIME: 7.707867383956909
 BACKGROUND LAP PERCENT TIME: 11.643156290054321
+Task exception was never retrieved
+future: <Task finished name='Task-838' coro=<Dispatcher._process_polling_updates() done, defined at /opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py:407> exception=IndexError('tuple index out of range')>
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 256, in process_update
+    return await self.message_handlers.notify(update.message)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+  File "/opt/Space_Gift/Scripts/main.py", line 225, in launch
+    dep = await db.get_deposit(message.from_user.id, loop)
+  File "/opt/Space_Gift/Scripts/db.py", line 337, in get_deposit
+    result = (await cursor.fetchall())[0][0]
+IndexError: tuple index out of range
