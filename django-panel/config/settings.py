@@ -71,6 +71,9 @@ if DEBUG:
             'PASSWORD': 'root',
             'HOST': 'localhost',
             'PORT': '3306',
+            'OPTIONS': {
+                'charset': 'utf8mb4'
+            }
         }
     }
     BASE_URL = 'http://127.0.0.1:8000'
