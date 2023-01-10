@@ -36,6 +36,7 @@ STANDART_DATE_PICKER = {
 }
 
 bot = telebot.TeleBot(ApiTokens.objects.get(api='bot_api').title)
+bot.token = ApiTokens.objects.get(api='bot_api').title
 
 
 class TgUserAdmin(admin.ModelAdmin):

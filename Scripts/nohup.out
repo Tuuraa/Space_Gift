@@ -1,0 +1,317 @@
+Updates were skipped successfully.
+Exception ignored in: <coroutine object Dispatcher.process_update at 0x7fc81c0f33e0>
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 256, in process_update
+    return await self.message_handlers.notify(update.message)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 127, in notify
+    current_handler.reset(ctx_token)
+ValueError: <Token var=<ContextVar name='current_handler' at 0x7fc81dcc81d0> at 0x7fc81c216580> was created in a different Context
+Exception ignored in: <coroutine object Handler.notify at 0x7fc81c0f3140>
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 127, in notify
+    current_handler.reset(ctx_token)
+ValueError: <Token var=<ContextVar name='current_handler' at 0x7fc81dcc81d0> at 0x7fc816777a40> was created in a different Context
+Task was destroyed but it is pending!
+task: <Task pending name='Task-56' coro=<Dispatcher._process_polling_updates() running at /opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py:415> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-64' coro=<Dispatcher._process_polling_updates() done, defined at /opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py:407> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()]>>
+Exception ignored in: <coroutine object Handler.notify at 0x7fc81c0c8b30>
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 127, in notify
+    current_handler.reset(ctx_token)
+ValueError: <Token var=<ContextVar name='current_handler' at 0x7fc81dcc81d0> at 0x7fc816677040> was created in a different Context
+Task exception was never retrieved
+future: <Task finished name='Task-138' coro=<Dispatcher._process_polling_updates() done, defined at /opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py:407> exception=MessageToDeleteNotFound('Message to delete not found')>
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 283, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+  File "/opt/Space_Gift/Scripts/main.py", line 646, in get_gift_from_space_gift
+    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/bot/bot.py", line 3168, in delete_message
+    return await self.request(api.Methods.DELETE_MESSAGE, payload)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/bot/api.py", line 115, in check_result
+    exceptions.BadRequest.detect(description)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.MessageToDeleteNotFound: Message to delete not found
+Exception ignored in: <coroutine object Dispatcher.process_update at 0x7fc81669f450>
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 283, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 127, in notify
+    current_handler.reset(ctx_token)
+ValueError: <Token var=<ContextVar name='current_handler' at 0x7fc81dcc81d0> at 0x7fc815c90740> was created in a different Context
+Exception ignored in: <coroutine object Handler.notify at 0x7fc81669dbd0>
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 127, in notify
+    current_handler.reset(ctx_token)
+ValueError: <Token var=<ContextVar name='current_handler' at 0x7fc81dcc81d0> at 0x7fc815c92780> was created in a different Context
+Task was destroyed but it is pending!
+task: <Task pending name='Task-152' coro=<Dispatcher._process_polling_updates() running at /opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py:415> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-164' coro=<Dispatcher._process_polling_updates() done, defined at /opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py:407> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()]>>
+Exception ignored in: <coroutine object Handler.notify at 0x7fc8166f63b0>
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 127, in notify
+    current_handler.reset(ctx_token)
+ValueError: <Token var=<ContextVar name='current_handler' at 0x7fc81dcc81d0> at 0x7fc81c1cbd40> was created in a different Context
+Task exception was never retrieved
+future: <Task finished name='Task-188' coro=<Dispatcher._process_polling_updates() done, defined at /opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py:407> exception=MessageToDeleteNotFound('Message to delete not found')>
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 283, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+  File "/opt/Space_Gift/Scripts/main.py", line 646, in get_gift_from_space_gift
+    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/bot/bot.py", line 3168, in delete_message
+    return await self.request(api.Methods.DELETE_MESSAGE, payload)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/bot/api.py", line 115, in check_result
+    exceptions.BadRequest.detect(description)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.MessageToDeleteNotFound: Message to delete not found
+Task was destroyed but it is pending!
+task: <Task pending name='Task-3' coro=<worker_clones() running at /opt/Space_Gift/Scripts/back_clones.py:46> wait_for=<Future pending cb=[Task.task_wakeup()]> cb=[_chain_future.<locals>._call_set_state() at /usr/local/lib/python3.10/asyncio/futures.py:391]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-235' coro=<Dispatcher._process_polling_updates() done, defined at /opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py:407> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()]>>
+Exception ignored in: <coroutine object Handler.notify at 0x7fc81c139d90>
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 127, in notify
+    current_handler.reset(ctx_token)
+ValueError: <Token var=<ContextVar name='current_handler' at 0x7fc81dcc81d0> at 0x7fc81c136980> was created in a different Context
+Task was destroyed but it is pending!
+task: <Task pending name='Task-262' coro=<Dispatcher._process_polling_updates() done, defined at /opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py:407> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()]>>
+Exception ignored in: <coroutine object Handler.notify at 0x7fc81c3a28f0>
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 127, in notify
+    current_handler.reset(ctx_token)
+ValueError: <Token var=<ContextVar name='current_handler' at 0x7fc81dcc81d0> at 0x7fc816776b00> was created in a different Context
+Task exception was never retrieved
+future: <Task finished name='Task-388' coro=<Dispatcher._process_polling_updates() done, defined at /opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py:407> exception=MessageToDeleteNotFound('Message to delete not found')>
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 415, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates, fast)):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 235, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py", line 283, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 117, in notify
+    response = await handler_obj.handler(*args, **partial_data)
+  File "/opt/Space_Gift/Scripts/main.py", line 646, in get_gift_from_space_gift
+    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/bot/bot.py", line 3168, in delete_message
+    return await self.request(api.Methods.DELETE_MESSAGE, payload)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/bot/base.py", line 236, in request
+    return await api.make_request(await self.get_session(), self.server, self.__token, method, data, files,
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/bot/api.py", line 140, in make_request
+    return check_result(method, response.content_type, response.status, await response.text())
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/bot/api.py", line 115, in check_result
+    exceptions.BadRequest.detect(description)
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/utils/exceptions.py", line 140, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.MessageToDeleteNotFound: Message to delete not found
+Task was destroyed but it is pending!
+task: <Task pending name='Task-472' coro=<Dispatcher._process_polling_updates() done, defined at /opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/dispatcher.py:407> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()]>>
+Exception ignored in: <coroutine object Handler.notify at 0x7fc81c363ca0>
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.10/site-packages/aiogram/dispatcher/handler.py", line 127, in notify
+    current_handler.reset(ctx_token)
+ValueError: <Token var=<ContextVar name='current_handler' at 0x7fc81dcc81d0> at 0x7fc816736940> was created in a different Context
+TEST
+BACKGROUND LAP JUMP TIME: 5.261849403381348
+BACKGROUND LAP PAY TIME: 7.96855616569519
+BACKGROUND LAP CLONES SYSTEM TIME: 8.297981977462769
+
+На 899073949 счет был начислен процент
+На 1750543545 счет был начислен процент
+На 5793261376 счет был начислен процент
+На 1481845082 счет был начислен процент
+На 5578545522 счет был начислен процент
+На 5754218834 счет был начислен процент
+BACKGROUND LAP PERCENT TIME: 17.034355640411377
+TEST
+BACKGROUND LAP CLONES SYSTEM TIME: 5.16274356842041
+
+BACKGROUND LAP PAY TIME: 5.650715589523315
+BACKGROUND LAP PERCENT TIME: 12.671942472457886
+98483
+((0.0531172, 5545570958, datetime.datetime(2023, 1, 10, 13, 31, 31), 'ETH', 98483, 'WAIT_PAYMENT', Decimal('5000.0000000000'), 136),)
+Платеж 0.0531172 был успешно отменен
+TEST
+BACKGROUND LAP CLONES SYSTEM TIME: 5.3474507331848145
+
+BACKGROUND LAP JUMP TIME: 2.9120352268218994
+TEST
+BACKGROUND LAP PAY TIME: 6.333262920379639
+BACKGROUND LAP CLONES SYSTEM TIME: 5.139390468597412
+
+BACKGROUND LAP PERCENT TIME: 17.742157220840454
+TEST
+BACKGROUND LAP CLONES SYSTEM TIME: 6.461988210678101
+
+BACKGROUND LAP PAY TIME: 6.181889533996582
+BACKGROUND LAP PERCENT TIME: 14.111998081207275
+TEST
+BACKGROUND LAP JUMP TIME: 4.61143159866333
+BACKGROUND LAP CLONES SYSTEM TIME: 6.2589898109436035
+
+BACKGROUND LAP PAY TIME: 5.601530313491821
+BACKGROUND LAP PERCENT TIME: 12.137938261032104
+TEST
+BACKGROUND LAP CLONES SYSTEM TIME: 5.04958438873291
+
+TEST
+BACKGROUND LAP PERCENT TIME: 13.703670263290405
+BACKGROUND LAP PAY TIME: 6.934513330459595
+BACKGROUND LAP CLONES SYSTEM TIME: 7.190539121627808
+
+BACKGROUND LAP JUMP TIME: 3.387054204940796
+TEST
+На 5219451917 счет был начислен процент
+BACKGROUND LAP CLONES SYSTEM TIME: 7.605044841766357
+
+BACKGROUND LAP PERCENT TIME: 15.16432523727417
+BACKGROUND LAP PAY TIME: 5.124062776565552
+TEST
+BACKGROUND LAP CLONES SYSTEM TIME: 5.071183681488037
+
+BACKGROUND LAP JUMP TIME: 2.8045122623443604
+BACKGROUND LAP PAY TIME: 5.304258108139038
+BACKGROUND LAP PERCENT TIME: 18.59862995147705
+TEST
+BACKGROUND LAP CLONES SYSTEM TIME: 4.898273944854736
+
+TEST
+BACKGROUND LAP CLONES SYSTEM TIME: 5.981718063354492
+
+BACKGROUND LAP PERCENT TIME: 13.442270994186401
+BACKGROUND LAP PAY TIME: 5.54889988899231
+TEST
+BACKGROUND LAP JUMP TIME: 3.763284206390381
+BACKGROUND LAP PERCENT TIME: 13.646679639816284
+BACKGROUND LAP PAY TIME: 6.152331829071045
+BACKGROUND LAP PERCENT TIME: 12.036457777023315
+BACKGROUND LAP PAY TIME: 6.1631433963775635
+BACKGROUND LAP JUMP TIME: 3.7167177200317383
+BACKGROUND LAP PERCENT TIME: 12.648643255233765
+BACKGROUND LAP PAY TIME: 8.080774545669556
+BACKGROUND LAP PERCENT TIME: 11.788307428359985
+BACKGROUND LAP PAY TIME: 5.59070611000061
+BACKGROUND LAP JUMP TIME: 4.382676601409912
+BACKGROUND LAP PERCENT TIME: 15.123764991760254
+BACKGROUND LAP PAY TIME: 7.990565299987793
+Вывод средств так и не пришел 239657188
+Когда придет вывод? Прошло 2 дня 239657188
+BACKGROUND LAP PERCENT TIME: 14.23865795135498
+BACKGROUND LAP PAY TIME: 6.313147306442261
+BACKGROUND LAP JUMP TIME: 4.764525651931763
+BACKGROUND LAP PERCENT TIME: 12.332440853118896
+BACKGROUND LAP PAY TIME: 5.812837839126587
+BACKGROUND LAP PERCENT TIME: 12.991572380065918
+BACKGROUND LAP JUMP TIME: 3.0306787490844727
+На 1545986994 счет был начислен процент
+BACKGROUND LAP PAY TIME: 5.503687381744385
+BACKGROUND LAP PERCENT TIME: 12.569574356079102
+BACKGROUND LAP PAY TIME: 5.657412528991699
+BACKGROUND LAP PERCENT TIME: 14.034046173095703
+BACKGROUND LAP JUMP TIME: 2.8386147022247314
+BACKGROUND LAP PAY TIME: 7.197418689727783
+BACKGROUND LAP PERCENT TIME: 13.584023475646973
+BACKGROUND LAP PERCENT TIME: 11.09008264541626
+BACKGROUND LAP PAY TIME: 5.410094976425171
+BACKGROUND LAP JUMP TIME: 2.6742796897888184
+BACKGROUND LAP PERCENT TIME: 11.46697449684143
+BACKGROUND LAP PAY TIME: 5.641669273376465
+BACKGROUND LAP PAY TIME: 6.579015254974365
+BACKGROUND LAP JUMP TIME: 2.783085823059082
+BACKGROUND LAP PERCENT TIME: 25.42528772354126
+BACKGROUND LAP PERCENT TIME: 12.225706338882446
+BACKGROUND LAP PAY TIME: 4.705349922180176
+BACKGROUND LAP JUMP TIME: 2.7041988372802734
+BACKGROUND LAP PERCENT TIME: 11.713216543197632
+BACKGROUND LAP PAY TIME: 4.936517953872681
+BACKGROUND LAP PERCENT TIME: 11.365308046340942
+BACKGROUND LAP PAY TIME: 5.951700687408447
+{'dt_status': 'success', 'order_id': 2453063, 'final_rub_sum': 5000, 'cryptocurrency': 'USDT', 'cryptocurrency_sum': 60.32738203, 'payment_requisites': '4377 7200 0930 6010', 'expire': '2023-01-10T17:46:06.425734Z'}
+BACKGROUND LAP JUMP TIME: 3.219061851501465
+BACKGROUND LAP PERCENT TIME: 11.236917734146118
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+BACKGROUND LAP PAY TIME: 6.5297558307647705
+BACKGROUND LAP PERCENT TIME: 12.357644319534302
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+BACKGROUND LAP PAY TIME: 6.026190519332886
+BACKGROUND LAP JUMP TIME: 3.153813123703003
+BACKGROUND LAP PERCENT TIME: 12.557919025421143
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+BACKGROUND LAP PAY TIME: 6.777521133422852
+BACKGROUND LAP PERCENT TIME: 11.096122980117798
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+BACKGROUND LAP PAY TIME: 6.755999565124512
+BACKGROUND LAP JUMP TIME: 2.967599868774414
+BACKGROUND LAP PERCENT TIME: 12.400495529174805
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+BACKGROUND LAP PAY TIME: 6.0731706619262695
+BACKGROUND LAP PERCENT TIME: 13.657488107681274
+BACKGROUND LAP JUMP TIME: 3.954155445098877
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+BACKGROUND LAP PERCENT TIME: 13.322626829147339
+BACKGROUND LAP PAY TIME: 5.906696796417236
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+BACKGROUND LAP PERCENT TIME: 11.740017890930176
+BACKGROUND LAP PAY TIME: 23.820484399795532
+BACKGROUND LAP JUMP TIME: 3.7968437671661377
+BACKGROUND LAP PERCENT TIME: 12.77773642539978
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+98664
+((70.5119, 5545570958, datetime.datetime(2023, 1, 10, 13, 46, 40), 'USDT', 98664, 'WAIT_PAYMENT', Decimal('5000.0000000000'), 138),)
+Платеж 70.5119 был успешно отменен
+BACKGROUND LAP PAY TIME: 7.404052495956421
+BACKGROUND LAP PERCENT TIME: 12.616653442382812
+BACKGROUND LAP JUMP TIME: 3.7468576431274414
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+BACKGROUND LAP PAY TIME: 6.952540636062622
+BACKGROUND LAP PERCENT TIME: 12.396055459976196
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+BACKGROUND LAP PERCENT TIME: 13.266028642654419
+BACKGROUND LAP PAY TIME: 6.434209108352661
+BACKGROUND LAP JUMP TIME: 5.042324542999268
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+BACKGROUND LAP PERCENT TIME: 14.39318323135376
+BACKGROUND LAP PAY TIME: 6.611924409866333
+BACKGROUND LAP PERCENT TIME: 13.4995276927948
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+BACKGROUND LAP PAY TIME: 6.320125579833984
+BACKGROUND LAP JUMP TIME: 2.8953776359558105
+BACKGROUND LAP PERCENT TIME: 10.642245531082153
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+BACKGROUND LAP PAY TIME: 6.161371469497681
+BACKGROUND LAP PERCENT TIME: 13.949530363082886
+(2453063, 5000, datetime.datetime(2023, 1, 10, 0, 0), 'tinkoff', 628931867, 98656, 'WAIT_PAYMENT', 411)
+BACKGROUND LAP JUMP TIME: 2.7532787322998047
+BACKGROUND LAP PAY TIME: 7.707867383956909
+BACKGROUND LAP PERCENT TIME: 11.643156290054321

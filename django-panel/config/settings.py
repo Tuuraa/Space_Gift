@@ -86,7 +86,7 @@ else:
         }
     }
     BASE_URL = 'http://135.181.201.63'
-pymysql.install_as_MySQLdb()
+#pymysql.install_as_MySQLdb()
 
 
 # Password validation
@@ -111,11 +111,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'ru-RU'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 
-USE_I18N = False
+USE_I18N = True
 
 USE_TZ = True
 
@@ -168,3 +168,4 @@ JET_THEMES = [
 ]
 
 JET_SIDE_MENU_COMPACT = False
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

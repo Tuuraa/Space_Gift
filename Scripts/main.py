@@ -37,7 +37,7 @@ configCl = ConfigDBManager.get()
 API_TOKEN = configCl.api_bot  # Считывание токена
 bot = Bot(token=API_TOKEN)
 
-NAME_BOT = loop  # Считывание имени бота
+NAME_BOT = config.name_bot  # Считывание имени бота
 NUMBER_PAY = config.NUMBER_PAY
 
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -283,14 +283,24 @@ async def ref(message: types.Message):
     active_ref_count = await db.get_count_active_ref(message.from_user.id, loop)
     ref_depozits = sum(x[8] for x in ref_users)
 
-    answer_text = f"<b> 🤖 Ваш ID: {message.from_user.id} </b>\n\n" \
-                  f"👥 Всего приглашенных рефералов: <b>{ref_count}</b>\n" \
-                  f"🧑‍💼 Всего активированных рефералов: <b>{active_ref_count}</b>\n" \
-                  f"🌟 Сумма депозитов ваших рефералов: <b>{ref_depozits}</b>\n\n" \
-                  f"✨ Всего людей инвестировали в проект: <b>{all_count}</b>\n" \
-                  f"🎁 Сумма пополнений в проекте: <b>{total_sum:.2f}</b>\n" \
-                  f"{'---' if top_planet == 0 else f'🪐 Лучшая достигнутая планета: <b>{logic.planets[top_planet - 1]}</b>'}\n\n" \
-                  f"Ваша реферальная ссылка:\nhttps://t.me/{NAME_BOT}?start={message.from_user.id}"
+    if top_planet == 0:
+        best_planet = '---'
+    else:
+        best_planet = logic.planets[top_planet - 1]
+
+    answer_text = f'''<b> 🤖 Ваш ID: {message.from_user.id} </b>
+
+👥 Всего приглашенных рефералов: <b>{ref_count}</b>
+🧑‍💼 Всего активированных рефералов: <b>{active_ref_count}</b>
+
+🌟 Сумма депозитов ваших рефералов: <b>{ref_depozits}</b>
+✨ Всего людей инвестировали в проект: <b>{all_count}</b>
+
+🎁 Сумма пополнений в проекте: <b>{int(total_sum)}</b>
+🪐 Лучшая достигнутая планета: <b>{best_planet}</b>
+
+Ваша реферальная ссылка:
+https://t.me/{NAME_BOT}?start={message.from_user.id}'''
 
     with open(PATH + "/img/referrer.png", 'rb') as file:
         await bot.send_photo(
@@ -432,7 +442,7 @@ async def invest(message: types.Message):
 async def support(message: types.Message):
     await message.answer("По любым вопросам пишите @smfadmin \nОтветит в течении часа!")
 
-
+'''
 @dp.message_handler(lambda mes: mes.text == "Тестовые клоны")
 async def TestClones(message: types.Message):
     await message.answer("Создано 20 клонов")
@@ -446,7 +456,7 @@ async def TestPay(message: types.Message):
         #await db.set_now_depozit(message.from_user.id, 5000, loop)
         await db.add_depozit(message.from_user.id, 5000, loop)
         await message.answer("Баланс пополнен")
-
+'''
 
 @dp.callback_query_handler(text="system_clones")
 async def system_clones(callback: types.CallbackQuery):
@@ -459,12 +469,12 @@ async def system_clones(callback: types.CallbackQuery):
             text + '<a href="https://i.ibb.co/wYdbyyt/system-clones.png">.</a>', parse_mode="HTML"
         )
 
-
+'''
 @dp.message_handler(lambda mes: mes.text == "Удалить аккаунт")
 async def deleteacc(message: types.Message):
     await message.answer("Аккаунт удален, перезапустите бота \n/start")
     await db.delete_acc(message.from_user.id, loop)
-
+'''
 
 @dp.callback_query_handler(text='reinvest')
 async def reinvest(callback: types.CallbackQuery):
