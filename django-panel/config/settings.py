@@ -68,7 +68,7 @@ if DEBUG:
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'yougiftdb',
             'USER': 'root',
-            'PASSWORD': 'vlad1550vlad1550',
+            'PASSWORD': 'root',
             'HOST': 'localhost',
             'PORT': '3306',
         }
@@ -83,6 +83,9 @@ else:
             'PASSWORD': '6CHWb6QmNUy9bLuX',
             'HOST': 'localhost',
             'PORT': '3306',
+            'OPTIONS': {
+                'charset': 'utf8mb4'
+            }
         }
     }
     BASE_URL = 'http://135.181.201.63'
