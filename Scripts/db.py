@@ -167,7 +167,7 @@ class ManagerUsersDataBase:
             await cursor.execute("update `users` set `refgift` = 1 where user_id = %s",
                                  (user_id,))
             await cursor.execute(
-                "UPDATE `users` SET `activate_ref_count` = `activate_ref_count` + 1 WHERE `user_id` = %s", (user_id,))
+                "UPDATE `users` SET `activate_ref_count` = `activate_ref_count` + 1 WHERE `user_id` = %s", (ref_id,))
             await connection.commit()
 
     async def reset_now_dep_for_new_planet(self, user_id, money, loop):
