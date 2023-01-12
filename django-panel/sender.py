@@ -6,9 +6,9 @@ from time import sleep
 from datetime import datetime, timezone
 
 import telebot
+import cv2
 
 from django.conf import settings
-
 from tg_panel import models
 
 bot = telebot.TeleBot(models.ApiTokens.objects.get(api='bot_api').title)
@@ -32,7 +32,7 @@ def process_statuses():
             print(f'{type(error)}: {error}')
 
 
-def send_post_to_user(post, user, video_file_id=None):
+def send_post_to_user(post, user, video=None):
     message = post.message
 
     if post.button_text and post.button_url:
@@ -55,19 +55,28 @@ def send_post_to_user(post, user, video_file_id=None):
             reply_markup=keyboard
         )
     elif post.video:
-        if video_file_id is None:
+        if video is None:
             with open(f'{settings.BASE_DIR}/media/{post.video}', 'rb') as file:
-                video = file.read()
-        else:
-            video = video_file_id
-            
-        #video_url = f'{settings.BASE_URL}/media/{post.video}'
-        return bot.send_video(user.user_id,
-                       video=video,
-                       caption=message,
-                       parse_mode='html',
-                       reply_markup=keyboard
-                       )
+                video_file = file.read()
+                
+                vid = cv2.VideoCapture(f'{settings.BASE_DIR}/media/{post.video}')
+                height = vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+                width = vid.get(cv2.CAP_PROP_FRAME_WIDTH)
+                
+        else: 
+            video_file = video.file_id
+            width = video.width
+            height = video.height
+                       
+        return bot.send_video(
+                    user.user_id,
+                    video=video_file,
+                    width=width,
+                    height=height,
+                    caption=message,
+                    parse_mode='html',
+                    reply_markup=keyboard
+                )
     else:
         return bot.send_message(user.user_id,
             text=message,
@@ -81,7 +90,7 @@ def process_post(post):
     post.status = 'process'
     post.save()
 
-    users = list(models.TgUser.objects.filter(user_id__in=(415321692, 1328872217)))
+    users = list(models.TgUser.objects.all())
 
     receivers = []
 
@@ -89,13 +98,13 @@ def process_post(post):
         receivers.append(user)
 
     amount_of_receivers = 0
-    video_file_id = None
+    video = None
     
     for user in receivers:
         try:
-            message = send_post_to_user(post, user, video_file_id)
+            message = send_post_to_user(post, user, video)
             if message.video is not None:
-                video_file_id = message.video.file_id
+                video = message.video
         except BaseException as error:
             print(f'{type(error)}: {error}')
         else:
