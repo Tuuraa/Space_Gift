@@ -109,12 +109,6 @@ class PayAdmin(admin.ModelAdmin):
             bot.send_message(user.user_id, text=f'⛔️ Ваша заявка на пополнение №{obj.pay_id} была отменена администратором', parse_mode='html')
             return
         elif obj.status == 'OPERATION_COMPLETED':
-            user.depozit += obj.pay_amount
-            user.money += obj.pay_amount
-            user.money += obj.pay_amount
-
-            user.save()
-
             if user.referrer_id is not None:
                 ref_user = TgUser.objects.filter(user_id=user.referrer_id).first()
                 if ref_user is not None and (user.depozit != 0 or user.status or int(user.planet) != 0):
@@ -137,6 +131,10 @@ class PayAdmin(admin.ModelAdmin):
                         bot.send_message(ref_user.user_id, text=f'Ваш реферал {user_name} пополнил баланс и вам подарили {int(ref_income)} RUB', parse_mode='html')
                     except Exception:
                         pass
+            user.depozit += obj.pay_amount
+            user.money += obj.pay_amount
+
+            user.save()
 
             try:
                 bot.send_message(user.user_id, text=f"Платеж №{obj.pay_id} успешно выполнен. Ваш счет пополнен на {obj.pay_amount} руб.", parse_mode='html')
@@ -198,12 +196,6 @@ class CryptPayAdmin(admin.ModelAdmin):
             bot.send_message(user.user_id, text=f'⛔️ Ваша заявка на пополнение №{obj.id} была отменена администратором', parse_mode='html')
             return
         elif obj.status == 'OPERATION_COMPLETED':
-            user.depozit += float(obj.amount_rub)
-            user.money += obj.amount_rub
-            user.money += obj.amount_rub
-
-            user.save()
-
             if user.referrer_id is not None:
                 ref_user = TgUser.objects.filter(user_id=user.referrer_id).first()
                 if ref_user is not None and (user.depozit != 0 or user.status or int(user.planet) != 0):
@@ -226,7 +218,9 @@ class CryptPayAdmin(admin.ModelAdmin):
                         bot.send_message(ref_user.user_id, text=f'Ваш реферал {user_name} пополнил баланс и вам подарили {int(ref_income)} RUB', parse_mode='html')
                     except Exception:
                         pass
-
+            user.depozit += float(obj.amount_rub)
+            user.money += obj.amount_rub
+            user.save()
             try:
                 bot.send_message(user.user_id, text=f"Платеж №{obj.id} успешно выполнен. Ваш счет пополнен на {int(obj.amount_rub)} руб.", parse_mode='html')
             except Exception:
