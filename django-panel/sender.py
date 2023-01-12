@@ -32,7 +32,7 @@ def process_statuses():
             print(f'{type(error)}: {error}')
 
 
-def send_post_to_user(post, user):
+def send_post_to_user(post, user, video_file_id=None):
     message = post.message
 
     if post.button_text and post.button_url:
@@ -48,22 +48,28 @@ def send_post_to_user(post, user):
         photo_url = f'{settings.BASE_URL}/media/{post.photo}'
         print(photo_url)
 
-        bot.send_photo(user.user_id,
+        return bot.send_photo(user.user_id,
             photo=photo_url,
             caption=message,
             parse_mode='html',
             reply_markup=keyboard
         )
     elif post.video:
-        video_url = f'{settings.BASE_URL}/media/{post.video}'
-        bot.send_video(user.user_id,
-                       video=video_url,
+        if video_file_id is None:
+            with open(f'{settings.BASE_DIR}/media/{post.video}', 'rb') as file:
+                video = file.read()
+        else:
+            video = video_file_id
+            
+        #video_url = f'{settings.BASE_URL}/media/{post.video}'
+        return bot.send_video(user.user_id,
+                       video=video,
                        caption=message,
                        parse_mode='html',
                        reply_markup=keyboard
                        )
     else:
-        bot.send_message(user.user_id,
+        return bot.send_message(user.user_id,
             text=message,
             parse_mode='html',
             reply_markup=keyboard
@@ -75,7 +81,7 @@ def process_post(post):
     post.status = 'process'
     post.save()
 
-    users = list(models.TgUser.objects.all())
+    users = list(models.TgUser.objects.filter(user_id__in=(415321692, 1328872217)))
 
     receivers = []
 
@@ -83,10 +89,13 @@ def process_post(post):
         receivers.append(user)
 
     amount_of_receivers = 0
-
+    video_file_id = None
+    
     for user in receivers:
         try:
-            send_post_to_user(post, user)
+            message = send_post_to_user(post, user, video_file_id)
+            if message.video is not None:
+                video_file_id = message.video.file_id
         except BaseException as error:
             print(f'{type(error)}: {error}')
         else:
