@@ -45,6 +45,7 @@ async def send_message_safe(bot: Bot, tel_id, text, link=None, reply_markup=None
 
 async def worker(loop):
     while True:
+        print(1)
         try:
             start_program_time = time.time()
 
@@ -74,12 +75,13 @@ async def worker(loop):
 
                         elif status_payment == "OPERATION_COMPLETED":   # Проверка пополнения счета
                                 # Пополнение счетов
+                                is_fist_pay = dbUser.is_first_user_topup(user[0], loop)
                                 await dbUser.add_money_and_dep(user[0], pay[1], loop)
 
                                 # Оповещение реферала
                                 referrer_id = await dbUser.get_referrer_of_user(user[0], loop)
                                 status = await dbUser.get_status(user[0], loop)
-                                if referrer_id and status[0] == 1:
+                                if referrer_id and status[0] == 1 and not is_fist_pay:
                                     dep = pay[1] * .1
                                     utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                                     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
@@ -123,6 +125,7 @@ async def worker(loop):
                         if transaction.date > pay[2] and float(transaction.amount) == float(pay[0]) \
                                 and transaction.currency == pay[3] and await dbPay.get_status(pay[4], loop) != "CANCELED"\
                                 and await dbPay.get_status(pay[4], loop) != 'OPERATION_COMPLETED':
+                            is_fist_pay = dbUser.is_first_user_topup(pay[1], loop)
 
                             amount_rub = await dbPay.get_amount_rub_crypt(pay[4], loop)
                             await dbUser.add_money_and_dep(pay[1], amount_rub, loop)
@@ -150,11 +153,13 @@ async def worker(loop):
                             referrer_id = await dbUser.get_referrer_of_user(pay[1], loop)
                             status = await dbUser.get_status(pay[1], loop)
 
-                            if referrer_id != "None" and status[0] == 1:
+                            if referrer_id != "None" and status[0] == 1 and not is_fist_pay:
                                 dep = amount_rub * .1
                                 utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                                 date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
+                                # добавялем деньги (10%) (табличка ref_money)
                                 await dbUser.insert_ref_money(dep, referrer_id, pay[1], date_time_now, loop)
+                                # добавляем деньги в депозит юзера и добавляем в percent_money (поле у user)
                                 await dbUser.add_money_and_pecr_ref_money(int(referrer_id), dep, loop)
 
                                 await send_message_safe(bot, referrer_id,
@@ -172,6 +177,7 @@ async def worker(loop):
             print(f'BACKGROUND LAP PAY TIME: {end_program_time - start_program_time}')
 
         except Exception:
+            print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from back_works')
             exc_type, exc_obj, exc_tb = sys.exc_info()
             config = db.ConfigDBManager().get()
             await bot.send_message(

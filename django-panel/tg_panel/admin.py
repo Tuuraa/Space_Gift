@@ -117,7 +117,7 @@ class PayAdmin(admin.ModelAdmin):
 
             if user.referrer_id is not None:
                 ref_user = TgUser.objects.filter(user_id=user.referrer_id).first()
-                if ref_user is not None and ref_user.status == 1:
+                if ref_user is not None and (ref_user.depozit != 0 or not ref_user.status or int(ref_user.planet) != 0):
                     ref_income = obj.pay_amount * .1
                     utc_now = pytz.utc.localize(datetime.utcnow())
                     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
@@ -206,7 +206,7 @@ class CryptPayAdmin(admin.ModelAdmin):
 
             if user.referrer_id is not None:
                 ref_user = TgUser.objects.filter(user_id=user.referrer_id).first()
-                if ref_user is not None and ref_user.status == 1:
+                if ref_user is not None and (ref_user.depozit != 0 or not ref_user.status or int(ref_user.planet) != 0):
                     ref_income = float(obj.amount_rub) * .1
                     utc_now = pytz.utc.localize(datetime.utcnow())
                     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
@@ -365,7 +365,7 @@ class AllStatsAdmin(admin.ModelAdmin):
 
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ['created', 'status', 'amount_of_receivers', 'photo', 'message', 'html_button']
+    list_display = ['created', 'status', 'amount_of_receivers', 'photo', 'video', 'message', 'html_button']
     list_display_links = ['created']
 
     search_fields = ['message', 'button_text', 'button_url']
@@ -387,6 +387,7 @@ class PostAdmin(admin.ModelAdmin):
                 {
                     'fields': [
                         'photo',
+                        'video',
                         'message',
                         ('button_text', 'button_url'),
                     ],

@@ -65,6 +65,14 @@ class ConfigDBManager:
 
 
 class ManagerUsersDataBase:
+    async def is_first_user_topup(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+
+        async with connection.cursor() as cursor:
+            await cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
+            result = await cursor.fetchall()
+            user = result[0]
+            return not (int(user[8]) != 0 or int(user[11]) != 0 or int(user[14]) != 0)
 
     async def exists_user(self, user_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
@@ -1007,3 +1015,8 @@ class ManagerClonesDataBase:
         async with connection.cursor() as cursor:
             await cursor.execute("DELETE FROM `clones` WHERE `id` = %s", (id,))
             await connection.commit()
+
+
+# if __name__ == '__main__':
+#     loops = asyncio.new_event_loop()
+#     asyncio.run(ManagerUsersDataBase().is_first_user_topup(415321692, loops))

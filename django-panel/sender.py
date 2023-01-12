@@ -54,6 +54,14 @@ def send_post_to_user(post, user):
             parse_mode='html',
             reply_markup=keyboard
         )
+    elif post.video:
+        video_url = f'{settings.BASE_URL}/media/{post.video}'
+        bot.send_video(user.user_id,
+                       video=video_url,
+                       caption=message,
+                       parse_mode='html',
+                       reply_markup=keyboard
+                       )
     else:
         bot.send_message(user.user_id,
             text=message,

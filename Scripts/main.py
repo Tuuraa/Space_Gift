@@ -276,13 +276,18 @@ async def ref(message: types.Message):
         total_sum += total_sum_pay_crypt
 
     all_users = await db.get_users(loop, extended=True)
-    all_count = await dbPay.get_total_topup_users(loop)
+    # all_count = await dbPay.get_total_topup_users(loop)
     top_planet = max(int(x[11]) for x in all_users)
 
     ref_users = list(filter(lambda x: x[2] == str(message.from_user.id), all_users))
     ref_count = await db.get_count_ref(message.from_user.id, loop)
     active_ref_count = await db.get_count_active_ref(message.from_user.id, loop)
-    ref_depozits = sum(x[8] for x in ref_users)
+    ref_depozits = sum(x[27] for x in ref_users)
+
+    all_count = 0
+    for i in all_users:
+        if int(i[8]) != 0 or int(i[11]) != 0 or int(i[14]) != 0:
+            all_count += 1
 
     if top_planet == 0:
         best_planet = '---'

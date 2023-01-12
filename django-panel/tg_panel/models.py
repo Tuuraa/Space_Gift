@@ -155,6 +155,7 @@ class ApiTokens(models.Model):
     api = models.CharField(verbose_name='Токен', max_length=300)
 
     class Meta:
+        managed = False
         verbose_name = 'Токен'
         verbose_name_plural = 'Токены'
         db_table = 'tokens'
@@ -231,6 +232,8 @@ class Post(models.Model):
     photo = Photo('Изображение до 5МБ',
         blank=True, null=True
     )
+
+    video = models.FileField('Видео', blank=True, null=True)
 
     message = models.TextField('Форматированный текст, до 1024 символов',
         max_length=1024
