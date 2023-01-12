@@ -75,7 +75,7 @@ def process_post(post):
     post.status = 'process'
     post.save()
 
-    users = list(models.TgUser.objects.filter(user_id=1328872217))
+    users = list(models.TgUser.objects.all())
 
     receivers = []
 
