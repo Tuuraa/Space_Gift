@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-qsay6%yqmxl4ot)pi6j2t4+_b96vou@j_5yuji)jvb_tt#k3lq'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*',]
 
@@ -92,7 +92,7 @@ else:
         }
     }
     BASE_URL = 'http://135.181.201.63'
-pymysql.install_as_MySQLdb()
+#pymysql.install_as_MySQLdb()
 
 
 # Password validation
@@ -122,7 +122,7 @@ LANGUAGE_CODE = 'ru'
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
-
+прошлое 
 USE_L10N = True
 
 USE_TZ = True
