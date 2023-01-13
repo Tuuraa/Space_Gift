@@ -142,9 +142,9 @@ class PayAdmin(admin.ModelAdmin):
                 pass
 
             if user.status == 1 or int(user.planet) > 0:
-                clones_count = int(obj.pay_amount / 5000)
-                for clone in range(0, clones_count):
-                    Clones.objects.create(active=True)
+                #clones_count = int(obj.pay_amount / 5000)
+                #for clone in range(0, clones_count):
+                #    Clones.objects.create(active=True)
 
                 count_ref = int(obj.pay_amount/10_000)
 
@@ -227,9 +227,9 @@ class CryptPayAdmin(admin.ModelAdmin):
                 pass
 
             if user.status == 1 or int(user.planet) > 0:
-                clones_count = int(obj.amount_rub / 5000)
-                for clone in range(0, clones_count):
-                    Clones.objects.create(active=True)
+                #clones_count = int(obj.amount_rub / 5000)
+                #for clone in range(0, clones_count):
+                #    Clones.objects.create(active=True)
 
                 count_ref = int(obj.amount_rub/10_000)
 

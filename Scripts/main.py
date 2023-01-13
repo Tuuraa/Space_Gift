@@ -276,18 +276,12 @@ async def ref(message: types.Message):
         total_sum += total_sum_pay_crypt
 
     all_users = await db.get_users(loop, extended=True)
-    # all_count = await dbPay.get_total_topup_users(loop)
     top_planet = max(int(x[11]) for x in all_users)
 
-    ref_users = list(filter(lambda x: x[2] == str(message.from_user.id), all_users))
     ref_count = await db.get_count_ref(message.from_user.id, loop)
     active_ref_count = await db.get_count_active_ref(message.from_user.id, loop)
-    ref_depozits = sum(x[27] for x in ref_users)
 
-    all_count = 0
-    for i in all_users:
-        if int(i[8]) != 0 or int(i[11]) != 0 or int(i[14]) != 0:
-            all_count += 1
+    all_count = await db.invested_users_count(loop)
 
     if top_planet == 0:
         best_planet = '---'
@@ -299,7 +293,6 @@ async def ref(message: types.Message):
 👥 Всего приглашенных рефералов: <b>{ref_count}</b>
 🧑‍💼 Всего активированных рефералов: <b>{active_ref_count}</b>
 
-🌟 Сумма депозитов ваших рефералов: <b>{ref_depozits}</b>
 ✨ Всего людей инвестировали в проект: <b>{all_count}</b>
 
 🎁 Сумма пополнений в проекте: <b>{int(total_sum)}</b>
@@ -388,13 +381,14 @@ async def about_space_gift(message: types.Message):
         text = file.read()
         await message.answer(text + '<a href="https://i.ibb.co/HxQPmC9/gift.png">.</a>', parse_mode='HTML')
 
-
+'''
 @dp.message_handler(text="🤖 Система клонов")
 async def about_space_gift(message: types.Message):
     with open(PATH + "/Data/system_clones.txt", 'r', encoding="utf-8") as file:
         text = file.read()
 
         await message.answer(text + '<a href="https://i.ibb.co/wYdbyyt/system-clones.png">.</a>', parse_mode="HTML")
+'''
 
 
 @dp.message_handler(text="🤑 Вознаграждение за приглашение")
@@ -1252,39 +1246,6 @@ async def delete(message: types.Message):
     safe(message.from_user.id)
 
 
-@dp.message_handler(commands="team")
-async def team_handler(message: types.Message):
-    """
-    Собираем инфу:
-        1) Кол-во рефералов у чела
-        2) Всего депозита у его рефералов ????
-
-        1) Всего челов в системе
-        2) Всего сумма депозитов у всех участников ????
-        3) Самая высокая планета, до которой дошли ????
-    """
-    all_users = await db.get_users(loop, extended=True)
-    all_count = len(all_users)
-    all_depozits = sum(x[8] for x in all_users)
-    top_planet = max(int(x[11]) for x in all_users)
-
-    ref_users = list(filter(lambda x: x[2] == message.from_user.id, all_users))
-    ref_count = len(ref_users)
-    ref_depozits = sum(x[8] for x in ref_users)
-
-    answer_text = f"<b> 🤖 Ваш ID: {message.from_user.id} </b>\n\n" \
-                  f"👥 Всего приглашенных рефералов: <b>{ref_count}</b>\n" \
-                  f"🌟 Сумма депозитов ваших рефералов: <b>{ref_depozits}</b>\n\n" \
-                  f"✨ Всего людей инвестировали в проект: <b>{all_count}</b>\n" \
-                  f"🎁 Сумма депозитов в проекте: <b>{all_depozits}</b>\n" \
-                  f"{'' if top_planet == 0 else f'🪐 Лучшая достигнутая планета: <b>{logic.planets[top_planet - 1]}</b>'}"
-
-    await message.answer(
-        text=answer_text,
-        parse_mode='html',
-    )
-
-
 @dp.callback_query_handler(text="remove_money_invest")
 async def remove_money_invest(callback: types.CallbackQuery):
     date = str(await db.get_last_withd(callback.from_user.id, loop))
@@ -1770,18 +1731,18 @@ if __name__ == '__main__':
 
     thread = threading.Thread(target=loops[0].run_forever)
     thread.start()
-    asyncio.run_coroutine_threadsafe(worker(loops[0]), loops[0])
+    asyncio.run_coroutine_threadsafe(worker(loops[0]), loops[0]).result()
 
     thread = threading.Thread(target=loops[1].run_forever)
     thread.start()
-    asyncio.run_coroutine_threadsafe(worker_percent(loops[1]), loops[1])
+    asyncio.run_coroutine_threadsafe(worker_percent(loops[1]), loops[1]).result()
 
     thread = threading.Thread(target=loops[2].run_forever)
     thread.start()
-    asyncio.run_coroutine_threadsafe(worker_clones(loops[2]), loops[2])
+    asyncio.run_coroutine_threadsafe(worker_clones(loops[2]), loops[2]).result()
 
     thread = threading.Thread(target=loops[3].run_forever)
     thread.start()
-    asyncio.run_coroutine_threadsafe(worker_jumps(loops[3]), loops[3])
+    asyncio.run_coroutine_threadsafe(worker_jumps(loops[3]), loops[3]).result()
 
     executor.start_polling(dp, skip_updates=True)

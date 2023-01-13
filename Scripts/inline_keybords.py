@@ -121,7 +121,7 @@ def get_about_project():
 
     reply.row(
         types.KeyboardButton("🎁 Система дарения"),
-        types.KeyboardButton("🤖 Система клонов")
+        #types.KeyboardButton("🤖 Система клонов")
     )
 
     reply.row(
@@ -228,8 +228,8 @@ def inform_pers():
 def invest_buttons():
     return types.InlineKeyboardMarkup().add(
         types.InlineKeyboardButton("➕ Инвестировать", callback_data="add_money")).add(
-        types.InlineKeyboardButton("💫 Инвестиции в Space money", callback_data="link_to_space_money")).add(
-        types.InlineKeyboardButton("🤖 Система клонов", callback_data="system_clones"))
+        types.InlineKeyboardButton("💫 Инвестиции в Space money", callback_data="link_to_space_money"))\
+        #.add(types.InlineKeyboardButton("🤖 Система клонов", callback_data="system_clones"))
 
 
 def get_link_space_money():

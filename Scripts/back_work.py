@@ -111,7 +111,7 @@ async def worker(loop):
                                 planet = await dbUser.get_planet(user[0], loop)
 
                                 if (status == 1 or int(planet[0]) > 0) and pay[1] >= 5000:
-                                    await clones.create_clones(pay[1], loop)
+                                    #await clones.create_clones(pay[1], loop)
                                     await helper.create_ref(pay[1], user[0], loop)
 
 
@@ -170,12 +170,12 @@ async def worker(loop):
                             planet = await dbUser.get_planet(pay[1], loop)
 
                             if (status == 1 or int(planet[0]) > 0) and amount_rub >= 5000:
-                                await clones.create_clones(amount_rub, loop)
+                                #await clones.create_clones(amount_rub, loop)
                                 await helper.create_ref(amount_rub, pay[1], loop)
 
             end_program_time = time.time()
             print(f'BACKGROUND LAP PAY TIME: {end_program_time - start_program_time}')
-
+            await asyncio.sleep(30)
         except Exception:
             print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from back_works')
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -184,5 +184,3 @@ async def worker(loop):
                 config.errors_group_id,
                 f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from back_works'
             )
-
-        await asyncio.sleep(30)

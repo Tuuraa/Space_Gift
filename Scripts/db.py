@@ -65,6 +65,13 @@ class ConfigDBManager:
 
 
 class ManagerUsersDataBase:
+    async def invested_users_count(self, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("SELECT count(*) FROM users where status = 1 or planet = '1'")
+            result = (await cursor.fetchone())[0]
+            return result
+
     async def is_first_user_topup(self, user_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
 
