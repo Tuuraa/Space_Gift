@@ -33,9 +33,12 @@ async def worker_percent(loop):
     while True:
         try:
             start_program_time = time.time()
-            users = clear_none(await dbUser.get_users(loop))
+            users = await dbUser.get_users(loop)
 
             for user in users:
+                if user[0] is None:
+                    continue
+
                 date = (await dbUser.get_date_now(user[0], loop)).astimezone(pytz.timezone("UTC"))
 
                 utc_now = pytz.utc.localize(datetime.datetime.utcnow())
@@ -95,9 +98,10 @@ async def worker_percent(loop):
 
             end_program_time = time.time()
             print(f'BACKGROUND LAP PERCENT TIME: {end_program_time - start_program_time}')
-            await asyncio.sleep(20)
         except Exception:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')
             config = db.ConfigDBManager().get()
             await bot.send_message(config.errors_group_id, f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')
+
+        await asyncio.sleep(20)
