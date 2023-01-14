@@ -25,7 +25,7 @@ from jump import worker_jumps
 import inline_keybords
 import logic
 import clones
-from utils import is_user_subbed
+from utils import is_user_subbed, count_total_referrals_by_user
 
 loop = asyncio.new_event_loop()
 lock = asyncio.Lock()
@@ -292,6 +292,10 @@ async def ref(message: types.Message):
 
 👥 Всего приглашенных рефералов: <b>{ref_count}</b>
 🧑‍💼 Всего активированных рефералов: <b>{active_ref_count}</b>
+
+Ваша команда:
+🫂 Всего людей в структуре: <b>{await count_total_referrals_by_user(message.from_user.id, 7, loop)}</b>
+👩🏻‍🚀 Всего активных людей в структуре: <b>{await count_total_referrals_by_user(message.from_user.id, 7, loop)}</b> 
 
 ✨ Всего людей инвестировали в проект: <b>{all_count}</b>
 

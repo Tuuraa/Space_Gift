@@ -650,6 +650,15 @@ class ManagerUsersDataBase:
             result = await cursor.fetchall()
             return result
 
+    async def get_ref_users_in(self, ref_users, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            placeholders = ', '.join(['%s'] * len(ref_users))
+            query = "SELECT `user_id` FROM users WHERE `referrer_id` in ({})".format(placeholders)
+            await cursor.execute(query, tuple(ref_users))
+            result = await cursor.fetchall()
+            return result
+
     async def ref_count(self, ref_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
