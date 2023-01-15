@@ -130,7 +130,6 @@ def get_about_project():
     )
 
     reply.row(
-        types.KeyboardButton("💰 Что такое арбитраж"),
         types.KeyboardButton("👥 Условия для сетевиков")
     )
 
