@@ -30,7 +30,7 @@ if DEBUG:
 
     HOST = "127.0.0.1"
     USERS = "root"
-    PASSWORD = "vlad1550vlad1550"
+    PASSWORD = "5377"
     DB_NAME = "yougiftdb"
 else:
     PATH = '/opt/Space_Gift'

@@ -41,13 +41,14 @@ async def get_launch(bot, user_id, loop):
 
     if user is None:
         link = 'space_gift_bot'
+        gift_id = 5415272844
     else:
         link = user.link
+        gift_id = int(user.user_id)
 
     level = int((await dbUser.get_step(user_id, loop))[0])
     level_text = f"Уровень {level}"
     path = ""
-    active = await dbUser.get_active(user_id, loop)
     more_text = ""
     active_text = ""
     text_planet = get_photo(planet[0])
@@ -64,18 +65,18 @@ async def get_launch(bot, user_id, loop):
     c_ref_op = await dbUser.get_activate_count_ref(user_id, loop)
     if await dbUser.get_activate_count_ref(user_id, loop) < count_ref[int(planet[0])]:
         if c_ref_op == 0:
-            active_text = f"\n❗ Чтобы попасть в очередь на планету {text_planet[1]} вам нужно пригласить " \
+            active_text = f"\n❗️ Чтобы попасть в очередь на планету {text_planet[1]} вам нужно пригласить " \
                          f"{c_ref} активных чел." \
-                         f" или пополнить депозит на {c_ref * 10_000} RUB ❗\n"
+                         f" или пополнить депозит на {c_ref * 10_000} RUB ❗️\n"
         else:
-            active_text = f"\n❗ Чтобы попасть в очередь на планету {text_planet[1]} вам нужно пригласить еще " \
+            active_text = f"\n❗️ Чтобы попасть в очередь на планету {text_planet[1]} вам нужно пригласить еще " \
                       f"{c_ref} активных чел." \
-                      f" или пополнить депозит на {c_ref * 10_000} RUB ❗\n"
+                      f" или пополнить депозит на {c_ref * 10_000} RUB ❗️\n"
 
     if level == 1 and status[0] == 0:
         path = first_path + f"{text_planet[1]}/В ожидании ({text_planet[1].lower()}).png"
         level_text = "В ожидании"
-    elif active == 0 and status[0] == 1 and await dbUser.get_count_ref(user_id, loop) >= count_ref[int(planet[0])]:
+    elif status[0] == 1 and await dbUser.get_count_ref(user_id, loop) >= count_ref[int(planet[0])] and gift_id != user_id:
         path = first_path + f"{text_planet[1]}/В очереди ({text_planet[1].lower()}).png"
         level_text = "В очереди"
         ud = (await dbUser.get_planet(user_id, loop))[0]
@@ -84,13 +85,13 @@ async def get_launch(bot, user_id, loop):
             more_text = f"\nНомер в очереди: {number}" \
 
         more_text += f"\n\n🙌Поздравляем! Вы заняли место в очереди на подарки от новых участников на свой депозит!\n" \
-                        f"⚡ Не жди очереди, начни увеличивать свой депозит уже сейчас и получать по 0,6% в день!\n\n"\
+                        f"⚡️ Не жди очереди, начни увеличивать свой депозит уже сейчас и получать по 0,6% в день!\n\n"\
                         f"1️⃣ Инвестируй в Space gift с собственных средств.\n" \
                         f"2️⃣ Получай +5000р на депозит за каждого приглашенного реферала.\n" \
                         f"3️⃣ Space gift начислит на депозит 10% от инвестиций реферала.\n\n" \
                         f"НЕ ЖДИ. ДЕЙСТВУЙ 💪 ✅"
 
-    elif active == 0 and status[0] == 1 and await dbUser.get_count_ref(user_id, loop) < count_ref[int(planet[0])]:
+    elif status[0] == 1 and await dbUser.get_count_ref(user_id, loop) < count_ref[int(planet[0])] and gift_id != user_id:
         path = first_path + f"{text_planet[1]}/В очереди ({text_planet[1].lower()}).png"
         level_text = "В очереди"
 
@@ -110,6 +111,7 @@ async def get_launch(bot, user_id, loop):
         text_plan = "🎆 Поздравляем, вы долетели до Юпитера! Ваш полет завершен! 🎆"
 
     cd = await dbUser.get_amount_gift_money(user_id, loop)
+
 
     text = f"📆 Профиль создан: {await dbUser.get_date(user_id, loop)}\n" \
         f"🤖 Ваш ID: {user_id}\n\n"\
