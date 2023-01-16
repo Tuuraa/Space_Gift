@@ -12,6 +12,7 @@ urlpatterns = [
     path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
     path('admin/', admin.site.urls, name='admin-page'),
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    url('', include('tg_panel.urls')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

@@ -23,14 +23,14 @@ ADMINS = [855151774]
 
 SUB_GROUP = -1001878641715
 
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     PATH = '/Users/v_sopin/Documents/GitHub/Space_Gift'
 
     HOST = "127.0.0.1"
     USERS = "root"
-    PASSWORD = "vlad1550vlad1550"
+    PASSWORD = "5377"
     DB_NAME = "yougiftdb"
 else:
     PATH = '/opt/Space_Gift'
@@ -41,4 +41,5 @@ else:
     DB_NAME = "yougiftdb"
 
 COMMISSION = 0.2
+COMMISSION_INVEST = 0.05
 

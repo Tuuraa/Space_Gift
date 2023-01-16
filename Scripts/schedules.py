@@ -22,6 +22,8 @@ async def main(loop):
                                  '`user_id` = %s', (result, user, ))
             await cursor.execute('update `users` set `activate_date` = %s where '
                                  '`user_id` = %s and status = 1', (date_time_now, user,))
+            await cursor.execute('update `users` set `remove_depizit` += 5000 where `status` = 1 or `planet` > 0 '
+                                 'or `depozit` > 0')
             await connection.commit()
 
         for id in ids:
