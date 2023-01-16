@@ -142,7 +142,7 @@ async def get_user_on_merk(planet, user_id, loop):
     if len(active_users) > 0:
         max_step_user = max(active_users, key=lambda sort: sort.step)
         if int(max_step_user.step) == 1:
-            active_users.sort(key=lambda sort: sort.activate_date)
+            active_users.sort(key=lambda sort: sort.activate_date if sort.activate_date is not None else float('+inf'))
             if len(active_users) > 0:
                 return active_users[0]
             else:

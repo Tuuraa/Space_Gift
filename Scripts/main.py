@@ -281,6 +281,10 @@ async def ref(message: types.Message):
     ref_count = await db.get_count_ref(message.from_user.id, loop)
     active_ref_count = await db.get_count_active_ref(message.from_user.id, loop)
 
+    total_tree_ref_count_info = await count_total_referrals_by_user(message.from_user.id, 7, loop)
+    total_tree_ref_count = total_tree_ref_count_info['total']
+    total_tree_ref_count_activated = total_tree_ref_count_info['activated']
+
     all_count = await db.invested_users_count(loop)
 
     if top_planet == 0:
@@ -294,12 +298,12 @@ async def ref(message: types.Message):
 🧑‍💼 Всего активированных рефералов: <b>{active_ref_count}</b>
 
 Ваша команда:
-🫂 Всего людей в структуре: <b>{await count_total_referrals_by_user(message.from_user.id, 7, loop)}</b>
-👩🏻‍🚀 Всего активных людей в структуре: <b>{await count_total_referrals_by_user(message.from_user.id, 7, loop)}</b> 
+🫂 Всего людей в структуре: <b>{total_tree_ref_count}</b>
+👩🏻‍🚀 Всего активных людей в структуре: <b>{total_tree_ref_count_activated}</b> 
 
 ✨ Всего людей инвестировали в проект: <b>{all_count}</b>
 
-🎁 Сумма пополнений в проекте: <b>{int(total_sum)}</b>
+🎁 Сумма пополнений в проекте: <b>{f"{int(total_sum):,}".replace(',', '.')}</b>
 🪐 Лучшая достигнутая планета: <b>{best_planet}</b>
 
 Ваша реферальная ссылка:
@@ -1270,7 +1274,7 @@ async def remove_money_invest(callback: types.CallbackQuery):
         await bot.send_message(
             callback.from_user.id,
             f"Какую сумму вы хотите вывести.\nМин. 1000.0 RUB, макс. 2000000.0 RUB)\n\n"
-            f"Доступно {money} RUB, с комиссией в 20%",
+            f"Доступно {money} RUB, с комиссией в 5%",
             reply_markup=inline_keybords.cancel_trans_money()
         )
         await WithdrawMoneyPercentFSM.WITHDRAW_AMOUNT.set()
@@ -1343,7 +1347,7 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
 
     async with lock:
         data_requests = await state.get_data()
-        amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * config.COMMISSION
+        amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * config.COMMISSION_INVEST
         utc_now = pytz.utc.localize(datetime.datetime.utcnow())
         date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
@@ -1353,9 +1357,9 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
             amount_crypt = int(data.get("WITHDRAW_AMOUNT"))
             curs = float(await coinbase_data.get_kurs(str(data.get("TYPE_CRYPT")).upper()))
             res = round(amount_crypt / curs, 11)
-            await dbWithDraw.create_request_crypt_percent(
+            await dbWithDraw.create_request_crypt(
                 data_requests["CRYPT_CARD"],
-                'crypt',
+                data_requests["DATA_USER"],
                 data_requests["WITHDRAW_TYPE"],
                 data_requests["WITHDRAW_AMOUNT"],
                 res,
@@ -1390,18 +1394,19 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
         await state.reset_state(with_data=False)
 
 
-@dp.message_handler(state=WithdrawMoneyPercentFSM.NUMBER_CARD)
-async def number_card(message: types.Message, state: FSMContext):
-    if message.text == "Отменить":
-        await state.reset_state(with_data=False)
-        await message.answer("Вывод денег успешно отменен", reply_markup=inline_keybords.profile_markup())
-        return
-
-    async with state.proxy() as data:
-        data["NUMBER_CARD"] = message.text
-    # await message.answer("Отлично. Теперь введите Ф.И.О")
-    await number_card(message, state)
-    # await WithdrawMoneyPercentFSM.DATA_USER.set()
+# @dp.message_handler(state=WithdrawMoneyPercentFSM.NUMBER_CARD)
+# async def number_card(message: types.Message, state: FSMContext):
+#     if message.text == "Отменить":
+#         await state.reset_state(with_data=False)
+#         await message.answer("Вывод денег успешно отменен", reply_markup=inline_keybords.profile_markup())
+#         return
+#
+#     async with state.proxy() as data:
+#         data["NUMBER_CARD"] = message.text
+#
+#     await message.answer("Отлично. Теперь введите Ф.И.О")
+#     await number_card(message, state)
+#     await WithdrawMoneyPercentFSM.DATA_USER.set()
 
 
 @dp.message_handler(state=WithdrawMoneyPercentFSM.NUMBER_CARD)
@@ -1429,7 +1434,7 @@ async def number_card(message: types.Message, state: FSMContext):
             data["DATA_USER"] = message.text
         data_requests = await state.get_data()
         print(data_requests)
-        amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * config.COMMISSION
+        amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * config.COMMISSION_INVEST
         utc_now = pytz.utc.localize(datetime.datetime.utcnow())
         date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
@@ -1439,7 +1444,7 @@ async def number_card(message: types.Message, state: FSMContext):
             amount_crypt = int(data.get("WITHDRAW_AMOUNT"))
             curs = float(await coinbase_data.get_kurs(str(data.get("TYPE_CRYPT")).upper()))
             res = round(amount_crypt / curs, 11)
-            await dbWithDraw.create_request_crypt_percent(
+            await dbWithDraw.create_request_crypt(
                 data_requests["CRYPT_CARD"],
                 data_requests["DATA_USER"],
                 data_requests["WITHDRAW_TYPE"],
@@ -1452,7 +1457,7 @@ async def number_card(message: types.Message, state: FSMContext):
                 loop
             )
         else:
-            await dbWithDraw.create_request_bank_percent(
+            await dbWithDraw.create_request_bank(
                 data_requests["NUMBER_CARD"],
                 data_requests["DATA_USER"],
                 data_requests["WITHDRAW_TYPE"],
@@ -1465,7 +1470,7 @@ async def number_card(message: types.Message, state: FSMContext):
         await message.answer(
             "Заявка на вывод средств успешно отправлена, ожидайте подтверждение "
             "отправки средств администратором в течении 24 часов вам придут деньги на "
-            "ваши реквизиты",
+            "ваши реквизиты ruruuururuur",
             reply_markup=inline_keybords.profile_markup()
         )
         utc_now = pytz.utc.localize(datetime.datetime.utcnow())

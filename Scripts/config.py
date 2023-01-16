@@ -41,4 +41,5 @@ else:
     DB_NAME = "yougiftdb"
 
 COMMISSION = 0.2
+COMMISSION_INVEST = 0.05
 

@@ -654,7 +654,7 @@ class ManagerUsersDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             placeholders = ', '.join(['%s'] * len(ref_users))
-            query = "SELECT `user_id` FROM users WHERE `referrer_id` in ({})".format(placeholders)
+            query = "SELECT user_id, depozit, status, planet FROM users WHERE `referrer_id` in ({})".format(placeholders)
             await cursor.execute(query, tuple(ref_users))
             result = await cursor.fetchall()
             return result
