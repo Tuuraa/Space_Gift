@@ -419,13 +419,6 @@ async def about_space_gift(message: types.Message):
         await message.answer(text + '<a href="https://i.ibb.co/h7QfjsN/cond-of-set.png">.</a>', parse_mode="HTML")
 
 
-@dp.message_handler(lambda mes: mes.text == "💰 Что такое арбитраж")
-async def ard(message: types.Message):
-    with open(PATH + "/Data/arbit.txt", 'r', encoding="utf-8") as file:
-        text = file.read()
-        await message.answer(text + '<a href="https://i.ibb.co/p2LMd75/about-arbitrag.png">.</a>', parse_mode="HTML")
-
-
 @dp.message_handler(text="💻 Инвестиции")
 async def invest(message: types.Message):
     dep = await db.get_deposit(message.from_user.id, loop)
