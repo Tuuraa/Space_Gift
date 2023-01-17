@@ -34,32 +34,60 @@ async def worker_verify_balance(loop):
         try:
             start_program_time = time.time()
             users = await dbUser.get_users(loop)
+            config = db.ConfigDBManager().get()
 
             for user in users:
                 if user[0] is None:
                     continue
 
-
+                # Проверка денег с планет
                 status = bool((await dbUser.get_status(user[0], loop))[0])
                 current_planet = int((await dbUser.get_planet(user[0], loop))[0])
                 step = int(await dbUser.get_step(user[0], loop))
-
-                if status is False and current_planet == 0:
-                    continue
+                user_data = (await dbUser.get_full_data(user[0], loop))[0]
 
                 user_money = int(await dbUser.get_amount_gift_money(user[0], loop))
                 verify_sum = sums[current_planet] * step
 
-                if user_money != verify_sum:
-                    print(f"{user[0] = }, {current_planet = }, {step = }\n{user_money = } || {verify_sum = }\n\n")
+                user_name = f"{user_data[3]} ({user_data[1]})"
+                if user_data[7]:
+                    user_name = f"@{user_data[7]}"
+
+                if user_money > verify_sum and not (status is False and current_planet == 0):
+                    # await bot.send_message(
+                    #     config.errors_group_id,
+                    #     f'У пользователя {user_name} на балансе сумма {user_money} рублей. Правильная сумма {verify_sum} рублей',
+                    # )
+                    print(f'У пользователя {user_name} на балансе сумма {user_money} рублей. Правильная сумма {verify_sum} рублей')
+
+
+                # Проверка рефералов
+                user_ref = (await dbUser.get_ref_users(user[0], loop))
+                user_ref_active_count = user_data[27]
+
+                active_ref_count = 0
+                for ref in user_ref:
+                    is_active = await dbUser.is_first_user_topup(ref[1], loop)
+                    if is_active:
+                        active_ref_count += 1
+
+                if active_ref_count > user_ref_active_count:
+                    # await bot.send_message(
+                    #     config.errors_group_id,
+                    #     f'У пользователя {user_name} {user_ref_active_count} активированных рефералов. Правильное количество {active_ref_count}',
+                    # )
+                    print(
+                        f'У пользователя {user_name} {user_ref_active_count} активированных рефералов.'
+                        f' Правильное количество {active_ref_count}'
+                    )
 
             end_program_time = time.time()
             print(f'BACKGROUND LAP PERCENT TIME: {end_program_time - start_program_time}')
         except Exception:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')
-            # config = db.ConfigDBManager().get()
-            # await bot.send_message(config.errors_group_id, f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')
+            config = db.ConfigDBManager().get()
+            await bot.send_message(config.errors_group_id, f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')
 
         await asyncio.sleep(20)
 
