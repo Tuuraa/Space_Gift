@@ -77,19 +77,19 @@ async def worker_verify_balance(loop):
                     #     f'У пользователя {user_name} {user_ref_active_count} активированных рефералов. Правильное количество {active_ref_count}',
                     # )
                     print(
-                        f'У пользователя {user_name} {user_ref_active_count} активированных рефералов.'
-                        f' Правильное количество {active_ref_count}'
+                        f'У пользователя {user_name} {activate_ref_count} активированных рефералов.'
+                        f' Правильное количество {user_active_ref_count}'
                     )
 
             end_program_time = time.time()
-            print(f'BACKGROUND LAP PERCENT TIME: {end_program_time - start_program_time}')
+            print(f'BACKGROUND LAP VERIFY TIME: {end_program_time - start_program_time}')
         except Exception:
             exc_type, exc_obj, exc_tb = sys.exc_info()
-            print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')
-            config = db.ConfigDBManager().get()
-            await bot.send_message(config.errors_group_id, f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')
+            print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Verify Balance')
+            #config = db.ConfigDBManager().get()
+            #await bot.send_message(config.errors_group_id, f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Verify Baance')
 
-        await asyncio.sleep(20)
+        await asyncio.sleep(60 * 60)
 
 if __name__ == '__main__':
     loop = asyncio.new_event_loop()
