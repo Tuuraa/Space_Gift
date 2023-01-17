@@ -292,7 +292,20 @@ async def ref(message: types.Message):
     else:
         best_planet = logic.planets[top_planet - 1]
 
-    answer_text = f'''<b> 🤖 Ваш ID: {message.from_user.id} </b>
+    ref_user = await db.get_referrer_of_user(message.from_user.id, loop)
+    if not ref_user:
+        ref_user_str = ''
+    else:
+        ref_user_str = '😇 Ваш пригласитель: {}\n\n'
+        ref_user_obj = (await db.get_full_data(ref_user, loop))[0]
+        print(ref_user_obj)
+        if not ref_user_obj[7]:
+            ref_nick = f'<a href="tg://user?id={ref_user}"> {ref_user_obj[3]} </a>'
+        else:
+            ref_nick = f'@{ref_user_obj[7]}'
+        ref_user_str = ref_user_str.format(ref_nick)
+
+    answer_text = ref_user_str + f'''<b> 🤖 Ваш ID: {message.from_user.id} </b>
 
 👥 Всего приглашенных рефералов: <b>{ref_count}</b>
 🧑‍💼 Всего активированных рефералов: <b>{active_ref_count}</b>
@@ -389,6 +402,7 @@ async def about_space_gift(message: types.Message):
         text = file.read()
         await message.answer(text + '<a href="https://i.ibb.co/HxQPmC9/gift.png">.</a>', parse_mode='HTML')
 
+
 '''
 @dp.message_handler(text="🤖 Система клонов")
 async def about_space_gift(message: types.Message):
@@ -443,6 +457,7 @@ async def invest(message: types.Message):
 async def support(message: types.Message):
     await message.answer("По любым вопросам пишите @smfadmin \nОтветит в течении часа!")
 
+
 '''
 @dp.message_handler(lambda mes: mes.text == "Тестовые клоны")
 async def TestClones(message: types.Message):
@@ -459,6 +474,7 @@ async def TestPay(message: types.Message):
         await message.answer("Баланс пополнен")
 '''
 
+
 @dp.callback_query_handler(text="system_clones")
 async def system_clones(callback: types.CallbackQuery):
     await bot.delete_message(callback.from_user.id, callback.message.message_id)
@@ -470,12 +486,14 @@ async def system_clones(callback: types.CallbackQuery):
             text + '<a href="https://i.ibb.co/wYdbyyt/system-clones.png">.</a>', parse_mode="HTML"
         )
 
+
 '''
 @dp.message_handler(lambda mes: mes.text == "Удалить аккаунт")
 async def deleteacc(message: types.Message):
     await message.answer("Аккаунт удален, перезапустите бота \n/start")
     await db.delete_acc(message.from_user.id, loop)
 '''
+
 
 @dp.callback_query_handler(text='reinvest')
 async def reinvest(callback: types.CallbackQuery):
@@ -588,7 +606,7 @@ async def wallet(message: types.Message):
                    f"📆 Профиль создан: {date}\n" \
                    f"🚀 Статус: {level_text} {text_status}\n" \
                    f"🙋‍♂ Лично приглашенные: {await db.get_count_ref(message.from_user.id, loop)} " \
-                   f"({ await db.get_activate_count_ref(message.from_user.id, loop)})\n" \
+                   f"({await db.get_activate_count_ref(message.from_user.id, loop)})\n" \
                    "Ваш депозит: 💰👇\n" \
                    "——————————————————\n" \
                    f"🎁 Системы дарения - {int(cd)}₽\n" \
