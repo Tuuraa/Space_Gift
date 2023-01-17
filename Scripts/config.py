@@ -26,11 +26,11 @@ SUB_GROUP = -1001878641715
 DEBUG = False
 
 if DEBUG:
-    PATH = '/Users/v_sopin/Documents/GitHub/Space_Gift'
+    PATH = '/Users/kit/PycharmProjects/Space_Gift'
 
     HOST = "127.0.0.1"
     USERS = "root"
-    PASSWORD = "5377"
+    PASSWORD = "root"
     DB_NAME = "yougiftdb"
 else:
     PATH = '/opt/Space_Gift'
