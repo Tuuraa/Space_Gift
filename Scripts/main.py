@@ -228,11 +228,13 @@ async def launch(message: types.Message):
     planet = await db.get_planet(message.from_user.id, loop)
     step = await db.get_step(message.from_user.id, loop)
 
+    user_topups = await dbPay.get_user_topups(message.from_user.id, loop)
+
     if int(planet[0]) == 5 and int(step) == 5:
         await message.answer("Поздравляю, ты красавчик!")
         return
 
-    elif status[0] == 1 or int(planet[0]) > 0 or dep >= 5000:
+    elif (status[0] == 1 or int(planet[0]) > 0 or dep >= 5000) and user_topups > 0:
         await logic.get_launch(bot, message.from_user.id, loop)
         return
 
