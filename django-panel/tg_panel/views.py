@@ -1,7 +1,12 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
-from .models import TgUser
+from .models import TgUser, ApiTokens
+import telebot
+
+
+bot = telebot.TeleBot(ApiTokens.objects.get(api='bot_api').title)
+bot.token = ApiTokens.objects.get(api='bot_api').title
 
 
 def index(request, *args, **kwargs):
@@ -27,4 +32,14 @@ def deposit_transfer(request, *args, **kwargs):
     user = users[0]
     user.depozit += float(amount_rub)
     user.save()
+
+    try:
+        bot.send_message(
+            chat_id=user_id,
+            text=f'<b> ✅ Депозит в размере {amount_rub} рублей успешно перенесен </b>, он будет отображаться в разделе "Кошелек"',
+            parse_mode="html",
+        )
+    except Exception:
+        pass
+
     return JsonResponse({'dt_status': 'success'})
