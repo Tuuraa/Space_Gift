@@ -58,7 +58,7 @@ async def worker_percent(loop):
                         reinv = float(await dbUser.get_reinvest(user[0], loop))
 
                         full_money = cd + dep + ref + ref_money + reinv
-                        money = round(float(full_money) * .006)
+                        money = round(float(full_money) * .008)
                         await send_message_safe(bot, user[0], f"На ваш счет начислилось {money} RUB")
                         await dbUser.add_gift_money(user[0], money, loop)
                         print(f"На {user[0]} счет был начислен процент")

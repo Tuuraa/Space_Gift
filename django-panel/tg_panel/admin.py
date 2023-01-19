@@ -80,7 +80,7 @@ class PayAdmin(admin.ModelAdmin):
                 return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
     user_link.short_description = 'Пользователь'
 
-    search_fields = ('pay_id', 'user_id', 'get_pay_amount')
+    search_fields = ('pay_id', 'user_id', 'pay_amount')
     list_display = ('pay_id', user_link, 'get_pay_amount', 'date', 'status')
     readonly_fields = ('pay_id', 'get_pay_amount', 'date', 'pay_type', 'user_id', 'cancel_id')
     exclude = ('pay_amount', )
