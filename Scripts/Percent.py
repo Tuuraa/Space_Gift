@@ -47,8 +47,9 @@ async def worker_percent(loop):
                 if (date_time_now - date).days >= 1:
                     status = await dbUser.get_status(user[0], loop)
                     planet = await dbUser.get_planet(user[0], loop)
+                    payments = await dbPay.get_user_topups(message.from_user.id, loop)
 
-                    if status[0] == 1 or int(planet[0]) > 0:
+                    if (status[0] == 1 or int(planet[0]) > 0) and payments > 0:
                         await dbUser.set_new_date(user[0], date_time_now, loop)
                         cd = float(await dbUser.get_amount_gift_money(user[0], loop))
                         dep = float(await dbUser.get_deposit(user[0], loop))

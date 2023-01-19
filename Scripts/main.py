@@ -228,11 +228,13 @@ async def launch(message: types.Message):
     planet = await db.get_planet(message.from_user.id, loop)
     step = await db.get_step(message.from_user.id, loop)
 
+    user_topups = await dbPay.get_user_topups(message.from_user.id, loop)
+
     if int(planet[0]) == 5 and int(step) == 5:
         await message.answer("Поздравляю, ты красавчик!")
         return
 
-    elif status[0] == 1 or int(planet[0]) > 0 or dep >= 5000:
+    elif (status[0] == 1 or int(planet[0]) > 0 or dep >= 5000) and user_topups > 0:
         await logic.get_launch(bot, message.from_user.id, loop)
         return
 
@@ -602,6 +604,12 @@ async def wallet(message: types.Message):
             reinv = await db.get_reinvest(message.from_user.id, loop)
             date = await db.get_date(message.chat.id, loop)
 
+            payments = await dbPay.get_user_topups(message.from_user.id, loop)
+
+            day_percent = f"{round(float(cd + dep + ref + ref_money + reinv) * .006, 5)} руб/день"
+            if payments == 0:
+                day_percent = f"0 руб/день\n<u>Чтобы получать дивиденды, пополните баланс</u>"
+
             text = f"🤖 Ваш ID: {message.from_user.id}\n" \
                    f"📆 Профиль создан: {date}\n" \
                    f"🚀 Статус: {level_text} {text_status}\n" \
@@ -616,7 +624,7 @@ async def wallet(message: types.Message):
                    f"🪙 Вы реинвестировали - {int(reinv)}₽\n" \
                    "——————————————————\n" \
                    f"💵 Общий депозит: {int(cd + dep + ref + ref_money + reinv)}₽\n" \
-                   f"💵 Пассив: {round(float(cd + dep + ref + ref_money + reinv) * .006, 5)} руб/день!\n" \
+                   f"💵 Пассив: {day_percent}!\n" \
                    f"💵 На вывод: {await db.get_gift_money(message.from_user.id, loop)}₽ \n" \
                    "( минимальная сумма вывода 1000₽ )"
 
@@ -624,7 +632,8 @@ async def wallet(message: types.Message):
                 message.chat.id,
                 photo=file,
                 caption=text,
-                reply_markup=inline_keybords.get_wallet_inline()
+                reply_markup=inline_keybords.get_wallet_inline(),
+                parse_mode='html'
             )
 
 
