@@ -242,10 +242,11 @@ class WithdrawAdmin(admin.ModelAdmin):
 
     def user_link(self):
         user = TgUser.objects.filter(user_id=self.user_id).first()
-        if user.link_name is not None:
-            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
-        else:
-            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
+        if user is not None:
+            if user.link_name is not None:
+                return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
+            else:
+                return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
     user_link.short_description = 'Пользователь'
 
     def has_change_permission(self, request, obj=None):
