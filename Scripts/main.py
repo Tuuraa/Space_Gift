@@ -48,29 +48,16 @@ dbWithDraw = ManagerWithDrawDataBase()
 
 message_handlers_commands = ["💳 Кошелёк", "🚀 Взлёт", "🔧 Инструменты", "📝 О проекте", "🌑 Space Money",
                              "⚙ Тех. поддержка"]
-list_persons = []  # Список для обработки регмстрирующихся пользователей
-now_user: User = None  # Пользователь сейчас, для удобной работы
 
 
 @dp.message_handler(commands=['start'])  # Обработка команды /start
-async def send_welcome(message: types.Message):
+async def send_welcome(message: types.Message, state: FSMContext):
     if message.chat.type == "private":
         if not await db.exists_user(message.from_user.id, loop):
             referrer_id = message.get_args()
-            if referrer_id != "":
-                global now_user
-                now_user = User(message.from_user.first_name, message.from_user.id,
-                                datetime.date.today(), int(referrer_id))
-                if now_user in list_persons:
-                    list_persons.remove(now_user)
-                if now_user not in list_persons:
-                    list_persons.append(now_user)
-            else:
-                now_user = User(message.from_user.first_name, message.from_user.id, datetime.date.today())
-                if now_user in list_persons:
-                    list_persons.remove(now_user)
-                if now_user not in list_persons:
-                    list_persons.append(now_user)
+            async with state.proxy() as data:
+                data['referrer_id'] = referrer_id if referrer_id else None
+                data['join_date'] = datetime.date.today()
 
             ''' Check if user don't sub on group '''
             if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
@@ -103,13 +90,11 @@ async def send_welcome(message: types.Message):
 
 
 @dp.callback_query_handler(text="login")  # Регистрирование пользователя и проверка рефералки
-async def login_after_callback(callback: types.CallbackQuery):
-    for us in list_persons:
-        if callback.from_user.id == us.user_id:
-            now_user = us
-            break
-    if now_user.referrer_id == callback.from_user.id:
-        list_persons.remove(now_user)
+async def login_after_callback(callback: types.CallbackQuery, state: FSMContext):
+    async with state.proxy() as data:
+        referrer_id = data['referrer_id']
+
+    if referrer_id == callback.from_user.id:
         await bot.send_message(callback.from_user.id,
                                "Нельзя регистрироваться по собственной реферальной ссылке!\n"
                                f"Чтобы начать регистрацию перейдите по https://t.me/{NAME_BOT}?start=855151774")
@@ -129,15 +114,14 @@ async def capcha_callback(callback: types.CallbackQuery):
 
 
 @dp.callback_query_handler(text="right")  # Если капча правильная, то спрашиваем о регистрации к пользователю
-async def sure_quest(callback: types.CallbackQuery):
-    for us in list_persons:
-        if callback.from_user.id == us.user_id:
-            now_user = us
-            break
+async def sure_quest(callback: types.CallbackQuery, state: FSMContext):
+    async with state.proxy() as data:
+        referrer_id = data['referrer_id']
+
     await bot.delete_message(callback.from_user.id, callback.message.message_id)
-    if now_user.referrer_id is not None:
+    if referrer_id is not None:
         await bot.send_message(callback.from_user.id,
-                               f"Верно ✅\n\nВы регистрируетесь к участнику @{await db.get_user_name(now_user.referrer_id, loop)}\n\n"
+                               f"Верно ✅\n\nВы регистрируетесь к участнику @{await db.get_user_name(referrer_id, loop)}\n\n"
                                f"После регистрации смена наставника невозможна!\n"
                                f"Вы подтверждаете регистрацию?", reply_markup=inline_keybords.sure_login())
     else:
@@ -149,9 +133,6 @@ async def sure_quest(callback: types.CallbackQuery):
 
 @dp.callback_query_handler(text="no_ans")  # Если он откажется
 async def no_ans(callback: types.CallbackQuery):
-    for us in list_persons:
-        if callback.from_user.id == us.user_id:
-            list_persons.remove(us)
     await bot.delete_message(callback.from_user.id, callback.message.message_id)
     await bot.send_message(callback.from_user.id, "Для возобновления используйте команду /start")
 
@@ -171,25 +152,22 @@ async def yes_ans(callback: types.CallbackQuery):
 async def code(message: types.Message, state: FSMContext):
     async with lock:
         async with state.proxy() as data:
-            data['code'] = message.text
-        for us in list_persons:
-            if message.from_user.id == us.user_id:
-                login_user = us
-                list_persons.remove(us)
-                break
+            referrer_id = data['referrer_id']
+            join_date = data['join_date']
         utc_now = pytz.utc.localize(datetime.datetime.utcnow())
         date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
-        await db.add_user(loop, login_user.name, login_user.user_id, login_user.date, date_time_now,
-                          user_name=message.from_user.username, referrer_id=login_user.referrer_id,
+        await db.add_user(loop, message.from_user.first_name, message.from_user.id, join_date, date_time_now,
+                          user_name=message.from_user.username, referrer_id=referrer_id,
                           last_withd=date_time_now, code=message.text)
-        if login_user.referrer_id is not None:
-            await db.update_count_ref(login_user.referrer_id, loop)
+
+        if referrer_id is not None:
+            await db.update_count_ref(referrer_id, loop)
             if message.from_user.username is None:
                 nick = f"{message.from_user.first_name} ({message.from_user.id})"
             else:
                 nick = f'@{message.from_user.username}'
             await bot.send_message(
-                login_user.referrer_id,
+                referrer_id,
                 f"По вашей реферальной ссылке зарегистрировался {nick}"
             )
 
@@ -214,9 +192,6 @@ async def except_capcha(callback: types.CallbackQuery):
 
 @dp.callback_query_handler(text="cancel")
 async def cancel_capcha(callback: types.CallbackQuery):
-    for us in list_persons:
-        if callback.from_user.id == us.user_id:
-            list_persons.remove(us)
     await bot.delete_message(callback.from_user.id, callback.message.message_id)
     await bot.send_message(callback.from_user.id, "Для возобновления используйте команду /start")
 
@@ -444,10 +419,10 @@ async def invest(message: types.Message):
     dep = await db.get_deposit(message.from_user.id, loop)
 
     await message.answer(
-        f"▪ Инвестируя в Space gift вы будете получать 0,6% в сутки а так же "
+        f"▪ Инвестируя в Space gift вы будете получать 0,8% в сутки а так же "
         f"система умножит ваши вложения, что бы продвинуть живую очередь на "
         f"получение подарков! ( Благодаря системе клонов )\n\n"
-        f"📠 Процент от инвестиций: 0.6% в сутки\n"
+        f"📠 Процент от инвестиций: 0.8% в сутки\n"
         f"⏱ Время доходности: 24 часа\n"
         f"📆 Срок вклада: Бессрочный c возможностью вывода через 100 дней\n\n"
         f"💳 Ваш вклад: {dep} RUB",
@@ -606,7 +581,7 @@ async def wallet(message: types.Message):
 
             payments = await dbPay.get_user_topups(message.from_user.id, loop)
 
-            day_percent = f"{round(float(cd + dep + ref + ref_money + reinv) * .006, 5)} руб/день"
+            day_percent = f"{round(float(cd + dep + ref + ref_money + reinv) * .008, 5)} руб/день"
             if payments == 0:
                 day_percent = f"0 руб/день\n<u>Чтобы получать дивиденды, пополните баланс</u>"
 
@@ -1240,7 +1215,7 @@ async def calc(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["COUNT_REFERRER"] = int(message.text)
 
-    numb = int(message.text) * 0.006
+    numb = int(message.text) * 0.008
     with open(PATH + "/img/calc.jpg", 'rb') as file:
         await bot.send_photo(
             message.chat.id,
