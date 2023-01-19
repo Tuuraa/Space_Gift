@@ -6,7 +6,7 @@ from  django.contrib.auth.models  import  Group
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.db.models import Sum
-from jet.filters import DateRangeFilter
+from daterange_filter.filter import DateRangeFilter
 
 from .models import TgUser, Pay, CryptPay, Transaction, Withdraw, ApiTokens, Statistic, AllStats, Post, RefMoney, Clones
 from .forms import PeriodDateTimePicker
@@ -73,10 +73,11 @@ class TgUserAdmin(admin.ModelAdmin):
 class PayAdmin(admin.ModelAdmin):
     def user_link(self):
         user = TgUser.objects.filter(user_id=self.user_id).first()
-        if user.link_name is not None:
-            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
-        else:
-            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
+        if user is not None:
+            if user.link_name is not None:
+                return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
+            else:
+                return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
     user_link.short_description = 'Пользователь'
 
     search_fields = ('pay_id', 'user_id', 'get_pay_amount')
@@ -156,10 +157,11 @@ class PayAdmin(admin.ModelAdmin):
 class CryptPayAdmin(admin.ModelAdmin):
     def user_link(self):
         user = TgUser.objects.filter(user_id=self.user_id).first()
-        if user.link_name is not None:
-            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
-        else:
-            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
+        if user is not None:
+            if user.link_name is not None:
+                return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
+            else:
+                return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
     user_link.short_description = 'Пользователь'
 
     search_fields = ('id', 'user_id', 'amount_rub')
@@ -242,10 +244,11 @@ class WithdrawAdmin(admin.ModelAdmin):
 
     def user_link(self):
         user = TgUser.objects.filter(user_id=self.user_id).first()
-        if user.link_name is not None:
-            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
-        else:
-            return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
+        if user is not None:
+            if user.link_name is not None:
+                return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
+            else:
+                return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
     user_link.short_description = 'Пользователь'
 
     def has_change_permission(self, request, obj=None):
