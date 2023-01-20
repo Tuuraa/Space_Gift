@@ -92,8 +92,8 @@ async def worker_percent(loop):
                 utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                 date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
-                if (datetime.datetime.strptime(str(date_time_now)[:-13], '%Y-%m-%d %H:%M:%S') -
-                    datetime.datetime.strptime(str(transatcion.date), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1\
+            if (datetime.datetime.strptime(date_time_now.strftime("%Y-%m-%d %H:%M:%S"), '%Y-%m-%d %H:%M:%S') -
+                    datetime.datetime.strptime(transatcion.date.strftime("%Y-%m-%d %H:%M:%S"), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1\
                     and transatcion.status == "WAIT_PAYMENT":
                     await dbPay.change_status_trans(transatcion.id, 'CANCELED', loop)
 
