@@ -75,7 +75,7 @@ async def worker(loop):
 
                         elif status_payment == "OPERATION_COMPLETED":   # Проверка пополнения счета
                                 # Пополнение счетов
-                                is_fist_pay = dbUser.is_first_user_topup(user[0], loop)
+                                is_fist_pay = await dbUser.is_first_user_topup(user[0], loop)
                                 await dbUser.add_money_and_dep(user[0], pay[1], loop)
 
                                 # Оповещение реферала
