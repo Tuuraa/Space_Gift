@@ -6,7 +6,7 @@ from  django.contrib.auth.models  import  Group
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.db.models import Sum
-from daterange_filter.filter import DateRangeFilter
+from jet.filters import DateRangeFilter
 
 from .models import TgUser, Pay, CryptPay, Transaction, Withdraw, ApiTokens, Statistic, AllStats, Post, RefMoney, Clones
 from .forms import PeriodDateTimePicker
