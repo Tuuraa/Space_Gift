@@ -439,6 +439,7 @@ async def about_space_gift(message: types.Message):
 @dp.message_handler(text="💻 Инвестиции")
 async def invest(message: types.Message):
     dep = await db.get_deposit(message.from_user.id, loop)
+    money_out = await db.get_gift_money(message.from_user.id, loop)
 
     await message.answer(
         f"▪ Инвестируя в Space gift вы будете получать 0,8% в сутки а так же "
@@ -447,8 +448,11 @@ async def invest(message: types.Message):
         f"📠 Процент от инвестиций: 0.8% в сутки\n"
         f"⏱ Время доходности: 24 часа\n"
         f"📆 Срок вклада: Бессрочный c возможностью вывода через 100 дней\n\n"
-        f"💳 Ваш вклад: {dep} RUB",
-        reply_markup=inline_keybords.invest_buttons()
+        f"💳 Ваш вклад: {dep} RUB\n"
+        f"💵 На вывод: {money_out}₽\n"
+        f"<b>Вы можете вывести дивиденды с комиссией в 5%</b>",
+        reply_markup=inline_keybords.invest_buttons(),
+        parse_mode='html'
     )
 
 
@@ -1337,8 +1341,9 @@ async def remove_money_invest(callback: types.CallbackQuery):
         return
 
     if not is_user_from_sm and (date_for_remove - dt_to_datetime).days < 100:
-        await callback.answer("🚫 Вы можете вывести деньги спустя 100 дней с момента регистрации или последнего вывода!",
-                              show_alert=True)
+        await callback.answer(
+            "🚫 Вы можете вывести деньги спустя 100 дней с момента регистрации или последнего вывода!",
+            show_alert=True)
         return
 
     if money < 1000:
@@ -1568,6 +1573,14 @@ async def number_card(message: types.Message, state: FSMContext):
         await state.reset_state(with_data=False)
 
 
+@dp.callback_query_handler(text="remove_money_0_05")
+async def remove_money_0_05(callback: types.CallbackQuery):
+    async with state.proxy() as data:
+        data["WITHDRAW_COMMISSION"] = config.COMMISSION_INVEST
+
+    return remove_money(callback)
+
+
 @dp.callback_query_handler(text="remove_money")
 async def remove_money(callback: types.CallbackQuery):
     money = int(await db.get_gift_money(callback.from_user.id, loop))
@@ -1673,12 +1686,16 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
             await state.reset_state(with_data=False)
             await message.answer("Вывод денег успешно отменен", reply_markup=inline_keybords.profile_markup())
             return
+
         async with state.proxy() as data:
             data["DATA_USER"] = 'crypt'
+            commission = config.COMMISSION
+            if data.get("WITHDRAW_COMMISSION"):
+                commission = data.get("WITHDRAW_COMMISSION")
 
         data_requests = await state.get_data()
         print(data_requests)
-        amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * config.COMMISSION
+        amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * commission
         utc_now = pytz.utc.localize(datetime.datetime.utcnow())
         date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
@@ -1746,9 +1763,13 @@ async def number_card(message: types.Message, state: FSMContext):
             return
         async with state.proxy() as data:
             data["DATA_USER"] = message.text
+            commission = config.COMMISSION
+            if data.get("WITHDRAW_COMMISSION"):
+                commission = data.get("WITHDRAW_COMMISSION")
+
         data_requests = await state.get_data()
         print(data_requests)
-        amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * config.COMMISSION
+        amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * commission
         utc_now = pytz.utc.localize(datetime.datetime.utcnow())
         date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
