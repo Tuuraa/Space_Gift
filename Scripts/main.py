@@ -1326,7 +1326,7 @@ async def remove_money_invest(callback: types.CallbackQuery):
     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
     date_for_remove = datetime.datetime.strptime(str(date_time_now)[:-13], '%Y-%m-%d %H:%M:%S')
 
-    is_user_from_sm = int(await db.get_last_withd(callback.from_user.id, loop))
+    is_user_from_sm = int(await db.is_user_from_space_money(callback.from_user.id, loop))
 
     money = int(await db.get_deposit(callback.from_user.id, loop))
 
