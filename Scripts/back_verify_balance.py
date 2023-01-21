@@ -54,10 +54,10 @@ async def worker_verify_balance(loop):
                     user_name = f"@{user_data[7]}"
 
                 if user_money > verify_sum and not (status is False and current_planet == 0):
-                    # await bot.send_message(
-                    #     config.errors_group_id,
-                    #     f'У пользователя {user_name} на балансе сумма {user_money} рублей. Правильная сумма {verify_sum} рублей',
-                    # )
+                    #await bot.send_message(
+                    #    config.errors_group_id,
+                    #    f'У пользователя {user_name} на балансе сумма {user_money} рублей. Правильная сумма {verify_sum} рублей',
+                    #)
                     print(f'У пользователя {user_name} на балансе сумма {user_money} рублей. Правильная сумма {verify_sum} рублей')
 
 
@@ -72,10 +72,10 @@ async def worker_verify_balance(loop):
                         user_active_ref_count += 1
 
                 if user_active_ref_count > activate_ref_count:
-                    # await bot.send_message(
-                    #     config.errors_group_id,
-                    #     f'У пользователя {user_name} {user_ref_active_count} активированных рефералов. Правильное количество {active_ref_count}',
-                    # )
+                    #await bot.send_message(
+                    #    config.errors_group_id,
+                    #    f'У пользователя {user_name} {activate_ref_count} активированных рефералов. Правильное количество {user_active_ref_count}',
+                    #)
                     print(
                         f'У пользователя {user_name} {activate_ref_count} активированных рефералов.'
                         f' Правильное количество {user_active_ref_count}'

@@ -177,8 +177,8 @@ async def worker(loop):
             print(f'BACKGROUND LAP PAY TIME: {end_program_time - start_program_time}')
             await asyncio.sleep(30)
         except Exception:
-            print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from back_works')
             exc_type, exc_obj, exc_tb = sys.exc_info()
+            print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from back_works')
             config = db.ConfigDBManager().get()
             await bot.send_message(
                 config.errors_group_id,
