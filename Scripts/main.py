@@ -1326,12 +1326,21 @@ async def remove_money_invest(callback: types.CallbackQuery):
     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
     date_for_remove = datetime.datetime.strptime(str(date_time_now)[:-13], '%Y-%m-%d %H:%M:%S')
 
+    is_user_from_sm = int(await db.get_last_withd(callback.from_user.id, loop))
+
     money = int(await db.get_deposit(callback.from_user.id, loop))
 
-    if (date_for_remove - dt_to_datetime).days < 100:
+    if is_user_from_sm and (date_for_remove - dt_to_datetime).days < 30:
+        await callback.answer(
+            "🚫 Вы можете вывести деньги спустя 30 дней с момента регистрации или последнего вывода!",
+            show_alert=True)
+        return
+
+    if not is_user_from_sm and (date_for_remove - dt_to_datetime).days < 100:
         await callback.answer("🚫 Вы можете вывести деньги спустя 100 дней с момента регистрации или последнего вывода!",
                               show_alert=True)
         return
+
     if money < 1000:
         await callback.answer("🚫 У вас на балансе не достаточно средств для вывода, минимальная сумма: 1000 RUB",
                               show_alert=True)
