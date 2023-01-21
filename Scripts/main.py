@@ -92,6 +92,11 @@ async def send_welcome(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(text="login")  # Регистрирование пользователя и проверка рефералки
 async def login_after_callback(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
+        if 'referrer_id' not in data:
+            return await bot.send_message(
+                callback.from_user.id,
+                "Возникли технические неполадки 😢\n\nПожалуйста, перейдите по ссылке реферала ещё раз"
+            )
         referrer_id = data['referrer_id']
 
     if referrer_id == callback.from_user.id:
@@ -121,6 +126,11 @@ async def capcha_callback(callback: types.CallbackQuery):
 @dp.callback_query_handler(text="right")  # Если капча правильная, то спрашиваем о регистрации к пользователю
 async def sure_quest(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
+        if 'referrer_id' not in data:
+            return await bot.send_message(
+                callback.from_user.id,
+                "Возникли технические неполадки 😢\n\nПожалуйста, перейдите по ссылке реферала ещё раз"
+            )
         referrer_id = data['referrer_id']
     try:
         await bot.delete_message(callback.from_user.id, callback.message.message_id)
@@ -165,6 +175,11 @@ async def yes_ans(callback: types.CallbackQuery):
 async def code(message: types.Message, state: FSMContext):
     async with lock:
         async with state.proxy() as data:
+            if 'referrer_id' not in data:
+                return await bot.send_message(
+                    callback.from_user.id,
+                    "Возникли технические неполадки 😢\n\nПожалуйста, перейдите по ссылке реферала ещё раз"
+                )
             referrer_id = data['referrer_id']
             join_date = data['join_date']
         utc_now = pytz.utc.localize(datetime.datetime.utcnow())
@@ -449,8 +464,8 @@ async def invest(message: types.Message):
         f"⏱ Время доходности: 24 часа\n"
         f"📆 Срок вклада: Бессрочный c возможностью вывода через 100 дней\n\n"
         f"💳 Ваш вклад: {dep} RUB\n",
-#        f"💵 На вывод: {money_out}₽\n"
-#        f"<b>Вы можете вывести дивиденды с комиссией в 5%</b>",
+        #        f"💵 На вывод: {money_out}₽\n"
+        #        f"<b>Вы можете вывести дивиденды с комиссией в 5%</b>",
         reply_markup=inline_keybords.invest_buttons(),
         parse_mode='html'
     )
