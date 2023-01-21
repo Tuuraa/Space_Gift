@@ -1578,7 +1578,7 @@ async def remove_money_0_05(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["WITHDRAW_COMMISSION"] = config.COMMISSION_INVEST
 
-    return remove_money(callback)
+    return await remove_money(callback)
 
 
 @dp.callback_query_handler(text="remove_money")
