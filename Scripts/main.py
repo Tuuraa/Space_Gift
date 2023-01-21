@@ -1574,7 +1574,7 @@ async def number_card(message: types.Message, state: FSMContext):
 
 
 @dp.callback_query_handler(text="remove_money_0_05")
-async def remove_money_0_05(callback: types.CallbackQuery):
+async def remove_money_0_05(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["WITHDRAW_COMMISSION"] = config.COMMISSION_INVEST
 
