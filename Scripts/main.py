@@ -68,9 +68,10 @@ async def send_welcome(message: types.Message, state: FSMContext):
                     )
                 )
                 return await message.answer(
-                    text="*Чтобы пользововаться ботом*, вам нужно подписаться "
-                         "на нашу *официальную группу* https://t.me/spacegiftbot\n\n"
-                         "Чтобы проверить статус подписки, напишите /start",
+                    text=f"*Чтобы пользововаться ботом*, вам нужно подписаться "
+                         f"на нашу *официальную группу* https://t.me/spacegiftbot\n\n"
+                         f"Чтобы проверить статус подписки, напишите боту ещё раз по ссылке: "
+                         f"https://t.me/space_gift_bot?start={referrer_id}",
                     parse_mode='markdown',
                     reply_markup=keyboard,
                 )
