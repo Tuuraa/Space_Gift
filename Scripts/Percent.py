@@ -35,33 +35,37 @@ async def worker_percent(loop):
             start_program_time = time.time()
             users = await dbUser.get_users(loop)
 
-            for user in users:
-                if user[0] is None:
-                    continue
+            utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+            date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
-                date = (await dbUser.get_date_now(user[0], loop)).astimezone(pytz.timezone("UTC"))
+            if 7 <= date_time_now.hour <= 8:
+                for user in users:
+                    if user[0] is None:
+                        continue
 
-                utc_now = pytz.utc.localize(datetime.datetime.utcnow())
-                date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
+                    date = (await dbUser.get_date_now(user[0], loop)).astimezone(pytz.timezone("UTC"))
 
-                if (date_time_now - date).days >= 1:
-                    status = await dbUser.get_status(user[0], loop)
-                    planet = await dbUser.get_planet(user[0], loop)
-                    payments = await dbPay.get_user_topups(user[0], loop)
+                    utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+                    date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
-                    if (status[0] == 1 or int(planet[0]) > 0) and payments > 0:
-                        await dbUser.set_new_date(user[0], date_time_now, loop)
-                        cd = float(await dbUser.get_amount_gift_money(user[0], loop))
-                        dep = float(await dbUser.get_deposit(user[0], loop))
-                        ref = await dbUser.get_activate_count_ref(user[0], loop) * 5000
-                        ref_money = float(await dbUser.get_percent_ref_money(user[0], loop))
-                        reinv = float(await dbUser.get_reinvest(user[0], loop))
+                    if date_time_now.day != date.day:
+                        status = await dbUser.get_status(user[0], loop)
+                        planet = await dbUser.get_planet(user[0], loop)
+                        payments = await dbPay.get_user_topups(user[0], loop)
 
-                        full_money = cd + dep + ref + ref_money + reinv
-                        money = round(float(full_money) * .008)
-                        await send_message_safe(bot, user[0], f"На ваш счет начислилось {money} RUB")
-                        await dbUser.add_gift_money(user[0], money, loop)
-                        print(f"На {user[0]} счет был начислен процент")
+                        if (status[0] == 1 or int(planet[0]) > 0) and payments > 0:
+                            await dbUser.set_new_date(user[0], date_time_now, loop)
+                            cd = float(await dbUser.get_amount_gift_money(user[0], loop))
+                            dep = float(await dbUser.get_deposit(user[0], loop))
+                            ref = await dbUser.get_activate_count_ref(user[0], loop) * 5000
+                            ref_money = float(await dbUser.get_percent_ref_money(user[0], loop))
+                            reinv = float(await dbUser.get_reinvest(user[0], loop))
+
+                            full_money = cd + dep + ref + ref_money + reinv
+                            money = round(float(full_money) * .008)
+                            await send_message_safe(bot, user[0], f"На ваш счет начислилось {money} RUB")
+                            await dbUser.add_gift_money(user[0], money, loop)
+                            print(f"На {user[0]} счет был начислен процент")
 
             pays_db = await dbPay.get_all_data_crypt(loop)
 
@@ -92,8 +96,8 @@ async def worker_percent(loop):
                 utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                 date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
-                if (datetime.datetime.strptime(str(date_time_now)[:-13], '%Y-%m-%d %H:%M:%S') -
-                    datetime.datetime.strptime(str(transatcion.date), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1\
+            if (datetime.datetime.strptime(date_time_now.strftime("%Y-%m-%d %H:%M:%S"), '%Y-%m-%d %H:%M:%S') -
+                    datetime.datetime.strptime(transatcion.date.strftime("%Y-%m-%d %H:%M:%S"), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1\
                     and transatcion.status == "WAIT_PAYMENT":
                     await dbPay.change_status_trans(transatcion.id, 'CANCELED', loop)
 

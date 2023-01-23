@@ -126,11 +126,18 @@ async def get_launch(bot, user_id, loop):
                f"подарки, Вам нужно сделать 🎁 подарок " \
                f"в размере {sums[text_planet[0]]} RUB астронавту @{link}."
 
-    with open(path, "rb") as file:
-        await bot.send_photo(
+    try:
+        with open(path, "rb") as file:
+            await bot.send_photo(
+                chat_id=user_id,
+                photo=file,
+                caption=text,
+                reply_markup=await inline_keybords.laucnh_inline(dbUser, user_id, loop)
+            )
+    except:
+        await bot.send_message(
             chat_id=user_id,
-            photo=file,
-            caption=text,
+            text=text,
             reply_markup=await inline_keybords.laucnh_inline(dbUser, user_id, loop)
         )
 

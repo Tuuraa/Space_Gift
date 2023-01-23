@@ -721,6 +721,13 @@ class ManagerUsersDataBase:
         async with connection.cursor() as cursor:
             await cursor.execute("SELECT COUNT(*) FROM `users` WHERE `referrer_id` = %s", (ref_id,))
 
+    async def is_user_from_space_money(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("SELECT `is_space_money` FROM `users` WHERE `user_id` = %s", (user_id,))
+            result = (await cursor.fetchall())[0][0]
+            return result
+
     async def get_last_withd(self, user_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:

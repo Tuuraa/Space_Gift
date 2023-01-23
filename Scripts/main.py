@@ -69,10 +69,11 @@ async def send_welcome(message: types.Message, state: FSMContext):
                     )
                 )
                 return await message.answer(
-                    text="*Чтобы пользововаться ботом*, вам нужно подписаться "
-                         "на нашу *официальную группу* https://t.me/spacegiftbot\n\n"
-                         "Чтобы проверить статус подписки, напишите /start",
-                    parse_mode='markdown',
+                    text=f"<b>Чтобы пользововаться ботом, вам нужно подписаться "
+                         f"на нашу официальную группу</b> https://t.me/spacegiftbot\n\n"
+                         f"Чтобы проверить статус подписки, напишите боту ещё раз по ссылке: "
+                         f"https://t.me/space_gift_bot?start={referrer_id}",
+                    parse_mode='html',
                     reply_markup=keyboard,
                 )
 
@@ -93,6 +94,11 @@ async def send_welcome(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(text="login")  # Регистрирование пользователя и проверка рефералки
 async def login_after_callback(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
+        if 'referrer_id' not in data:
+            return await bot.send_message(
+                callback.from_user.id,
+                "Возникли технические неполадки 😢\n\nПожалуйста, перейдите по ссылке реферала ещё раз"
+            )
         referrer_id = data['referrer_id']
 
     if referrer_id == callback.from_user.id:
@@ -100,8 +106,10 @@ async def login_after_callback(callback: types.CallbackQuery, state: FSMContext)
                                "Нельзя регистрироваться по собственной реферальной ссылке!\n"
                                f"Чтобы начать регистрацию перейдите по https://t.me/{NAME_BOT}?start=855151774")
         return
-
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(callback.from_user.id,
                            "Пользовательское соглашение Space Gift и политика конфиденциальности"
                            "\nhttps://telegra.ph/Polzovatelskoe-soglashenie-Space-Gift-12-30",
@@ -110,16 +118,26 @@ async def login_after_callback(callback: types.CallbackQuery, state: FSMContext)
 
 @dp.callback_query_handler(text="capcha")  # Капча
 async def capcha_callback(callback: types.CallbackQuery):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await inline_keybords.create_capcha(bot, callback.from_user.id)
 
 
 @dp.callback_query_handler(text="right")  # Если капча правильная, то спрашиваем о регистрации к пользователю
 async def sure_quest(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
+        if 'referrer_id' not in data:
+            return await bot.send_message(
+                callback.from_user.id,
+                "Возникли технические неполадки 😢\n\nПожалуйста, перейдите по ссылке реферала ещё раз"
+            )
         referrer_id = data['referrer_id']
-
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     if referrer_id is not None:
         await bot.send_message(callback.from_user.id,
                                f"Верно ✅\n\nВы регистрируетесь к участнику @{await db.get_user_name(referrer_id, loop)}\n\n"
@@ -134,13 +152,19 @@ async def sure_quest(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(text="no_ans")  # Если он откажется
 async def no_ans(callback: types.CallbackQuery):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(callback.from_user.id, "Для возобновления используйте команду /start")
 
 
 @dp.callback_query_handler(text="yes_ans")  # Если он согласится
 async def yes_ans(callback: types.CallbackQuery):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(
         callback.from_user.id,
         "🔐 Теперь Вам нужно придумать код-текст для восстановления "
@@ -153,6 +177,11 @@ async def yes_ans(callback: types.CallbackQuery):
 async def code(message: types.Message, state: FSMContext):
     async with lock:
         async with state.proxy() as data:
+            if 'referrer_id' not in data:
+                return await bot.send_message(
+                    callback.from_user.id,
+                    "Возникли технические неполадки 😢\n\nПожалуйста, перейдите по ссылке реферала ещё раз"
+                )
             referrer_id = data['referrer_id']
             join_date = data['join_date']
         utc_now = pytz.utc.localize(datetime.datetime.utcnow())
@@ -186,14 +215,20 @@ async def code(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(text="except")  # Если капча не правильная
 async def except_capcha(callback: types.CallbackQuery):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(callback.from_user.id, "Ошибка ❌! Попробуйте еще раз")
     await inline_keybords.create_capcha(bot, callback.from_user.id)
 
 
 @dp.callback_query_handler(text="cancel")
 async def cancel_capcha(callback: types.CallbackQuery):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(callback.from_user.id, "Для возобновления используйте команду /start")
 
 
@@ -370,7 +405,10 @@ async def about_space_gift(message: types.Message):
 
 @dp.callback_query_handler(text="link_to_space_money")
 async def link_to_space_money(callback: types.CallbackQuery):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     with open(PATH + "/Data/invest_space_money.txt", 'r', encoding="utf-8") as file:
         text = file.read()
 
@@ -423,6 +461,7 @@ async def about_space_gift(message: types.Message):
 @dp.message_handler(text="💻 Инвестиции")
 async def invest(message: types.Message):
     dep = await db.get_deposit(message.from_user.id, loop)
+    money_out = await db.get_gift_money(message.from_user.id, loop)
 
     await message.answer(
         f"▪ Инвестируя в Space gift вы будете получать 0,8% в сутки а так же "
@@ -431,8 +470,11 @@ async def invest(message: types.Message):
         f"📠 Процент от инвестиций: 0.8% в сутки\n"
         f"⏱ Время доходности: 24 часа\n"
         f"📆 Срок вклада: Бессрочный c возможностью вывода через 100 дней\n\n"
-        f"💳 Ваш вклад: {dep} RUB",
-        reply_markup=inline_keybords.invest_buttons()
+        f"💳 Ваш вклад: {dep} RUB\n",
+        #        f"💵 На вывод: {money_out}₽\n"
+        #        f"<b>Вы можете вывести дивиденды с комиссией в 5%</b>",
+        reply_markup=inline_keybords.invest_buttons(),
+        parse_mode='html'
     )
 
 
@@ -460,7 +502,10 @@ async def TestPay(message: types.Message):
 
 @dp.callback_query_handler(text="system_clones")
 async def system_clones(callback: types.CallbackQuery):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     with open(PATH + "/Data/system_clones.txt", 'r', encoding="utf-8") as file:
         text = file.read()
 
@@ -643,16 +688,21 @@ async def get_gift_from_space_gift(callback: types.CallbackQuery):
             # await db.add_money(callback.from_user.id, now_dep, loop)
             # await db.add_amount_gift_money(callback.from_user.id, now_dep, loop)
             # await db.set_now_depozit(callback.from_user.id, 0, loop)
-
-            await bot.delete_message(
-                callback.from_user.id,
-                callback.message.message_id
-            )
-            await bot.send_message(
-                callback.from_user.id,
-                f"Поздравляем! 🎉 Space Gift подарил вам {now_dep} RUB 🙌"
-            )
-            await bot.delete_message(callback.from_user.id, callback.message.message_id)
+            try:
+                await bot.delete_message(
+                    callback.from_user.id,
+                    callback.message.message_id
+                )
+            except:
+                ...
+                await bot.send_message(
+                    callback.from_user.id,
+                    f"Поздравляем! 🎉 Space Gift подарил вам {now_dep} RUB 🙌"
+                )
+            try:
+                await bot.delete_message(callback.from_user.id, callback.message.message_id)
+            except:
+                pass
             await logic.get_launch(bot, callback.from_user.id, loop)
 
 
@@ -742,7 +792,10 @@ async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: Us
 
 @dp.callback_query_handler(text="ok_gift")
 async def ok_gift(callback: types.CallbackQuery):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(
         callback.from_user.id,
         "Напишите текст для отправки"
@@ -765,7 +818,10 @@ async def send(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(text="set_money_for_gift")
 async def set_money_for_gift(callback: types.CallbackQuery):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(
         callback.from_user.id,
         "📤 Выберите платежную систему на которую хотите совершить перевод для пополнение средств в бота \n"
@@ -776,7 +832,10 @@ async def set_money_for_gift(callback: types.CallbackQuery):
 
 @dp.callback_query_handler(text="add_money")
 async def add_money(callback: types.CallbackQuery):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(
         callback.from_user.id,
         "📤 Выберите платежную систему на которую хотите совершить перевод для пополнение средств в бота \n"
@@ -817,10 +876,13 @@ async def get_double_depozit(callback: types.CallbackQuery):
         await db.change_first_dep(callback.from_user.id, 0, loop)
         await db.set_now_depozit(callback.from_user.id, 0, loop)
 
-        await bot.delete_message(
-            callback.from_user.id,
-            callback.message.message_id
-        )
+        try:
+            await bot.delete_message(
+                callback.from_user.id,
+                callback.message.message_id
+            )
+        except:
+            pass
         await bot.send_message(
             callback.from_user.id,
             "Поздравляем! 🎉 Ваш депозит удвоен 🙌"
@@ -830,7 +892,10 @@ async def get_double_depozit(callback: types.CallbackQuery):
 
 @dp.callback_query_handler(text="payrement_crypt")
 async def payrement_crypt(callback: types.CallbackQuery):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(
         callback.from_user.id,
         "🏦 Выберите криптовалюту которой будет удобно сделать пополнение",
@@ -863,8 +928,10 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 async def btc_trans(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["PAY_TYPE"] = "USDT"
-
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(
         callback.from_user.id,
         "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
@@ -876,8 +943,10 @@ async def btc_trans(callback: types.CallbackQuery, state: FSMContext):
 async def btc_trans(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["PAY_TYPE"] = "BTC"
-
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(
         callback.from_user.id,
         "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
@@ -889,8 +958,10 @@ async def btc_trans(callback: types.CallbackQuery, state: FSMContext):
 async def ltc_trans(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["PAY_TYPE"] = "LTC"
-
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(
         callback.from_user.id,
         "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
@@ -902,8 +973,10 @@ async def ltc_trans(callback: types.CallbackQuery, state: FSMContext):
 async def eth_trans(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["PAY_TYPE"] = "ETH"
-
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(
         callback.from_user.id,
         "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
@@ -1081,7 +1154,10 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(text="payrement_bank")
 async def get_gift_callback(callback: types.CallbackQuery):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
 
     await bot.send_message(
         callback.from_user.id,
@@ -1104,7 +1180,10 @@ def safe(id):
 
 @dp.callback_query_handler(text="sberbank", state=PayFSM.PAY_TYPE)
 async def sberbank_pay(callback: types.CallbackQuery, state: FSMContext):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     async with state.proxy() as data:
         data["PAY_TYPE"] = "sberbank"
 
@@ -1117,7 +1196,10 @@ async def sberbank_pay(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(text="tinkoff", state=PayFSM.PAY_TYPE)
 async def tinkoff_pay(callback: types.CallbackQuery, state: FSMContext):
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     async with state.proxy() as data:
         data["PAY_TYPE"] = "tinkoff"
 
@@ -1217,7 +1299,10 @@ async def cancel_pay(callback: types.CallbackQuery):
                 del_pay = pay_data
 
     if del_pay is not None:
-        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+        try:
+            await bot.delete_message(callback.from_user.id, callback.message.message_id)
+        except:
+            pass
         await bot.send_message(callback.from_user.id, f"Завка на пополнение была успешно отменена")
         print(f"Платеж {del_pay[0]} был успешно отменен")
         await dbPay.change_status_for_cancel("CANCELED", callback.message.message_id, type, loop)
@@ -1268,10 +1353,13 @@ async def calc(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(text="transfer_money")
 async def transfer_money(callback: types.CallbackQuery):
-    await bot.delete_message(
-        callback.from_user.id,
-        callback.message.message_id
-    )
+    try:
+        await bot.delete_message(
+            callback.from_user.id,
+            callback.message.message_id
+        )
+    except:
+        pass
 
     await bot.send_message(
         callback.from_user.id,
@@ -1294,21 +1382,34 @@ async def remove_money_invest(callback: types.CallbackQuery):
     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
     date_for_remove = datetime.datetime.strptime(str(date_time_now)[:-13], '%Y-%m-%d %H:%M:%S')
 
+    is_user_from_sm = int(await db.is_user_from_space_money(callback.from_user.id, loop))
+
     money = int(await db.get_deposit(callback.from_user.id, loop))
 
-    if (date_for_remove - dt_to_datetime).days < 100:
-        await callback.answer("🚫 Вы можете вывести деньги спустя 100 дней с момента регистрации или последнего вывода!",
-                              show_alert=True)
+    if is_user_from_sm and (date_for_remove - dt_to_datetime).days < 30:
+        await callback.answer(
+            "🚫 Вы можете вывести деньги спустя 30 дней с момента регистрации или последнего вывода!",
+            show_alert=True)
         return
+
+    if not is_user_from_sm and (date_for_remove - dt_to_datetime).days < 100:
+        await callback.answer(
+            "🚫 Вы можете вывести деньги спустя 100 дней с момента регистрации или последнего вывода!",
+            show_alert=True)
+        return
+
     if money < 1000:
         await callback.answer("🚫 У вас на балансе не достаточно средств для вывода, минимальная сумма: 1000 RUB",
                               show_alert=True)
         return
     else:
-        await bot.delete_message(
-            callback.from_user.id,
-            callback.message.message_id
-        )
+        try:
+            await bot.delete_message(
+                callback.from_user.id,
+                callback.message.message_id
+            )
+        except:
+            pass
         await bot.send_message(
             callback.from_user.id,
             f"Какую сумму вы хотите вывести.\nМин. 1000.0 RUB, макс. 2000000.0 RUB)\n\n"
@@ -1342,8 +1443,10 @@ async def withdraw_amount(message: types.Message, state: FSMContext):
 async def withdraw_payrement_bank(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["WITHDRAW_TYPE"] = "bank"
-
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(callback.from_user.id, "Введите номер карты, на которую хотите перевести деньги")
     await WithdrawMoneyPercentFSM.NUMBER_CARD.set()
 
@@ -1353,7 +1456,10 @@ async def withdraw_payrement_crypt(callback: types.CallbackQuery, state: FSMCont
     async with state.proxy() as data:
         data["WITHDRAW_TYPE"] = "crypt"
 
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(callback.from_user.id,
                            "🏦 Введите криптовалюту, на которую будет осуществляться вывод (BTC, USDT, ETH, LTC)")
     await WithdrawMoneyPercentFSM.TYPE_CRYPT.set()
@@ -1519,6 +1625,14 @@ async def number_card(message: types.Message, state: FSMContext):
         await state.reset_state(with_data=False)
 
 
+@dp.callback_query_handler(text="remove_money_0_05")
+async def remove_money_0_05(callback: types.CallbackQuery, state: FSMContext):
+    async with state.proxy() as data:
+        data["WITHDRAW_COMMISSION"] = config.COMMISSION_INVEST
+
+    return await remove_money(callback)
+
+
 @dp.callback_query_handler(text="remove_money")
 async def remove_money(callback: types.CallbackQuery):
     money = int(await db.get_gift_money(callback.from_user.id, loop))
@@ -1527,11 +1641,13 @@ async def remove_money(callback: types.CallbackQuery):
         await callback.answer("🚫 У вас на балансе не достаточно средств для вывода, минимальная сумма: 1000 RUB",
                               show_alert=True)
     else:
-
-        await bot.delete_message(
-            callback.from_user.id,
-            callback.message.message_id
-        )
+        try:
+            await bot.delete_message(
+                callback.from_user.id,
+                callback.message.message_id
+            )
+        except:
+            pass
         await bot.send_message(
             callback.from_user.id,
             f"Какую сумму вы хотите вывести.\nМин. 1000.0 RUB, макс. 2000000.0 RUB)\n\nДоступно {money} RUB",
@@ -1580,8 +1696,10 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 async def withdraw_payrement_bank(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["WITHDRAW_TYPE"] = "bank"
-
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(callback.from_user.id, "Введите номер карты, на которую хотите перевести деньги")
     await WithdrawMoneyFSM.NUMBER_CARD.set()
 
@@ -1590,8 +1708,10 @@ async def withdraw_payrement_bank(callback: types.CallbackQuery, state: FSMConte
 async def withdraw_payrement_crypt(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["WITHDRAW_TYPE"] = "crypt"
-
-    await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
     await bot.send_message(callback.from_user.id,
                            "🏦 Введите криптовалюту, на которую будет осуществляться вывод (BTC, USDT, ETH, LTC)")
     await WithdrawMoneyFSM.TYPE_CRYPT.set()
@@ -1618,12 +1738,16 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
             await state.reset_state(with_data=False)
             await message.answer("Вывод денег успешно отменен", reply_markup=inline_keybords.profile_markup())
             return
+
         async with state.proxy() as data:
             data["DATA_USER"] = 'crypt'
+            commission = config.COMMISSION
+            if data.get("WITHDRAW_COMMISSION"):
+                commission = data.get("WITHDRAW_COMMISSION")
 
         data_requests = await state.get_data()
         print(data_requests)
-        amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * config.COMMISSION
+        amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * commission
         utc_now = pytz.utc.localize(datetime.datetime.utcnow())
         date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
@@ -1691,9 +1815,13 @@ async def number_card(message: types.Message, state: FSMContext):
             return
         async with state.proxy() as data:
             data["DATA_USER"] = message.text
+            commission = config.COMMISSION
+            if data.get("WITHDRAW_COMMISSION"):
+                commission = data.get("WITHDRAW_COMMISSION")
+
         data_requests = await state.get_data()
         print(data_requests)
-        amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * config.COMMISSION
+        amount_com = int(data.get("WITHDRAW_AMOUNT")) - int(data.get("WITHDRAW_AMOUNT")) * commission
         utc_now = pytz.utc.localize(datetime.datetime.utcnow())
         date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 

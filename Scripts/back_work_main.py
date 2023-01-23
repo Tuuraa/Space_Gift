@@ -15,7 +15,7 @@ async def main():
         worker_percent(loop),
         worker_clones(loop),
         worker_jumps(loop),
-        worker_verify_balance(loop),
+        #worker_verify_balance(loop),
     )
     print('end')
 
