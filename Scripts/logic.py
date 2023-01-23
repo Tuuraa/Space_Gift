@@ -226,6 +226,7 @@ async def get_gift(user_id, gift_user: UserDB, loop):
 
 
 async def gift(bot, user: UserDB, loop):
+
     planet = await dbUser.get_planet(user.user_id, loop)
     path = first_path
 
@@ -267,11 +268,14 @@ async def gift(bot, user: UserDB, loop):
            f"Вашего депозита подарить Астронавту {link}"
 
     with open(path, "rb") as file:
-        await bot.send_photo(
-            chat_id=user.user_id,
-            photo=file,
-            caption=text,
-        )
+        try:
+            await bot.send_photo(
+                chat_id=user.user_id,
+                photo=file,
+                caption=text,
+            )
+        except:
+            pass
 
 
 async def get_queue(planet, user_id, loop):

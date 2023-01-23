@@ -99,6 +99,25 @@ class ManagerUsersDataBase:
             result = await cursor.fetchall()
             return result
 
+    async def fake_user(self, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute('SELECT * FROM fake_users')
+            result = await cursor.fetchone()
+            return result
+
+    async def remove_fake_user(self, user_id , loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute('DELETE FROM users WHERE user_id = %s', (user_id))
+            await connection.commit()
+
+    async def delete_fake_user(self, user_id , loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute('DELETE FROM fake_users WHERE user_id = %s', (user_id))
+            await connection.commit()
+
     async def add_user(self, loop, name, user_id, date, date_now, user_name, last_withd, code, referrer_id=None):
         connection, cursor = await async_connect_to_mysql(loop)
 
@@ -269,12 +288,24 @@ class ManagerUsersDataBase:
             result = (await cursor.fetchall())[0][0]
             return result
 
+    async def increment_count_gift(self, count, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("update tokens set title = %s where api = 'count_gift'", (count))
+            await connection.commit()
+
     async def get_ref(self, user_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("SELECT `referrer_id` FROM `users` WHERE `user_id` = %s", (user_id,))
             result = await cursor.fetchone()
             return result[0]
+
+    async def set_planet(self, user_id, planet, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("UPDATE `users` SET `planet` = %s WHERE `user_id` = %s", (planet, user_id,))
+            await connection.commit()
 
     async def set_gift_id(self, from_id, to_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
@@ -352,6 +383,18 @@ class ManagerUsersDataBase:
             result = (await cursor.fetchall())[0][0]
             return result
 
+    async def get_count_gift(self, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("SELECT `title` FROM `tokens` WHERE `api` = 'count_gift'")
+            result = await cursor.fetchone()
+            count_gift = result
+
+            await cursor.execute("SELECT `title` FROM `tokens` WHERE `api` = 'counter'")
+            result = await cursor.fetchone()
+
+            return int(count_gift[0]), int(result[0])
+
     async def get_now_depozit(self, user_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
@@ -422,6 +465,20 @@ class ManagerUsersDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("UPDATE `users` SET `planet` = `planet` + %s WHERE user_id = %s", (1, user_id,))
+            await connection.commit()
+
+    async def get_fake_user(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("SELECT name, link_name FROM `users` WHERE `user_id` = %s", (user_id,))
+            result = (await cursor.fetchone())
+            return result
+
+    async def add_fake_user(self, user_id, name, link, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute('insert into fake_users (user_id, name, link_name) values (%s, %s, %s)',
+                                 (user_id, name, link))
             await connection.commit()
 
     async def add_gift_value(self, user_id, loop):

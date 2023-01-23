@@ -7,7 +7,6 @@ from back_verify_balance import worker_verify_balance
 import threading
 
 
-
 async def main():
     loop = asyncio.new_event_loop()
     print('start')
@@ -19,7 +18,7 @@ async def main():
         worker_verify_balance(loop),
     )
     print('end')
-        
+
 
 if __name__ == '__main__':
     asyncio.run(main())
