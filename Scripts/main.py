@@ -9,7 +9,7 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from arrow import utcnow
+# from arrow import utcnow
 
 import datetime
 import PayManager
