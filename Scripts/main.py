@@ -1703,12 +1703,14 @@ async def remove_money_0_05(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(text="remove_money")
 async def remove_money(callback: types.CallbackQuery, state: FSMContext):
-    money = int(await db.get_gift_money(callback.from_user.id, loop))
     async with state.proxy() as data:
         if data.get('IS_INVEST') is True:
-            money = int(await db.get_gift_money_invest(callback.from_user.id, loop))
+            money = int(await db.get_gift_money_invest(message.from_user.id, loop))
+        else:
+            money = int(await db.get_gift_money(message.from_user.id, loop))
 
     if money < 1000:
+        await state.reset_data()
         await callback.answer("🚫 У вас на балансе не достаточно средств для вывода, минимальная сумма: 1000 RUB",
                               show_alert=True)
     else:
@@ -1743,10 +1745,11 @@ async def withdraw_amount(message: types.Message, state: FSMContext):
             await message.answer("Слишком маленькая сумма")
             return
 
-        money = int(await db.get_gift_money(message.from_user.id, loop))
         async with state.proxy() as data:
             if data.get('IS_INVEST') is True:
                 money = int(await db.get_gift_money_invest(message.from_user.id, loop))
+            else:
+                money = int(await db.get_gift_money(message.from_user.id, loop))
 
         if int(message.text) > money:
             await message.answer(f"Недостаточно денег на счету. Доступно: {money} руб")
