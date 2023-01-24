@@ -1695,10 +1695,10 @@ async def number_card(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(text="remove_money_0_05")
 async def remove_money_0_05(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
-        # data["WITHDRAW_COMMISSION"] = config.COMMISSION_INVEST
+        data["WITHDRAW_COMMISSION"] = config.COMMISSION_INVEST
         data['IS_INVEST'] = True
 
-    return await remove_money(callback, WithdrawMoneyFSM.WITHDRAW_AMOUNT)
+    return await remove_money(callback, state)
 
 
 @dp.callback_query_handler(text="remove_money")
@@ -1746,7 +1746,7 @@ async def withdraw_amount(message: types.Message, state: FSMContext):
         money = int(await db.get_gift_money(message.from_user.id, loop))
         async with state.proxy() as data:
             if data.get('IS_INVEST') is True:
-                money = int(await db.get_gift_money_invest(callback.from_user.id, loop))
+                money = int(await db.get_gift_money_invest(message.from_user.id, loop))
 
         if int(message.text) > money:
             await message.answer(f"Недостаточно денег на счету. Доступно: {money} руб")
