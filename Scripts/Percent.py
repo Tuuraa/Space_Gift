@@ -64,13 +64,19 @@ async def worker_percent(loop):
                             money = round(float(full_money) * .008)
                             invest_money = round(float(dep) * .008)
 
+                            answer = ""
+                            if money:
+                                answer += f"На ваш основной счет начислилось {money} RUB.\n"
+                            if invest_money:
+                                answer += f"На ваш инвестиционный счет начислилось {invest_money} RUB."
+
                             await send_message_safe(
                                 bot,
                                 user[0],
-                                f"На ваш счет начислилось {money} RUB.\nНа ваш инвестиционный счет начислилось {invest_money} RUB."
+                                answer
                             )
                             await dbUser.add_gift_money(user[0], money, loop)
-                            await dbUser.add_gift_money_invest(user[0], money, loop)
+                            await dbUser.add_gift_money_invest(user[0], invest_money, loop)
 
                             print(f"На {user[0]} счет был начислен процент")
 
