@@ -15,7 +15,6 @@ from db import ManagerUsersDataBase
 dbUser = ManagerUsersDataBase()
 dbPay = ManagerPayDataBase()
 
-
 configCl = ConfigDBManager.get()
 
 API_TOKEN = configCl.api_bot  # Считывание токена
@@ -61,10 +60,18 @@ async def worker_percent(loop):
                             ref_money = float(await dbUser.get_percent_ref_money(user[0], loop))
                             reinv = float(await dbUser.get_reinvest(user[0], loop))
 
-                            full_money = cd + dep + ref + ref_money + reinv
+                            full_money = cd + ref + ref_money + reinv
                             money = round(float(full_money) * .008)
-                            await send_message_safe(bot, user[0], f"На ваш счет начислилось {money} RUB")
+                            invest_money = round(float(dep) * .008)
+
+                            await send_message_safe(
+                                bot,
+                                user[0],
+                                f"На ваш счет начислилось {money} RUB.\nНа ваш инвестиционный счет начислилось {invest_money} RUB."
+                            )
                             await dbUser.add_gift_money(user[0], money, loop)
+                            await dbUser.add_gift_money_invest(user[0], money, loop)
+
                             print(f"На {user[0]} счет был начислен процент")
 
             pays_db = await dbPay.get_all_data_crypt(loop)
@@ -74,7 +81,7 @@ async def worker_percent(loop):
                 date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
                 if (datetime.datetime.strptime(str(date_time_now)[:-13], '%Y-%m-%d %H:%M:%S') -
-                       datetime.datetime.strptime(str(pay[2]), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1 and \
+                    datetime.datetime.strptime(str(pay[2]), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1 and \
                         (await dbPay.get_status(pay[4], loop)) == "WAIT_PAYMENT":
                     try:
                         await bot.delete_message(pay[1], pay[4])
@@ -96,9 +103,10 @@ async def worker_percent(loop):
                 utc_now = pytz.utc.localize(datetime.datetime.utcnow())
                 date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
-            if (datetime.datetime.strptime(date_time_now.strftime("%Y-%m-%d %H:%M:%S"), '%Y-%m-%d %H:%M:%S') -
-                    datetime.datetime.strptime(transatcion.date.strftime("%Y-%m-%d %H:%M:%S"), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1\
-                    and transatcion.status == "WAIT_PAYMENT":
+                if (datetime.datetime.strptime(date_time_now.strftime("%Y-%m-%d %H:%M:%S"), '%Y-%m-%d %H:%M:%S') -
+                    datetime.datetime.strptime(transatcion.date.strftime("%Y-%m-%d %H:%M:%S"),
+                                               '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1 \
+                        and transatcion.status == "WAIT_PAYMENT":
                     await dbPay.change_status_trans(transatcion.id, 'CANCELED', loop)
 
             end_program_time = time.time()
@@ -107,6 +115,12 @@ async def worker_percent(loop):
             exc_type, exc_obj, exc_tb = sys.exc_info()
             print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')
             config = db.ConfigDBManager().get()
-            await bot.send_message(config.errors_group_id, f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')
+            await bot.send_message(config.errors_group_id,
+                                   f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')
 
         await asyncio.sleep(20)
+
+
+if __name__ == '__main__':
+    loop = asyncio.new_event_loop()
+    asyncio.run(worker_percent(loop))

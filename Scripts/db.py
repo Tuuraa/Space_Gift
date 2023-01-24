@@ -623,6 +623,30 @@ class ManagerUsersDataBase:
                 (money, user_id,))
             await connection.commit()
 
+
+    async def get_gift_money_invest(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("SELECT `gift_money_invest` FROM `users` WHERE `user_id` = %s", (user_id,))
+            result = (await cursor.fetchall())[0][0]
+            return result
+
+    async def add_gift_money_invest(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute(
+                "UPDATE `users` SET `gift_money_invest` =  `gift_money_invest` + %s WHERE `user_id` = %s",
+                (money, user_id,))
+            await connection.commit()
+
+    async def remove_gift_money_invest(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute(
+                "UPDATE `users` SET `gift_money_invest` =  `gift_money_invest` - %s WHERE `user_id` = %s",
+                (money, user_id,))
+            await connection.commit()
+
     async def add_remove_dep(self, user_id, money, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:

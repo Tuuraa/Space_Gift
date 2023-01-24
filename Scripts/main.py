@@ -486,7 +486,8 @@ async def about_space_gift(message: types.Message):
 @dp.message_handler(text="💻 Инвестиции")
 async def invest(message: types.Message):
     dep = await db.get_deposit(message.from_user.id, loop)
-    money_out = await db.get_gift_money(message.from_user.id, loop)
+    money_out = await db.get_gift_money_invest(message.from_user.id, loop)
+    day_percent = f"{round(dep * .008, 5)} руб/день"
 
     await message.answer(
         f"▪ Инвестируя в Space gift вы будете получать 0,8% в сутки а так же "
@@ -495,9 +496,10 @@ async def invest(message: types.Message):
         f"📠 Процент от инвестиций: 0.8% в сутки\n"
         f"⏱ Время доходности: 24 часа\n"
         f"📆 Срок вклада: Бессрочный c возможностью вывода через 100 дней\n\n"
-        f"💳 Ваш вклад: {dep} RUB\n",
-        #        f"💵 На вывод: {money_out}₽\n"
-        #        f"<b>Вы можете вывести дивиденды с комиссией в 5%</b>",
+        f"💳 Ваш вклад: {dep} RUB\n"
+        f"💵 Пассив: {day_percent} руб/день!\n"
+        f"💵 На вывод: {money_out}₽\n"
+        f"<b>Комиссия на вывод - 5%</b>",
         reply_markup=inline_keybords.invest_buttons(),
         parse_mode='html'
     )
@@ -677,7 +679,6 @@ async def wallet(message: types.Message):
                 level_text = "В очереди"
 
             cd = await db.get_amount_gift_money(message.from_user.id, loop)
-            dep = await db.get_deposit(message.from_user.id, loop)
             ref = await db.get_activate_count_ref(message.from_user.id, loop) * 5000
             ref_money = await db.get_percent_ref_money(message.from_user.id, loop)
             reinv = await db.get_reinvest(message.from_user.id, loop)
@@ -685,7 +686,7 @@ async def wallet(message: types.Message):
 
             payments = await dbPay.get_user_topups(message.from_user.id, loop)
 
-            day_percent = f"{round(float(cd + dep + ref + ref_money + reinv) * .008, 5)} руб/день"
+            day_percent = f"{round(float(cd + ref + ref_money + reinv) * .008, 5)} руб/день"
             if payments == 0:
                 day_percent = f"0 руб/день\n<u>Чтобы получать дивиденды, пополните баланс</u>"
 
@@ -697,12 +698,11 @@ async def wallet(message: types.Message):
                    "Ваш депозит: 💰👇\n" \
                    "——————————————————\n" \
                    f"🎁 Системы дарения - {int(cd)}₽\n" \
-                   f"💸 Вы инвестировали - {int(dep)}₽\n" \
                    f"🤑 За приглашения - {int(ref)}₽\n" \
                    f"🤑 За инвестиции реферала - {int(ref_money)}₽\n" \
                    f"🪙 Вы реинвестировали - {int(reinv)}₽\n" \
                    "——————————————————\n" \
-                   f"💵 Общий депозит: {int(cd + dep + ref + ref_money + reinv)}₽\n" \
+                   f"💵 Общий депозит: {int(cd + ref + ref_money + reinv)}₽\n" \
                    f"💵 Пассив: {day_percent}!\n" \
                    f"💵 На вывод: {await db.get_gift_money(message.from_user.id, loop)}₽ \n" \
                    "( минимальная сумма вывода 1000₽ )"
@@ -1159,7 +1159,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
 
                     await db.activate_date(callback.from_user.id, date_time_now, loop)
                     await db.change_status(callback.from_user.id, 1, loop)
-                    await db.increment_count_gift(count_gift+1, loop)
+                    await db.increment_count_gift(count_gift + 1, loop)
                     await inform_pers(callback, state, user=user, answer=answer[2])
                 else:
                     await bot.send_message(
@@ -1695,14 +1695,18 @@ async def number_card(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(text="remove_money_0_05")
 async def remove_money_0_05(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
-        data["WITHDRAW_COMMISSION"] = config.COMMISSION_INVEST
+        # data["WITHDRAW_COMMISSION"] = config.COMMISSION_INVEST
+        data['IS_INVEST'] = True
 
     return await remove_money(callback)
 
 
 @dp.callback_query_handler(text="remove_money")
-async def remove_money(callback: types.CallbackQuery):
+async def remove_money(callback: types.CallbackQuery, state: FSMContext):
     money = int(await db.get_gift_money(callback.from_user.id, loop))
+    async with state.proxy() as data:
+        if data.get('IS_INVEST') is True:
+            money = int(await db.get_gift_money_invest(callback.from_user.id, loop))
 
     if money < 1000:
         await callback.answer("🚫 У вас на балансе не достаточно средств для вывода, минимальная сумма: 1000 RUB",
@@ -1738,7 +1742,11 @@ async def withdraw_amount(message: types.Message, state: FSMContext):
         if int(message.text) < 1000:
             await message.answer("Слишком маленькая сумма")
             return
+
         money = int(await db.get_gift_money(message.from_user.id, loop))
+        async with state.proxy() as data:
+            if data.get('IS_INVEST') is True:
+                money = int(await db.get_gift_money_invest(callback.from_user.id, loop))
 
         if int(message.text) > money:
             await message.answer(f"Недостаточно денег на счету. Доступно: {money} руб")
@@ -1746,6 +1754,7 @@ async def withdraw_amount(message: types.Message, state: FSMContext):
 
         async with state.proxy() as data:
             data["WITHDRAW_AMOUNT"] = int(message.text)
+
         await message.answer(
             "📤 Выберите платежную систему, c помощью которой хотите вывести средства из бота",
             reply_markup=inline_keybords.get_inline_for_withdraw()
@@ -1767,6 +1776,7 @@ async def withdraw_payrement_bank(callback: types.CallbackQuery, state: FSMConte
         await bot.delete_message(callback.from_user.id, callback.message.message_id)
     except:
         pass
+
     await bot.send_message(callback.from_user.id, "Введите номер карты, на которую хотите перевести деньги")
     await WithdrawMoneyFSM.NUMBER_CARD.set()
 
@@ -1852,11 +1862,13 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
             reply_markup=inline_keybords.profile_markup()
         )
 
-        await db.remove_gift_money(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
-        await state.reset_state(with_data=False)
+        async with state.proxy() as data:
+            if data.get('IS_INVEST') is True:
+                await db.remove_gift_money_invest(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
+            else:
+                await db.remove_gift_money(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
 
-    # await message.answer(f"Отлично. Теперь введите Ф.И.О")
-    # await WithdrawMoneyFSM.DATA_USER.set()
+        await state.reset_state(with_data=False)
 
 
 @dp.message_handler(state=WithdrawMoneyFSM.NUMBER_CARD)
@@ -1926,7 +1938,12 @@ async def number_card(message: types.Message, state: FSMContext):
             reply_markup=inline_keybords.profile_markup()
         )
 
-        await db.remove_gift_money(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
+        async with state.proxy() as data:
+            if data.get('IS_INVEST') is True:
+                await db.remove_gift_money_invest(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
+            else:
+                await db.remove_gift_money(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
+
         await state.reset_state(with_data=False)
 
 
