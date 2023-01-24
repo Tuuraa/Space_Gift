@@ -9,6 +9,7 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from arrow import utcnow
 
 import datetime
 import PayManager
@@ -17,7 +18,7 @@ from FSM import PayFSM, CalculatorFSM, WithdrawMoneyFSM, ChangeCryptTypeFSN, Ans
     SendGiftFSM, PayCryptFSM, UserCodeFSM, WithdrawMoneyPercentFSM, ReinvestFSM
 from db import ManagerUsersDataBase, ManagerPayDataBase, ManagerWithDrawDataBase, ConfigDBManager
 import coinbase_data
-from User import User, UserDB
+from User import UserDB
 from back_work import worker
 from Percent import worker_percent
 from back_clones import worker_clones
@@ -250,7 +251,12 @@ async def tools(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[3])
 async def about_project(message: types.Message):
-    await message.answer("Выберите пункт", reply_markup=inline_keybords.get_about_project())
+    await bot.send_video(
+        message.from_user.id,
+        'BAACAgIAAxkBAAJxe2PMBlTIzjQ96NCR_M9qHZQB4WcQAAImJAACarVgSjylnLV_C9ZrLQQ',
+        caption='Выберите пункт 👇',
+        reply_markup=inline_keybords.get_about_project()
+    )
 
 
 @dp.message_handler(lambda mes: mes.text == "💰 Калькулятор")
@@ -367,7 +373,7 @@ async def about_space_gift(message: types.Message):
 async def about_space_gift(message: types.Message):
     await bot.send_document(
         chat_id=message.from_user.id,
-        document="BQACAgIAAxkBAAIIcWOt4NorfbboGlhmUpNu9DXrPPAcAAKjIQACu61pSTqL2GKFg1MVLAQ",
+        document="BQACAgIAAxkBAAJxn2PMCTQg01EvWtBb_-yPDJ-cZhwsAAI1JAACarVgSmkBYe7OErd4LQQ",
     )
 
 
@@ -705,12 +711,14 @@ async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: Us
 
     if id != "None":
         await db.set_gift_id(callback.from_user.id, id, loop)
-        await bot.send_message(
-            int(id),
-            f"Участник @{await db.get_user_name(callback.from_user.id, loop)} подарил "
-            f"{amount} RUB на ваш депозит, отправьте ему сообщение с благодарностью, нажите на кнопку ниже 👇",
-            reply_markup=inline_keybords.get_gift_ok_inline()
-        )
+        try:
+            await bot.send_message(
+                int(id),
+                f"Участник @{await db.get_user_name(callback.from_user.id, loop)} подарил "
+                f"{amount} RUB на ваш депозит"
+            )
+        except:
+            pass
 
         if int(user.step) < 5:
             await db.update_step(user.user_id, loop)
@@ -727,6 +735,13 @@ async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: Us
                     await logic.gift(bot, user, loop)
                     if int(user.planet) < 5:
                         await db.update_new_step(user.user_id, loop)
+
+                        # Удаление фэйк акка
+                        if (await db.get_referrer_of_user(user.user_id, loop)) == '1':
+                            fake_user = await db.get_fake_user(user.user_id, loop)
+                            await db.remove_fake_user(user.user_id, loop)
+                            await db.add_fake_user(user.user_id, fake_user[0], fake_user[1], loop)
+
                         new_user: UserDB = (
                             await logic.get_user_on_planet((await db.get_planet(callback.from_user.id, loop))[0],
                                                            callback.from_user.id, loop))
@@ -734,18 +749,22 @@ async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: Us
                         # await db.change_status(user.user_id, 0, loop)
                         # await db.update_planet(user.user_id, loop)
                         await db.remove_depozit(user.money, answer, loop)
-                        await logic.check_active(int(user.planet) + 1, user.user_id, loop)
                         if new_user:
-                            await bot.send_message(
-                                new_user.user_id,
-                                "Поздравляем 🎉🎊\nВы попали на уровень 1✅\nНажмите кнопку 🚀 Взлет"
-                            )
+                            try:
+                                await bot.send_message(
+                                    new_user.user_id,
+                                    "Поздравляем 🎉🎊\nВы попали на уровень 1✅\nНажмите кнопку 🚀 Взлет"
+                                )
+                            except:
+                                pass
                     else:
-                        await bot.send_message(
-                            user.user_id,
-                            "Вы закончили игру"
-                        )
-                    await logic.get_user_on_planet(user.planet, user.user_id, loop)
+                        try:
+                            await bot.send_message(
+                                user.user_id,
+                                "Вы закончили игру"
+                            )
+                        except:
+                            pass
                 else:
                     await bot.send_message(
                         user.user_id,
@@ -1011,16 +1030,31 @@ async def amount_crypt(message: types.Message, state: FSMContext):
 async def get_gift(callback: types.CallbackQuery, state: FSMContext):
     async with lock:
         status = await db.get_status(callback.from_user.id, loop)
+
+        count_gift, counter = await db.get_count_gift(loop)
+
         if status[0] == 0:
 
             user: UserDB = (await logic.get_user_on_planet((await db.get_planet(callback.from_user.id, loop))[0],
                                                            callback.from_user.id, loop))
+
             if user is not None:
                 answer = await logic.get_gift(callback.from_user.id, user, loop)
                 await bot.send_message(
                     callback.from_user.id,
                     answer[1]
                 )
+
+                if count_gift % counter == 0:
+                    fake_user = await db.fake_user(loop)
+
+                    if fake_user:
+                        await db.delete_fake_user(fake_user[0], loop)
+                        await db.add_user(loop, fake_user[1], fake_user[0], datetime.date.today(), utcnow(),
+                                          fake_user[2], utcnow(), 'fake', 1)
+                        await db.activate_date(fake_user[0], utcnow().shift(minutes=+1), loop)
+                        await db.set_planet(fake_user[0], (await db.get_planet(user.user_id, loop)), loop)
+                        await db.change_status(fake_user[0], 1, loop)
 
                 if answer[0]:
                     # await state.reset_state(with_data=True)
@@ -1055,6 +1089,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
 
                     await db.activate_date(callback.from_user.id, date_time_now, loop)
                     await db.change_status(callback.from_user.id, 1, loop)
+                    await db.increment_count_gift(count_gift+1, loop)
                     await inform_pers(callback, state, user=user, answer=answer[2])
                 else:
                     await bot.send_message(
@@ -1106,6 +1141,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
 
                 await db.activate_date(callback.from_user.id, date_time_now, loop)
                 await db.change_status(callback.from_user.id, 1, loop)
+                await db.increment_count_gift(count_gift + 1, loop)
         else:
             await bot.send_message(
                 callback.from_user.id,
@@ -1850,8 +1886,8 @@ async def change_type_res(message: types.Message, state: FSMContext):
         await state.reset_state(with_data=False)
 
 
-@dp.message_handler()
-async def change_type_res(message: types.Message):
+@dp.message_handler(content_types=["document", "video", "audio"])
+def handle_files(message: types.Message):
     print(message.text + " " + str(message.from_user.id))
 
 
