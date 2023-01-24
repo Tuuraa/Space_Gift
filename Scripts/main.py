@@ -1705,9 +1705,9 @@ async def remove_money_0_05(callback: types.CallbackQuery, state: FSMContext):
 async def remove_money(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         if data.get('IS_INVEST') is True:
-            money = int(await db.get_gift_money_invest(message.from_user.id, loop))
+            money = int(await db.get_gift_money_invest(callback.from_user.id, loop))
         else:
-            money = int(await db.get_gift_money(message.from_user.id, loop))
+            money = int(await db.get_gift_money(callback.from_user.id, loop))
 
     if money < 1000:
         await state.reset_data()
