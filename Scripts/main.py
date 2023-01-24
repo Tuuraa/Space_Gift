@@ -1698,7 +1698,7 @@ async def remove_money_0_05(callback: types.CallbackQuery, state: FSMContext):
         # data["WITHDRAW_COMMISSION"] = config.COMMISSION_INVEST
         data['IS_INVEST'] = True
 
-    return await remove_money(callback)
+    return await remove_money(callback, WithdrawMoneyFSM.WITHDRAW_AMOUNT)
 
 
 @dp.callback_query_handler(text="remove_money")
