@@ -59,23 +59,6 @@ async def send_welcome(message: types.Message, state: FSMContext):
                 data['referrer_id'] = referrer_id if referrer_id else None
                 data['join_date'] = datetime.date.today()
 
-            ''' Check if user don't sub on group '''
-            if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
-                keyboard = types.InlineKeyboardMarkup().add(
-                    types.InlineKeyboardButton(
-                        text="😇 Подписаться",
-                        url='https://t.me/spacegiftbot',
-                    )
-                )
-                return await message.answer(
-                    text=f"<b>Чтобы пользововаться ботом, вам нужно подписаться "
-                         f"на нашу официальную группу</b> https://t.me/spacegiftbot\n\n"
-                         f"Чтобы проверить статус подписки, напишите боту ещё раз по ссылке: "
-                         f"https://t.me/space_gift_bot?start={referrer_id}",
-                    parse_mode='html',
-                    reply_markup=keyboard,
-                )
-
             with open(PATH + "/Data/start_text.txt", 'r', encoding='utf8') as file:
                 reply = file.read()
             with open(PATH + "/img/login.png", 'rb') as file:
@@ -888,6 +871,20 @@ async def payrement_crypt(callback: types.CallbackQuery):
 @dp.message_handler(lambda mes: mes.text in message_handlers_commands, state="*")
 async def cancel_handler(message: types.Message, state: FSMContext):
     await state.reset_state(with_data=True)
+
+    if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
+        keyboard = types.InlineKeyboardMarkup().add(
+            types.InlineKeyboardButton(
+                text="😇 Подписаться",
+                url='https://t.me/spacegiftbot',
+            )
+        )
+        return await message.answer(
+            text=f"<b>Чтобы пользововаться ботом, вам нужно подписаться "
+                 f"на нашу официальную группу</b> https://t.me/spacegiftbot\n\n",
+            parse_mode='html',
+            reply_markup=keyboard,
+        )
 
     if message.text == "💳 Кошелёк":
         await wallet(message)
