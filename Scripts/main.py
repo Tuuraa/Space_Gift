@@ -1382,7 +1382,7 @@ async def cancel_pay(callback: types.CallbackQuery):
 async def calc(message: types.Message, state: FSMContext):
     if not message.text.isdigit():
         if message.text in ["⬅ Вернуться", "📄 Презентация", "👥 Реферальная ссылка", "💰 Калькулятор"]:
-            await state.reset_state(with_data=False)
+            await state.reset_state()
 
             if message.text == "⬅ Вернуться":
                 await back(message)
@@ -1489,7 +1489,7 @@ async def remove_money_invest(callback: types.CallbackQuery):
 @dp.message_handler(state=WithdrawMoneyPercentFSM.WITHDRAW_AMOUNT)
 async def withdraw_amount(message: types.Message, state: FSMContext):
     if message.text == "Отменить":
-        await state.reset_state(with_data=False)
+        await state.reset_state()
         await message.answer("Вывод денег успешно отменен", reply_markup=inline_keybords.profile_markup())
         return
 
@@ -1552,7 +1552,7 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
     # await WithdrawMoneyPercentFSM.DATA_USER.set()
 
     if message.text == "Отменить":
-        await state.reset_state(with_data=False)
+        await state.reset_state()
         await message.answer("Вывод денег успешно отменен", reply_markup=inline_keybords.profile_markup())
         return
 
@@ -1602,7 +1602,7 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
 
         await db.remove_depozit(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
         await db.set_last_withd(message.from_user.id, date_time_now, loop)
-        await state.reset_state(with_data=False)
+        await state.reset_state()
 
 
 # @dp.message_handler(state=WithdrawMoneyPercentFSM.NUMBER_CARD)
@@ -1623,7 +1623,7 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
 @dp.message_handler(state=WithdrawMoneyPercentFSM.NUMBER_CARD)
 async def number_card(message: types.Message, state: FSMContext):
     if message.text == "Отменить":
-        await state.reset_state(with_data=False)
+        await state.reset_state()
         await message.answer("Вывод денег успешно отменен", reply_markup=inline_keybords.profile_markup())
         return
 
@@ -1638,7 +1638,7 @@ async def number_card(message: types.Message, state: FSMContext):
 async def number_card(message: types.Message, state: FSMContext):
     async with lock:
         if message.text == "Отменить":
-            await state.reset_state(with_data=False)
+            await state.reset_state()
             await message.answer("Вывод денег успешно отменен", reply_markup=inline_keybords.profile_markup())
             return
         async with state.proxy() as data:
@@ -1689,7 +1689,7 @@ async def number_card(message: types.Message, state: FSMContext):
 
         await db.remove_depozit(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
         await db.set_last_withd(message.from_user.id, date_time_now, loop)
-        await state.reset_state(with_data=False)
+        await state.reset_state()
 
 
 @dp.callback_query_handler(text="remove_money_0_05")
@@ -1732,7 +1732,7 @@ async def remove_money(callback: types.CallbackQuery, state: FSMContext):
 @dp.message_handler(state=WithdrawMoneyFSM.WITHDRAW_AMOUNT)
 async def withdraw_amount(message: types.Message, state: FSMContext):
     if message.text == "Отменить":
-        await state.reset_state(with_data=False)
+        await state.reset_state()
         await message.answer("Вывод денег успешно отменен", reply_markup=inline_keybords.profile_markup())
         return
 
@@ -1815,7 +1815,7 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
 
     async with lock:
         if message.text == "Отменить":
-            await state.reset_state(with_data=False)
+            await state.reset_state()
             await message.answer("Вывод денег успешно отменен", reply_markup=inline_keybords.profile_markup())
             return
 
@@ -1871,13 +1871,13 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
             else:
                 await db.remove_gift_money(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
 
-        await state.reset_state(with_data=False)
+        await state.reset_state()
 
 
 @dp.message_handler(state=WithdrawMoneyFSM.NUMBER_CARD)
 async def number_card(message: types.Message, state: FSMContext):
     if message.text == "Отменить":
-        await state.reset_state(with_data=False)
+        await state.reset_state()
         await message.answer("Вывод денег успешно отменен", reply_markup=inline_keybords.profile_markup())
         return
 
@@ -1892,7 +1892,7 @@ async def number_card(message: types.Message, state: FSMContext):
 async def number_card(message: types.Message, state: FSMContext):
     async with lock:
         if message.text == "Отменить":
-            await state.reset_state(with_data=False)
+            await state.reset_state()
             await message.answer("Вывод денег успешно отменен", reply_markup=inline_keybords.profile_markup())
             return
         async with state.proxy() as data:
@@ -1947,7 +1947,7 @@ async def number_card(message: types.Message, state: FSMContext):
             else:
                 await db.remove_gift_money(message.from_user.id, data_requests["WITHDRAW_AMOUNT"], loop)
 
-        await state.reset_state(with_data=False)
+        await state.reset_state()
 
 
 # ------------------------------------------------Admin------------------------------------------------------------------------------
