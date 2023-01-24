@@ -217,6 +217,20 @@ async def cancel_capcha(callback: types.CallbackQuery):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[1])  # Взлет
 async def launch(message: types.Message):
+    if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
+        keyboard = types.InlineKeyboardMarkup().add(
+            types.InlineKeyboardButton(
+                text="😇 Подписаться",
+                url='https://t.me/spacegiftbot',
+            )
+        )
+        return await message.answer(
+            text=f"<b>Чтобы пользововаться ботом, вам нужно подписаться "
+                 f"на нашу официальную группу</b> https://t.me/spacegiftbot\n\n",
+            parse_mode='html',
+            reply_markup=keyboard,
+        )
+
     dep = await db.get_deposit(message.from_user.id, loop)
     status = await db.get_status(message.from_user.id, loop)
     planet = await db.get_planet(message.from_user.id, loop)
@@ -246,11 +260,39 @@ async def launch(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[2])
 async def tools(message: types.Message):
+    if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
+        keyboard = types.InlineKeyboardMarkup().add(
+            types.InlineKeyboardButton(
+                text="😇 Подписаться",
+                url='https://t.me/spacegiftbot',
+            )
+        )
+        return await message.answer(
+            text=f"<b>Чтобы пользововаться ботом, вам нужно подписаться "
+                 f"на нашу официальную группу</b> https://t.me/spacegiftbot\n\n",
+            parse_mode='html',
+            reply_markup=keyboard,
+        )
+
     await message.answer("Выберите пункт", reply_markup=inline_keybords.get_tools())
 
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[3])
 async def about_project(message: types.Message):
+    if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
+        keyboard = types.InlineKeyboardMarkup().add(
+            types.InlineKeyboardButton(
+                text="😇 Подписаться",
+                url='https://t.me/spacegiftbot',
+            )
+        )
+        return await message.answer(
+            text=f"<b>Чтобы пользововаться ботом, вам нужно подписаться "
+                 f"на нашу официальную группу</b> https://t.me/spacegiftbot\n\n",
+            parse_mode='html',
+            reply_markup=keyboard,
+        )
+
     await bot.send_video(
         message.from_user.id,
         'BAACAgIAAxkBAAJxe2PMBlTIzjQ96NCR_M9qHZQB4WcQAAImJAACarVgSjylnLV_C9ZrLQQ',
@@ -574,6 +616,20 @@ async def reinv_amount(message: types.Message, state: FSMContext):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[4])
 async def space_go(message: types.Message):
+    if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
+        keyboard = types.InlineKeyboardMarkup().add(
+            types.InlineKeyboardButton(
+                text="😇 Подписаться",
+                url='https://t.me/spacegiftbot',
+            )
+        )
+        return await message.answer(
+            text=f"<b>Чтобы пользововаться ботом, вам нужно подписаться "
+                 f"на нашу официальную группу</b> https://t.me/spacegiftbot\n\n",
+            parse_mode='html',
+            reply_markup=keyboard,
+        )
+
     await message.answer(
         "💫 Space money\n\nℹ Мы используем <b><i>новое направление</i></b> крипто арбитража для крупных ивестеров. "
         "Депозит будет передаваться в управление специалистам, которые работают с большими "
@@ -588,6 +644,20 @@ async def space_go(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[0])  # Кошелек
 async def wallet(message: types.Message):
+    if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
+        keyboard = types.InlineKeyboardMarkup().add(
+            types.InlineKeyboardButton(
+                text="😇 Подписаться",
+                url='https://t.me/spacegiftbot',
+            )
+        )
+        return await message.answer(
+            text=f"<b>Чтобы пользововаться ботом, вам нужно подписаться "
+                 f"на нашу официальную группу</b> https://t.me/spacegiftbot\n\n",
+            parse_mode='html',
+            reply_markup=keyboard,
+        )
+
     async with lock:
         with open(PATH + "/img/bal.jpg", 'rb') as file:
             level = int((await db.get_step(message.from_user.id, loop))[0])
