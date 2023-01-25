@@ -807,10 +807,10 @@ async def inform_pers(callback: types.CallbackQuery, state: FSMContext, user: Us
                         await db.update_new_step(user.user_id, loop)
 
                         # Удаление фэйк акка
-                        if (await db.get_referrer_of_user(user.user_id, loop)) == '1':
-                            fake_user = await db.get_fake_user(user.user_id, loop)
-                            await db.remove_fake_user(user.user_id, loop)
-                            await db.add_fake_user(user.user_id, fake_user[0], fake_user[1], loop)
+                        # if (await db.get_referrer_of_user(user.user_id, loop)) == '1':
+                        #     fake_user = await db.get_fake_user(user.user_id, loop)
+                        #     await db.remove_fake_user(user.user_id, loop)
+                        #     await db.add_fake_user(user.user_id, fake_user[0], fake_user[1], loop)
 
                         new_user: UserDB = (
                             await logic.get_user_on_planet((await db.get_planet(callback.from_user.id, loop))[0],
@@ -1115,16 +1115,16 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                     answer[1]
                 )
 
-                if count_gift % counter == 0:
-                    fake_user = await db.fake_user(loop)
-
-                    if fake_user:
-                        await db.delete_fake_user(fake_user[0], loop)
-                        await db.add_user(loop, fake_user[1], fake_user[0], datetime.date.today(), utcnow(),
-                                          fake_user[2], utcnow(), 'fake', 1)
-                        await db.activate_date(fake_user[0], utcnow().shift(minutes=+1), loop)
-                        await db.set_planet(fake_user[0], (await db.get_planet(user.user_id, loop)), loop)
-                        await db.change_status(fake_user[0], 1, loop)
+                # if count_gift % counter == 0:
+                #     fake_user = await db.fake_user(loop)
+                #
+                #     if fake_user:
+                #         await db.delete_fake_user(fake_user[0], loop)
+                #         await db.add_user(loop, fake_user[1], fake_user[0], datetime.date.today(), utcnow(),
+                #                           fake_user[2], utcnow(), 'fake', 1)
+                #         await db.activate_date(fake_user[0], utcnow().shift(minutes=+1), loop)
+                #         await db.set_planet(fake_user[0], (await db.get_planet(user.user_id, loop)), loop)
+                #         await db.change_status(fake_user[0], 1, loop)
 
                 if answer[0]:
                     # await state.reset_state(with_data=True)
@@ -1159,7 +1159,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
 
                     await db.activate_date(callback.from_user.id, date_time_now, loop)
                     await db.change_status(callback.from_user.id, 1, loop)
-                    await db.increment_count_gift(count_gift + 1, loop)
+                    # await db.increment_count_gift(count_gift + 1, loop)
                     await inform_pers(callback, state, user=user, answer=answer[2])
                 else:
                     await bot.send_message(
