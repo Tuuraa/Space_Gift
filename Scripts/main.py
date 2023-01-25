@@ -1101,7 +1101,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
     async with lock:
         status = await db.get_status(callback.from_user.id, loop)
 
-        count_gift, counter = await db.get_count_gift(loop)
+        # count_gift, counter = await db.get_count_gift(loop)
 
         if status[0] == 0:
 
@@ -1211,7 +1211,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
 
                 await db.activate_date(callback.from_user.id, date_time_now, loop)
                 await db.change_status(callback.from_user.id, 1, loop)
-                await db.increment_count_gift(count_gift + 1, loop)
+                # await db.increment_count_gift(count_gift + 1, loop)
         else:
             await bot.send_message(
                 callback.from_user.id,
