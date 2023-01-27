@@ -1796,14 +1796,6 @@ class ManagerResetSystem:
             """)
         await connection.commit()
 
-        async with connection.cursor() as cursor:
-            await cursor.execute(
-                "SELECT `archive_dep`, `amount_gift_money` FROM `users` WHERE `user_id` = %s",
-                (628931867,),
-            )
-            result = await cursor.fetchall()
-            print(result)
-
     @staticmethod
     async def add_advance_payment(user_id, loop):
         date = datetime.now()
