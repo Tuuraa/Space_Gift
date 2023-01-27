@@ -233,10 +233,10 @@ def inform_pers():
 def invest_buttons():
     return types.InlineKeyboardMarkup().add(
         types.InlineKeyboardButton("➕ Инвестировать", callback_data="add_money")).add(
+        types.InlineKeyboardButton("🪙 Реинвестировать", callback_data="reinvest_invest")).add(
         types.InlineKeyboardButton("➖ Вывести дивиденды", callback_data="remove_money_0_05")).add(
-        types.InlineKeyboardButton("💫 Инвестиции в Space money", callback_data="link_to_space_money")).add(
-        types.InlineKeyboardButton("🌟 Вывести инвестиции", callback_data="remove_money_invest")
-    )
+        types.InlineKeyboardButton("🌟 Вывести инвестиции", callback_data="remove_money_invest")).add(
+        types.InlineKeyboardButton("💫 Инвестиции в Space money", callback_data="link_to_space_money"))
     # .add(types.InlineKeyboardButton("🤖 Система клонов", callback_data="system_clones"))
 
 

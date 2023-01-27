@@ -16,7 +16,7 @@ import PayManager
 import config
 import utils
 from FSM import PayFSM, CalculatorFSM, WithdrawMoneyFSM, ChangeCryptTypeFSN, AnswerAfterGiftFSM, \
-    SendGiftFSM, PayCryptFSM, UserCodeFSM, WithdrawMoneyPercentFSM, ReinvestFSM
+    SendGiftFSM, PayCryptFSM, UserCodeFSM, WithdrawMoneyPercentFSM, ReinvestFSM, ReinvestInvestFSM
 from db import ManagerUsersDataBase, ManagerPayDataBase, ManagerWithDrawDataBase, ConfigDBManager, ManagerResetSystem
 import coinbase_data
 from User import UserDB
@@ -297,7 +297,7 @@ async def about_project(message: types.Message):
 
     await bot.send_video(
         message.from_user.id,
-        'BAACAgIAAxkBAAJxe2PMBlTIzjQ96NCR_M9qHZQB4WcQAAImJAACarVgSjylnLV_C9ZrLQQ',
+        'BAACAgIAAxkBAAEEP5Vj0rgthFrz6A6cgh3RfCOKSJ39PwACQSQAApHkmEoBpoIsYNqUky0E',
         caption='Выберите пункт 👇',
         reply_markup=inline_keybords.get_about_project()
     )
@@ -417,7 +417,7 @@ async def about_space_gift(message: types.Message):
 async def about_space_gift(message: types.Message):
     await bot.send_document(
         chat_id=message.from_user.id,
-        document="BQACAgIAAxkBAAJxn2PMCTQg01EvWtBb_-yPDJ-cZhwsAAI1JAACarVgSmkBYe7OErd4LQQ",
+        document="BQACAgIAAxkBAAEEP1xj0rbTCbq76nmkDBKT9kAP3C-WDwACISQAApHkmErvMRT4cF5Gpy0E",
     )
 
 
@@ -572,7 +572,7 @@ async def reinv_amount(message: types.Message, state: FSMContext):
     if not message.text.isdigit():
         global message_handlers_commands
         if message.text in message_handlers_commands:
-            await state.reset_state(with_data=False)
+            await state.reset_state(with_data=True)
 
             if message.text == "💳 Кошелёк":
                 await wallet(message)
@@ -615,6 +615,68 @@ async def reinv_amount(message: types.Message, state: FSMContext):
         f"Вы реинвестировали {round(gift_money, 2)} RUB теперь Ваш "
         f"общий депозит {int(cd + dep + ref + ref_money + reinv)} RUB"
     )
+    await state.reset_state(with_data=True)
+
+
+@dp.callback_query_handler(text='reinvest_invest')
+async def reinvest_invest_money(callback: types.CallbackQuery):
+    async with lock:
+        gift_money_invest = await db.get_gift_money_invest(callback.from_user.id, loop)
+        if gift_money_invest <= 0:
+            await callback.answer("🚫 У вас недостаточно средств для реинвестирования", show_alert=True)
+            return
+
+        await bot.send_message(
+            callback.from_user.id,
+            'Введите сумму, которую хотите реинвестировать'
+        )
+        await ReinvestInvestFSM.amount.set()
+
+
+@dp.message_handler(state=ReinvestInvestFSM.amount)
+async def reinv_invest_amount(message: types.Message, state: FSMContext):
+    if not message.text.isdigit():
+        global message_handlers_commands
+        if message.text in message_handlers_commands:
+            await state.reset_state(with_data=True)
+
+            if message.text == "💳 Кошелёк":
+                await wallet(message)
+            elif message.text == "🚀 Взлёт":
+                await launch(message)
+            elif message.text == "🔧 Инструменты":
+                await tools(message)
+            elif message.text == "📝 О проекте":
+                await about_project(message)
+            elif message.text == "💻 Инвестиции":
+                await invest(message)
+            elif message.text == "⚙ Техническая поддержка":
+                await support(message)
+
+            return
+
+    if not message.text.isdigit():
+        await message.answer("Введите правильную сумму")
+        return
+
+    gift_money_invest = await db.get_gift_money_invest(message.from_user.id, loop)
+    if int(message.text) > int(gift_money_invest):
+        await message.answer(f"Введите правильную сумму. Доступно: {gift_money_invest} руб.")
+        return
+
+    gift_money_amount = int(message.text)
+
+    await db.add_depozit(message.from_user.id, gift_money_amount, loop)
+    await db.remove_gift_money_invest(message.from_user.id, gift_money_amount, loop)
+
+    dep = await db.get_deposit(message.from_user.id, loop)
+
+    await bot.send_message(
+        message.from_user.id,
+        f"Вы реинвестировали <b>{round(gift_money_amount, 2)} RUB</b>\nТеперь Ваш депозит <b>{dep} RUB</b>",
+        parse_mode='html'
+    )
+
     await state.reset_state(with_data=True)
 
 

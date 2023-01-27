@@ -211,7 +211,10 @@ async def worker(loop):
             exc_type, exc_obj, exc_tb = sys.exc_info()
             print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from back_works')
             config = db.ConfigDBManager().get()
-            await bot.send_message(
-                config.errors_group_id,
-                f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from back_works'
-            )
+            try:
+                await bot.send_message(
+                    config.errors_group_id,
+                    f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from back_works'
+                )
+            except:
+                pass

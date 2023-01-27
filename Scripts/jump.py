@@ -68,9 +68,11 @@ async def worker_jumps(loop):
         except Exception:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             config = db.ConfigDBManager().get()
-
-            await bot.send_message(
-                config.errors_group_id,
-                f'{exc_type}, {exc_obj}, {exc_tb} from jump'
-            )
+            try:
+                await bot.send_message(
+                    config.errors_group_id,
+                    f'{exc_type}, {exc_obj}, {exc_tb} from jump'
+                )
+            except:
+                pass
         await asyncio.sleep(60)
