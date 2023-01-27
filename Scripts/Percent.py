@@ -121,8 +121,11 @@ async def worker_percent(loop):
             exc_type, exc_obj, exc_tb = sys.exc_info()
             print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')
             config = db.ConfigDBManager().get()
-            await bot.send_message(config.errors_group_id,
-                                   f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')
+            try:
+                await bot.send_message(config.errors_group_id,
+                                    f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')
+            except:
+                pass
 
         await asyncio.sleep(20)
 
