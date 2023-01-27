@@ -34,6 +34,7 @@ CREATE TABLE `withdraw` (
   `amount_commission` float DEFAULT NULL,
   `amount_crypt` float DEFAULT NULL,
   `type_crypt` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_invest` tinyint DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;

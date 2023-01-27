@@ -1,5 +1,6 @@
 from aiogram import types
 from random import randint
+import datetime
 from db import ManagerUsersDataBase
 import PayManager
 
@@ -161,9 +162,16 @@ def get_link_to_space_money():
 
 
 def get_wallet_inline():
-    return types.InlineKeyboardMarkup().add(
+    keyboard = types.InlineKeyboardMarkup().add(
         types.InlineKeyboardButton("🪙 Реинвестировать", callback_data="reinvest")).add(
         types.InlineKeyboardButton("➖ Вывести дивиденды", callback_data="remove_money"))
+
+    if datetime.datetime.now().day >= 25:
+        keyboard.add(
+            types.InlineKeyboardButton("➕ Оплатить заранее вход ", callback_data="add_money_advance")
+        )
+
+    return keyboard
 
 
 def get_double_dep():

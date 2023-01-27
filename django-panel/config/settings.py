@@ -2,6 +2,9 @@ import os
 import pymysql
 from pathlib import Path
 
+import pymysql
+pymysql.install_as_MySQLdb()
+
 from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -10,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-qsay6%yqmxl4ot)pi6j2t4+_b96vou@j_5yuji)jvb_tt#k3lq'
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*',]
 
