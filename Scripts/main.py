@@ -295,7 +295,7 @@ async def about_project(message: types.Message):
 
     await bot.send_video(
         message.from_user.id,
-        'BAACAgIAAxkBAAJxe2PMBlTIzjQ96NCR_M9qHZQB4WcQAAImJAACarVgSjylnLV_C9ZrLQQ',
+        'BAACAgIAAxkBAAEEP5Vj0rgthFrz6A6cgh3RfCOKSJ39PwACQSQAApHkmEoBpoIsYNqUky0E',
         caption='Выберите пункт 👇',
         reply_markup=inline_keybords.get_about_project()
     )
@@ -415,7 +415,7 @@ async def about_space_gift(message: types.Message):
 async def about_space_gift(message: types.Message):
     await bot.send_document(
         chat_id=message.from_user.id,
-        document="BQACAgIAAxkBAAJxn2PMCTQg01EvWtBb_-yPDJ-cZhwsAAI1JAACarVgSmkBYe7OErd4LQQ",
+        document="BQACAgIAAxkBAAEEP1xj0rbTCbq76nmkDBKT9kAP3C-WDwACISQAApHkmErvMRT4cF5Gpy0E",
     )
 
 
