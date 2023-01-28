@@ -1,0 +1,57 @@
+Index: Scripts/Percent.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import asyncio\nimport time\nimport datetime\n\nimport pytz\nfrom aiogram import Bot\nimport sys\nfrom db import ManagerPayDataBase, ConfigDBManager\nimport coinbase_data\nfrom helper import clear_none\n\nimport db\nfrom db import ManagerUsersDataBase\n\ndbUser = ManagerUsersDataBase()\ndbPay = ManagerPayDataBase()\n\n\nconfigCl = ConfigDBManager.get()\n\nAPI_TOKEN = configCl.api_bot  # Считывание токена\nbot = Bot(token=API_TOKEN)\n\n\nasync def send_message_safe(bot, tel_id, text, reply_markup=None):\n    try:\n        await bot.send_message(tel_id, text, parse_mode='HTML', reply_markup=reply_markup)\n    except Exception:\n        pass\n\n\nasync def worker_percent(loop):\n    while True:\n        try:\n            start_program_time = time.time()\n            users = await dbUser.get_users(loop)\n\n            for user in users:\n                if user[0] is None:\n                    continue\n\n                date = (await dbUser.get_date_now(user[0], loop)).astimezone(pytz.timezone(\"UTC\"))\n\n                utc_now = pytz.utc.localize(datetime.datetime.utcnow())\n                date_time_now = utc_now.astimezone(pytz.timezone(\"UTC\"))\n\n                if (date_time_now - date).days >= 1:\n                    status = await dbUser.get_status(user[0], loop)\n                    planet = await dbUser.get_planet(user[0], loop)\n                    payments = await dbPay.get_user_topups(user[0], loop)\n\n                    if (status[0] == 1 or int(planet[0]) > 0) and payments > 0:\n                        await dbUser.set_new_date(user[0], date_time_now, loop)\n                        cd = float(await dbUser.get_amount_gift_money(user[0], loop))\n                        dep = float(await dbUser.get_deposit(user[0], loop))\n                        ref = await dbUser.get_activate_count_ref(user[0], loop) * 5000\n                        ref_money = float(await dbUser.get_percent_ref_money(user[0], loop))\n                        reinv = float(await dbUser.get_reinvest(user[0], loop))\n\n                        full_money = cd + dep + ref + ref_money + reinv\n                        money = round(float(full_money) * .008)\n                        await send_message_safe(bot, user[0], f\"На ваш счет начислилось {money} RUB\")\n                        await dbUser.add_gift_money(user[0], money, loop)\n                        print(f\"На {user[0]} счет был начислен процент\")\n\n            pays_db = await dbPay.get_all_data_crypt(loop)\n\n            for pay in pays_db:\n                utc_now = pytz.utc.localize(datetime.datetime.utcnow())\n                date_time_now = utc_now.astimezone(pytz.timezone(\"UTC\"))\n\n                if (datetime.datetime.strptime(str(date_time_now)[:-13], '%Y-%m-%d %H:%M:%S') -\n                       datetime.datetime.strptime(str(pay[2]), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1 and \\\n                        (await dbPay.get_status(pay[4], loop)) == \"WAIT_PAYMENT\":\n                    try:\n                        await bot.delete_message(pay[1], pay[4])\n                    except:\n                        pass\n\n                    await send_message_safe(\n                        bot,\n                        pay[1],\n                        f\"Ваша заявка на пополнение криптовалюты отменена \"\n                        f\"автоматечески т.к. оплата не поступила в течении 60-ти минут\"\n                    )\n\n                    await dbPay.change_status_for_cancel(\"CANCELED\", pay[4], \"CRYPT\", loop)\n\n            transatcions = await coinbase_data.get_completed_transactions(loop)\n\n            for transatcion in transatcions:\n                utc_now = pytz.utc.localize(datetime.datetime.utcnow())\n                date_time_now = utc_now.astimezone(pytz.timezone(\"UTC\"))\n\n                if (datetime.datetime.strptime(str(date_time_now)[:-13], '%Y-%m-%d %H:%M:%S') -\n                    datetime.datetime.strptime(str(transatcion.date), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1\\\n                    and transatcion.status == \"WAIT_PAYMENT\":\n                    await dbPay.change_status_trans(transatcion.id, 'CANCELED', loop)\n\n            end_program_time = time.time()\n            print(f'BACKGROUND LAP PERCENT TIME: {end_program_time - start_program_time}')\n        except Exception:\n            exc_type, exc_obj, exc_tb = sys.exc_info()\n            print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')\n            config = db.ConfigDBManager().get()\n            await bot.send_message(config.errors_group_id, f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Percent')\n\n        await asyncio.sleep(20)\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Scripts/Percent.py b/Scripts/Percent.py
+--- a/Scripts/Percent.py	(revision 0e4295fbda0e01637970ac94d8a82a0c16c4ec69)
++++ b/Scripts/Percent.py	(date 1674245179404)
+@@ -92,8 +92,8 @@
+                 utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+                 date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
+ 
+-                if (datetime.datetime.strptime(str(date_time_now)[:-13], '%Y-%m-%d %H:%M:%S') -
+-                    datetime.datetime.strptime(str(transatcion.date), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1\
++                if (datetime.datetime.strptime(date_time_now.strftime("%Y-%m-%d %H:%M:%S"), '%Y-%m-%d %H:%M:%S') -
++                    datetime.datetime.strptime(transatcion.date.strftime("%Y-%m-%d %H:%M:%S"), '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600 > 1\
+                     and transatcion.status == "WAIT_PAYMENT":
+                     await dbPay.change_status_trans(transatcion.id, 'CANCELED', loop)
+ 
+Index: .idea/sqldialects.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/sqldialects.xml b/.idea/sqldialects.xml
+new file mode 100644
+--- /dev/null	(date 1674231248917)
++++ b/.idea/sqldialects.xml	(date 1674231248917)
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="SqlDialectMappings">
++    <file url="file://$PROJECT_DIR$/Scripts/db.py" dialect="GenericSQL" />
++    <file url="PROJECT" dialect="MySQL" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/DonationBot.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<module type=\"PYTHON_MODULE\" version=\"4\">\n  <component name=\"NewModuleRootManager\">\n    <content url=\"file://$MODULE_DIR$\">\n      <excludeFolder url=\"file://$MODULE_DIR$/venv\" />\n    </content>\n    <orderEntry type=\"jdk\" jdkName=\"Python 3.10\" jdkType=\"Python SDK\" />\n    <orderEntry type=\"sourceFolder\" forTests=\"false\" />\n  </component>\n</module>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/DonationBot.iml b/.idea/DonationBot.iml
+--- a/.idea/DonationBot.iml	(revision 0e4295fbda0e01637970ac94d8a82a0c16c4ec69)
++++ b/.idea/DonationBot.iml	(date 1673960418272)
+@@ -2,6 +2,7 @@
+ <module type="PYTHON_MODULE" version="4">
+   <component name="NewModuleRootManager">
+     <content url="file://$MODULE_DIR$">
++      <sourceFolder url="file://$MODULE_DIR$/Scripts" isTestSource="false" />
+       <excludeFolder url="file://$MODULE_DIR$/venv" />
+     </content>
+     <orderEntry type="jdk" jdkName="Python 3.10" jdkType="Python SDK" />

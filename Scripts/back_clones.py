@@ -105,9 +105,12 @@ async def worker_clones(loop):
             exc_type, exc_obj, exc_tb = sys.exc_info()
             print(exc_type, exc_obj, exc_tb.tb_lineno)
             config = db.ConfigDBManager().get()
-            await bot.send_message(
-                config.errors_group_id,
-                f'{exc_type}, {exc_obj}, {exc_tb} from back_clones'
-            )
+            try:
+                await bot.send_message(
+                    config.errors_group_id,
+                    f'{exc_type}, {exc_obj}, {exc_tb} from back_clones'
+                )
+            except:
+                pass
 
         await asyncio.sleep(20)

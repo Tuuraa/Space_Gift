@@ -10,7 +10,7 @@ import db
 import os
 from config import PATH
 
-from db import ManagerPayDataBase, ManagerUsersDataBase, ManagerClonesDataBase, ConfigDBManager
+from db import ManagerPayDataBase, ManagerUsersDataBase, ManagerClonesDataBase, ConfigDBManager, ManagerResetSystem
 import Payment
 from helper import clear_repeat, cancel_unnecessary
 import clones
@@ -20,6 +20,7 @@ import datetime
 dbPay = ManagerPayDataBase()
 dbUser = ManagerUsersDataBase()
 dbClones = ManagerClonesDataBase()
+dbSystem = ManagerResetSystem()
 
 configCl = ConfigDBManager.get()
 
@@ -64,7 +65,10 @@ async def worker(loop):
                         if status_payment == "CANCELED":
                             await dbPay.change_status_for_cancel("CANCELED", pay[5], "CREDIT", loop)
                             print(f"Ваша заявка на пополнение {pay[0]} отменена автоматечески")
-                            await bot.delete_message(user[0], pay[5])
+                            try:
+                                await bot.delete_message(user[0], pay[5])
+                            except:
+                                pass
 
                             await send_message_safe(
                                 bot,
@@ -74,6 +78,16 @@ async def worker(loop):
                             )
 
                         elif status_payment == "OPERATION_COMPLETED":   # Проверка пополнения счета
+                                if int(pay[8]):
+                                    await dbSystem.add_advance_payment(user[0], loop)
+                                    await dbPay.change_status_for_cancel("OPERATION_COMPLETED", pay[5], "CREDIT", loop)
+                                    await send_message_safe(
+                                        bot,
+                                        user[0],
+                                        f"Платеж {pay[0]} успешно выполнен. Вы сделали предоплату на следующий месяц"
+                                    )
+                                    continue
+
                                 # Пополнение счетов
                                 is_fist_pay = await dbUser.is_first_user_topup(user[0], loop)
                                 await dbUser.add_money_and_dep(user[0], pay[1], loop)
@@ -125,6 +139,23 @@ async def worker(loop):
                         if transaction.date > pay[2] and float(transaction.amount) == float(pay[0]) \
                                 and transaction.currency == pay[3] and await dbPay.get_status(pay[4], loop) != "CANCELED"\
                                 and await dbPay.get_status(pay[4], loop) != 'OPERATION_COMPLETED':
+
+                            if int(pay[8]):
+                                await dbSystem.add_advance_payment(pay[1], loop)
+                                try:
+                                    await bot.delete_message(pay[1], pay[4])
+                                except:
+                                    pass
+
+                                await dbPay.change_status_for_cancel("OPERATION_COMPLETED", pay[4], "CRYPT", loop)
+                                await dbPay.change_status_trans(transaction.id, "COMPLETED", loop)
+                                await send_message_safe(
+                                    bot,
+                                    pay[1],
+                                    f"Платеж успешно выполнен. Вы сделали предоплату на следующий месяц"
+                                )
+                                continue
+
                             is_fist_pay = dbUser.is_first_user_topup(pay[1], loop)
 
                             amount_rub = await dbPay.get_amount_rub_crypt(pay[4], loop)
@@ -180,7 +211,10 @@ async def worker(loop):
             exc_type, exc_obj, exc_tb = sys.exc_info()
             print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from back_works')
             config = db.ConfigDBManager().get()
-            await bot.send_message(
-                config.errors_group_id,
-                f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from back_works'
-            )
+            try:
+                await bot.send_message(
+                    config.errors_group_id,
+                    f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from back_works'
+                )
+            except:
+                pass

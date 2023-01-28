@@ -52,3 +52,7 @@ class UserCodeFSM(StatesGroup):
 
 class ReinvestFSM(StatesGroup):
     amount = State()
+
+
+class ReinvestInvestFSM(StatesGroup):
+    amount = State()
