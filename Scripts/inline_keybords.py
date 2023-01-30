@@ -1,16 +1,17 @@
 from aiogram import types
 from random import randint
+import datetime
 from db import ManagerUsersDataBase
 import PayManager
 
 
 def get_start_inline():
-    return types.InlineKeyboardMarkup().\
+    return types.InlineKeyboardMarkup(). \
         add(types.InlineKeyboardButton("Зарегистрироваться", callback_data="login"))
 
 
 def accept_inline():
-    return types.InlineKeyboardMarkup().\
+    return types.InlineKeyboardMarkup(). \
         add(types.InlineKeyboardButton("✅ Принять соглашение Space Gift", callback_data="capcha"))
 
 
@@ -36,10 +37,10 @@ async def create_capcha(bot, id):
     markups.add(types.InlineKeyboardButton("❌ Отмена", callback_data="cancel"))
 
     await bot.send_message(id, f"Чтобы принять соглашение Space Gift и \n"
-                           "политику конфиденциальности"
-                           "\nвыберите правильный ответ.\n"
-                            "👉 Сколько будет:"
-                           f"\n{value_first} + {value_second} = ?",
+                               "политику конфиденциальности"
+                               "\nвыберите правильный ответ.\n"
+                               "👉 Сколько будет:"
+                               f"\n{value_first} + {value_second} = ?",
                            reply_markup=markups)
 
 
@@ -67,36 +68,36 @@ def add_money():
 
 
 def calculate():
-    return types.InlineKeyboardMarkup()\
+    return types.InlineKeyboardMarkup() \
         .add(types.InlineKeyboardButton("Рассчитать снова", callback_data="calculate"))
 
 
 def back():
-    return types.ReplyKeyboardMarkup(resize_keyboard=True).add(types.InlineKeyboardButton("Отменить платеж", callback_data="calculate"))
+    return types.ReplyKeyboardMarkup(resize_keyboard=True).add(
+        types.InlineKeyboardButton("Отменить платеж", callback_data="calculate"))
 
 
 def takeoff():
     return types.InlineKeyboardMarkup().add(
-            types.InlineKeyboardButton("💸 Пополнить", callback_data="set_money_for_gift")
-        )
+        types.InlineKeyboardButton("💸 Пополнить", callback_data="set_money_for_gift")
+    )
 
 
 def get_gift():
-    return types.InlineKeyboardMarkup().\
-        add(types.InlineKeyboardButton("▪ Банковская карта RUB", callback_data="payrement_bank")).\
+    return types.InlineKeyboardMarkup(). \
+        add(types.InlineKeyboardButton("▪ Банковская карта RUB", callback_data="payrement_bank")). \
         add(types.InlineKeyboardButton("▪ Криптовалюта", callback_data="payrement_crypt"))
 
 
 def get_crypt_types():
-    return types.InlineKeyboardMarkup()\
+    return types.InlineKeyboardMarkup() \
         .add(types.InlineKeyboardButton("BTC", callback_data="btc_trans"),
-                types.InlineKeyboardButton("LTC", callback_data="ltc_trans")).add(
-                types.InlineKeyboardButton("ETH", callback_data="eth_trans"),
-                types.InlineKeyboardButton("USDT", callback_data="usdt_trans"))
+             types.InlineKeyboardButton("LTC", callback_data="ltc_trans")).add(
+        types.InlineKeyboardButton("ETH", callback_data="eth_trans"),
+        types.InlineKeyboardButton("USDT", callback_data="usdt_trans"))
 
 
 async def banks_payment():
-
     banks: list = await PayManager.get_banks()
     inline = types.InlineKeyboardMarkup()
 
@@ -107,7 +108,7 @@ async def banks_payment():
 
 
 def cancel_pay():
-    return types.InlineKeyboardMarkup()\
+    return types.InlineKeyboardMarkup() \
         .add(types.InlineKeyboardButton("❌ Отменить заявку", callback_data="cancel_pay"))
 
 
@@ -121,7 +122,7 @@ def get_about_project():
 
     reply.row(
         types.KeyboardButton("🎁 Система дарения"),
-        #types.KeyboardButton("🤖 Система клонов")
+        # types.KeyboardButton("🤖 Система клонов")
     )
 
     reply.row(
@@ -133,10 +134,10 @@ def get_about_project():
         types.KeyboardButton("👥 Условия для сетевиков")
     )
 
-    #reply.row(
-        #types.KeyboardButton("О Space Gift"),
-        #types.KeyboardButton("O Space Money")
-    #)
+    # reply.row(
+    # types.KeyboardButton("О Space Gift"),
+    # types.KeyboardButton("O Space Money")
+    # )
 
     reply.row(
         types.KeyboardButton("⬅ Вернуться")
@@ -151,7 +152,7 @@ def get_tools():
         types.KeyboardButton("👥 Реферальная ссылка"),
         types.KeyboardButton("📄 Презентация"),
         types.KeyboardButton("⬅ Вернуться")
-    )#.add().row("Тестовое пополнение", "Удалить аккаунт")
+    )  # .add().row("Тестовое пополнение", "Удалить аккаунт")
 
 
 def get_link_to_space_money():
@@ -161,9 +162,16 @@ def get_link_to_space_money():
 
 
 def get_wallet_inline():
-    return types.InlineKeyboardMarkup().add(
+    keyboard = types.InlineKeyboardMarkup().add(
         types.InlineKeyboardButton("🪙 Реинвестировать", callback_data="reinvest")).add(
         types.InlineKeyboardButton("➖ Вывести дивиденды", callback_data="remove_money"))
+
+    if datetime.datetime.now().day >= 25:
+        keyboard.add(
+            types.InlineKeyboardButton("➕ Оплатить вход заранее", callback_data="add_money_advance")
+        )
+
+    return keyboard
 
 
 def get_double_dep():
@@ -180,8 +188,8 @@ def get_transfer_inline():
 
 
 def get_inline_for_withdraw():
-    return types.InlineKeyboardMarkup().\
-        add(types.InlineKeyboardButton("▪ Банковская карта RUB", callback_data="withdraw_payrement_bank")).\
+    return types.InlineKeyboardMarkup(). \
+        add(types.InlineKeyboardButton("▪ Банковская карта RUB", callback_data="withdraw_payrement_bank")). \
         add(types.InlineKeyboardButton("▪ Криптовалюта", callback_data="withdraw_payrement_crypt"))
 
 
@@ -203,7 +211,7 @@ async def laucnh_inline(db: ManagerUsersDataBase, user_id, loop):
     mark = types.InlineKeyboardMarkup()
     status = await db.get_status(user_id, loop)
 
-    if status[0] == 0:  #🎁 Сделать подарок
+    if status[0] == 0:  # 🎁 Сделать подарок
         return mark.add(types.InlineKeyboardButton("🎁 Сделать подарок", callback_data="get_gift"))
     else:
         reply = types.InlineKeyboardMarkup()
@@ -218,21 +226,20 @@ async def laucnh_inline(db: ManagerUsersDataBase, user_id, loop):
 
 
 def inform_pers():
-    return types.InlineKeyboardMarkup().\
+    return types.InlineKeyboardMarkup(). \
         add(types.InlineKeyboardButton("💬 Осведомить участника", callback_data="inform_pers"))
 
 
 def invest_buttons():
     return types.InlineKeyboardMarkup().add(
         types.InlineKeyboardButton("➕ Инвестировать", callback_data="add_money")).add(
+        types.InlineKeyboardButton("🪙 Реинвестировать", callback_data="reinvest_invest")).add(
         types.InlineKeyboardButton("➖ Вывести дивиденды", callback_data="remove_money_0_05")).add(
-        types.InlineKeyboardButton("💫 Инвестиции в Space money", callback_data="link_to_space_money")).add(
-        types.InlineKeyboardButton("🌟 Вывести инвестиции", callback_data="remove_money_invest")
-    )
-        #.add(types.InlineKeyboardButton("🤖 Система клонов", callback_data="system_clones"))
+        types.InlineKeyboardButton("🌟 Вывести инвестиции", callback_data="remove_money_invest")).add(
+        types.InlineKeyboardButton("💫 Инвестиции в Space money", callback_data="link_to_space_money"))
+    # .add(types.InlineKeyboardButton("🤖 Система клонов", callback_data="system_clones"))
 
 
 def get_link_space_money():
-    return types.InlineKeyboardMarkup()\
+    return types.InlineKeyboardMarkup() \
         .add(types.InlineKeyboardButton("💫 Перейти на сайт Space money", url="spacemoney.space"))
-

@@ -14,9 +14,10 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import datetime
 import PayManager
 import config
+import utils
 from FSM import PayFSM, CalculatorFSM, WithdrawMoneyFSM, ChangeCryptTypeFSN, AnswerAfterGiftFSM, \
-    SendGiftFSM, PayCryptFSM, UserCodeFSM, WithdrawMoneyPercentFSM, ReinvestFSM
-from db import ManagerUsersDataBase, ManagerPayDataBase, ManagerWithDrawDataBase, ConfigDBManager
+    SendGiftFSM, PayCryptFSM, UserCodeFSM, WithdrawMoneyPercentFSM, ReinvestFSM, ReinvestInvestFSM
+from db import ManagerUsersDataBase, ManagerPayDataBase, ManagerWithDrawDataBase, ConfigDBManager, ManagerResetSystem
 import coinbase_data
 from User import UserDB
 from back_work import worker
@@ -46,6 +47,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 db = ManagerUsersDataBase()
 dbPay = ManagerPayDataBase()
 dbWithDraw = ManagerWithDrawDataBase()
+dbSystem = ManagerResetSystem()
 
 message_handlers_commands = ["💳 Кошелёк", "🚀 Взлёт", "🔧 Инструменты", "📝 О проекте", "🌑 Space Money",
                              "⚙ Тех. поддержка"]
@@ -570,7 +572,7 @@ async def reinv_amount(message: types.Message, state: FSMContext):
     if not message.text.isdigit():
         global message_handlers_commands
         if message.text in message_handlers_commands:
-            await state.reset_state(with_data=False)
+            await state.reset_state(with_data=True)
 
             if message.text == "💳 Кошелёк":
                 await wallet(message)
@@ -613,6 +615,68 @@ async def reinv_amount(message: types.Message, state: FSMContext):
         f"Вы реинвестировали {round(gift_money, 2)} RUB теперь Ваш "
         f"общий депозит {int(cd + dep + ref + ref_money + reinv)} RUB"
     )
+    await state.reset_state(with_data=True)
+
+
+@dp.callback_query_handler(text='reinvest_invest')
+async def reinvest_invest_money(callback: types.CallbackQuery):
+    async with lock:
+        gift_money_invest = await db.get_gift_money_invest(callback.from_user.id, loop)
+        if gift_money_invest <= 0:
+            await callback.answer("🚫 У вас недостаточно средств для реинвестирования", show_alert=True)
+            return
+
+        await bot.send_message(
+            callback.from_user.id,
+            'Введите сумму, которую хотите реинвестировать'
+        )
+        await ReinvestInvestFSM.amount.set()
+
+
+@dp.message_handler(state=ReinvestInvestFSM.amount)
+async def reinv_invest_amount(message: types.Message, state: FSMContext):
+    if not message.text.isdigit():
+        global message_handlers_commands
+        if message.text in message_handlers_commands:
+            await state.reset_state(with_data=True)
+
+            if message.text == "💳 Кошелёк":
+                await wallet(message)
+            elif message.text == "🚀 Взлёт":
+                await launch(message)
+            elif message.text == "🔧 Инструменты":
+                await tools(message)
+            elif message.text == "📝 О проекте":
+                await about_project(message)
+            elif message.text == "💻 Инвестиции":
+                await invest(message)
+            elif message.text == "⚙ Техническая поддержка":
+                await support(message)
+
+            return
+
+    if not message.text.isdigit():
+        await message.answer("Введите правильную сумму")
+        return
+
+    gift_money_invest = await db.get_gift_money_invest(message.from_user.id, loop)
+    if int(message.text) > int(gift_money_invest):
+        await message.answer(f"Введите правильную сумму. Доступно: {gift_money_invest} руб.")
+        return
+
+    gift_money_amount = int(message.text)
+
+    await db.add_depozit(message.from_user.id, gift_money_amount, loop)
+    await db.remove_gift_money_invest(message.from_user.id, gift_money_amount, loop)
+
+    dep = await db.get_deposit(message.from_user.id, loop)
+
+    await bot.send_message(
+        message.from_user.id,
+        f"Вы реинвестировали <b>{round(gift_money_amount, 2)} RUB</b>\nТеперь Ваш депозит <b>{dep} RUB</b>",
+        parse_mode='html'
+    )
+
     await state.reset_state(with_data=True)
 
 
@@ -683,23 +747,35 @@ async def wallet(message: types.Message):
             ref_money = await db.get_percent_ref_money(message.from_user.id, loop)
             reinv = await db.get_reinvest(message.from_user.id, loop)
             date = await db.get_date(message.chat.id, loop)
+            archive_dep = await db.get_archive_dep(message.chat.id, loop)
 
             payments = await dbPay.get_user_topups(message.from_user.id, loop)
 
-            day_percent = f"{round(float(cd + ref + ref_money + reinv) * .008, 5)} руб/день"
+            total_referrals = await utils.count_total_referrals_by_user(message.from_user.id, 1, loop)
+
+            in_advance_pay = await dbSystem.get_user_advance_payment(message.from_user.id, loop)
+            advance_pay_message = "Нет (0₽) ❌"
+            if in_advance_pay is not None:
+                advance_pay_message = "Да (5000₽) ✅"
+
+            day_percent = f"{round(float(cd + ref + ref_money + reinv + archive_dep) * .008, 5)} руб/день"
             if payments == 0:
                 day_percent = f"0 руб/день\n<u>Чтобы получать дивиденды, пополните баланс</u>"
 
             text = f"🤖 Ваш ID: {message.from_user.id}\n" \
                    f"📆 Профиль создан: {date}\n" \
                    f"🚀 Статус: {level_text} {text_status}\n" \
-                   f"🙋‍♂ Лично приглашенные: {await db.get_count_ref(message.from_user.id, loop)} " \
+                   f"✨ Оплатил заранее: {advance_pay_message}\n" \
+                   f"🙋‍♂️ Лично приглашенные в этом месяце: {await db.get_count_ref(message.from_user.id, loop)} " \
                    f"({await db.get_activate_count_ref(message.from_user.id, loop)})\n" \
+                   f"👥 Лично приглашенные за всё время: {total_referrals['total']} " \
+                   f"({total_referrals['activated']})\n" \
                    "Ваш депозит: 💰👇\n" \
                    "——————————————————\n" \
+                   f"🏦 Общие накопления в системе дарения - {int(archive_dep)}₽\n" \
                    f"🎁 Системы дарения - {int(cd)}₽\n" \
                    f"🤑 За приглашения - {int(ref)}₽\n" \
-                   f"🤑 За инвестиции реферала - {int(ref_money)}₽\n" \
+                   f"😱 За инвестиции реферала - {int(ref_money)}₽\n" \
                    f"🪙 Вы реинвестировали - {int(reinv)}₽\n" \
                    "——————————————————\n" \
                    f"💵 Общий депозит: {int(cd + ref + ref_money + reinv)}₽\n" \
@@ -870,11 +946,15 @@ async def send(message: types.Message, state: FSMContext):
 
 
 @dp.callback_query_handler(text="set_money_for_gift")
-async def set_money_for_gift(callback: types.CallbackQuery):
+async def set_money_for_gift(callback: types.CallbackQuery, state):
     try:
         await bot.delete_message(callback.from_user.id, callback.message.message_id)
     except:
         pass
+
+    async with state.proxy() as data:
+        data['pay_in_advance'] = False
+
     await bot.send_message(
         callback.from_user.id,
         "📤 Выберите платежную систему на которую хотите совершить перевод для пополнение средств в бота \n"
@@ -884,11 +964,15 @@ async def set_money_for_gift(callback: types.CallbackQuery):
 
 
 @dp.callback_query_handler(text="add_money")
-async def add_money(callback: types.CallbackQuery):
+async def add_money(callback: types.CallbackQuery, state):
     try:
         await bot.delete_message(callback.from_user.id, callback.message.message_id)
     except:
         pass
+
+    async with state.proxy() as data:
+        data['pay_in_advance'] = False
+
     await bot.send_message(
         callback.from_user.id,
         "📤 Выберите платежную систему на которую хотите совершить перевод для пополнение средств в бота \n"
@@ -995,14 +1079,20 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 async def btc_trans(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["PAY_TYPE"] = "USDT"
+        pay_in_advance = data['pay_in_advance']
+
     try:
         await bot.delete_message(callback.from_user.id, callback.message.message_id)
     except:
         pass
-    await bot.send_message(
-        callback.from_user.id,
-        "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
-    )
+
+    if pay_in_advance:
+        await amount_crypt(None, state, user_id=callback.from_user.id)
+    else:
+        await bot.send_message(
+            callback.from_user.id,
+            "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
+        )
     await PayCryptFSM.next()
 
 
@@ -1010,95 +1100,126 @@ async def btc_trans(callback: types.CallbackQuery, state: FSMContext):
 async def btc_trans(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["PAY_TYPE"] = "BTC"
+        pay_in_advance = data['pay_in_advance']
+
     try:
         await bot.delete_message(callback.from_user.id, callback.message.message_id)
     except:
         pass
-    await bot.send_message(
-        callback.from_user.id,
-        "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
-    )
-    await PayCryptFSM.next()
+
+    if pay_in_advance:
+        await amount_crypt(None, state, user_id=callback.from_user.id)
+    else:
+        await bot.send_message(
+            callback.from_user.id,
+            "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
+        )
+        await PayCryptFSM.next()
 
 
 @dp.callback_query_handler(text="ltc_trans", state=PayCryptFSM.PAY_TYPE)
 async def ltc_trans(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["PAY_TYPE"] = "LTC"
+        pay_in_advance = data['pay_in_advance']
+
     try:
         await bot.delete_message(callback.from_user.id, callback.message.message_id)
     except:
         pass
-    await bot.send_message(
-        callback.from_user.id,
-        "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
-    )
-    await PayCryptFSM.next()
+
+    if pay_in_advance:
+        await amount_crypt(None, state, user_id=callback.from_user.id)
+    else:
+        await bot.send_message(
+            callback.from_user.id,
+            "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
+        )
+        await PayCryptFSM.next()
 
 
 @dp.callback_query_handler(text="eth_trans", state=PayCryptFSM.PAY_TYPE)
 async def eth_trans(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["PAY_TYPE"] = "ETH"
+        pay_in_advance = data['pay_in_advance']
+
     try:
         await bot.delete_message(callback.from_user.id, callback.message.message_id)
     except:
         pass
-    await bot.send_message(
-        callback.from_user.id,
-        "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
-    )
-    await PayCryptFSM.next()
+
+    if pay_in_advance:
+        await amount_crypt(None, state, user_id=callback.from_user.id)
+    else:
+        await bot.send_message(
+            callback.from_user.id,
+            "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
+        )
+        await PayCryptFSM.next()
 
 
 @dp.message_handler(state=PayCryptFSM.PAY_AMOUNT)
-async def amount_crypt(message: types.Message, state: FSMContext):
-    if not message.text.isdigit():
-        await message.answer("Некорректное число")
-        return
-
+async def amount_crypt(message, state: FSMContext, user_id=None):
+    if message:
+        amount = message.text
+    else:
+        amount = "5000"
     async with state.proxy() as data:
-        data["AMOUNT"] = str(message.text)
+        data["AMOUNT"] = str(amount)
+        print('meow second pay type in amount_crypt', data["PAY_TYPE"])
 
-    if int(message.text) < 5000:
+    if int(amount) < 5000:
         await message.answer("🚫 Минимальная сумма пополнения 5000.0 RUB, введите корректную сумму!")
         return
-    if int(message.text) % 5000 != 0:
+    if int(amount) % 5000 != 0:
         await message.answer("Сумма должна быть кратна 5000 RUB!")
         return
     else:
         async with state.proxy() as data:
-            data["PAY_AMOUNT"] = int(message.text)
+            data["PAY_AMOUNT"] = int(amount)
 
-        pay = await state.get_data()
+            pay = await state.get_data()
 
-        amount = round(int(message.text) / await coinbase_data.get_kurs(data.get('PAY_TYPE')), 8)
-        await message.answer(
-            f"☑️Заявка на пополнение №{int(await dbPay.get_count_crypt(loop)) + 1} успешно создана\n\n"
-            f"Сумма к оплате: <b>{amount} {data.get('PAY_TYPE')}</b>",
-            parse_mode="html",
-        )
-        if pay.get("PAY_TYPE") == "USDT":
-            number = configCl.USDT_WALLET + '\n\ntrc 20'
-        else:
-            number = await coinbase_data.get_address(pay.get("PAY_TYPE"))
+            print(f"{data.get('PAY_TYPE')}")
+            amount = round(int(amount) / await coinbase_data.get_kurs(data.get('PAY_TYPE')), 8)
+            await bot.send_message(user_id,
+                f"☑️Заявка на пополнение №{int(await dbPay.get_count_crypt(loop)) + 1} успешно создана\n\n"
+                f"Сумма к оплате: <b>{amount} {data.get('PAY_TYPE')}</b>",
+                parse_mode="html",
+            )
+            if pay.get("PAY_TYPE") == "USDT":
+                number = configCl.USDT_WALLET + '\n\ntrc 20'
+            else:
+                number = await coinbase_data.get_address(pay.get("PAY_TYPE"))
 
-        await message.answer(str(number))
-        mes = await message.answer(
-            f"⏳ Заявка №{int(await dbPay.get_count_crypt(loop)) + 1} и {data.get('PAY_TYPE')}-адрес действительны: 60 минут.\n\n"
-            f"После успешной отправки {amount} {data.get('PAY_TYPE')} на указанный {data.get('PAY_TYPE')}-адрес выше, "
-            f"отправьте скриншот об оплате @smfadmin и администратор подтвердит зачисление.\n\n"
-            "Или же Вы можете отменить данную заявку нажав на кнопку «❌ Отменить заявку»\n\n"
-            "💸 Криптовалюта зачислится в систему в течении 20 минут, ожидайте 😌",
-            reply_markup=inline_keybords.cancel_pay()
-        )
-        utc_now = pytz.utc.localize(datetime.datetime.utcnow())
-        date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
-        await dbPay.create_crypt_pay(pay.get("PAY_TYPE"), amount, str(date_time_now)[:-7],
-                                     int(message.from_user.id), mes["message_id"], "WAIT_PAYMENT", data.get("AMOUNT"),
-                                     loop)
-        await state.reset_state(with_data=False)
+            await bot.send_message(user_id, str(number))
+            mes = await bot.send_message(user_id,
+                f"⏳ Заявка №{int(await dbPay.get_count_crypt(loop)) + 1} и {data.get('PAY_TYPE')}-адрес действительны: 60 минут.\n\n"
+                f"После успешной отправки {amount} {data.get('PAY_TYPE')} на указанный {data.get('PAY_TYPE')}-адрес выше, "
+                f"отправьте скриншот об оплате @smfadmin и администратор подтвердит зачисление.\n\n"
+                "Или же Вы можете отменить данную заявку нажав на кнопку «❌ Отменить заявку»\n\n"
+                "💸 Криптовалюта зачислится в систему в течении 20 минут, ожидайте 😌",
+                reply_markup=inline_keybords.cancel_pay()
+            )
+            utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+            date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
+            await dbPay.create_crypt_pay(pay.get("PAY_TYPE"), amount, str(date_time_now)[:-7],
+                                         int(user_id), mes["message_id"], "WAIT_PAYMENT", data.get("AMOUNT"),
+                                         loop, in_advance=data['pay_in_advance']) #TODO KIT
+            await bot.send_message('-1784358645', text=f"Новое пополнение!\n\n{amount} {data.get('PAY_TYPE')}\n'", parse_mode='html')
+            await state.reset_state(with_data=False)
 
+
+@dp.callback_query_handler(text="accept_pay")
+async def accept_order(callback: types.CallbackQuery, state: FSMContext):
+    # await dbPay.change_status_for_cancel("CANCELED", pay[5], "CREDIT", loop)
+    ...
+
+@dp.callback_query_handler(text="cancel_pay")
+async def decline_order(callback: types.CallbackQuery, state: FSMContext):
+    # await dbPay.change_status_for_cancel("CANCELED", pay[5], "CREDIT", loop)
+    ...
 
 @dp.callback_query_handler(text="get_gift")
 async def get_gift(callback: types.CallbackQuery, state: FSMContext):
@@ -1257,11 +1378,13 @@ async def sberbank_pay(callback: types.CallbackQuery, state: FSMContext):
         pass
     async with state.proxy() as data:
         data["PAY_TYPE"] = "sberbank"
-
-    await bot.send_message(
-        callback.from_user.id,
-        "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
-    )
+        if data['pay_in_advance']:
+            await get_amount(None, state, user_id=callback.from_user.id)
+        else:
+            await bot.send_message(
+                callback.from_user.id,
+                "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
+            )
     await PayFSM.next()
 
 
@@ -1282,23 +1405,27 @@ async def tinkoff_pay(callback: types.CallbackQuery, state: FSMContext):
 
 
 @dp.message_handler(state=PayFSM.PAY_AMOUNT)
-async def get_amount(message: types.Message, state: FSMContext):
-    if not message.text.isdigit():
+async def get_amount(message, state: FSMContext, user_id=None):
+    if message is None:
+        amount = "5000"
+    else:
+        amount = message.text
+    if not amount.isdigit():
         global message_handlers_commands
-        if message.text in message_handlers_commands:
+        if amount in message_handlers_commands:
             await state.reset_state(with_data=False)
 
-            if message.text == "💳 Кошелёк":
+            if amount == "💳 Кошелёк":
                 await wallet(message)
-            elif message.text == "🚀 Взлёт":
+            elif amount == "🚀 Взлёт":
                 await launch(message)
-            elif message.text == "🔧 Инструменты":
+            elif amount == "🔧 Инструменты":
                 await tools(message)
-            elif message.text == "📝 О проекте":
+            elif amount == "📝 О проекте":
                 await about_project(message)
-            elif message.text == "💻 Инвестиции":
+            elif amount == "💻 Инвестиции":
                 await invest(message)
-            elif message.text == "⚙ Техническая поддержка":
+            elif amount == "⚙ Техническая поддержка":
                 await support(message)
 
             return
@@ -1306,23 +1433,28 @@ async def get_amount(message: types.Message, state: FSMContext):
             await message.answer("🚫 Это не число, введите корректную сумму!")
             return
 
-    if int(message.text) < 5000:
+    if int(amount) < 5000:
         await message.answer("🚫 Минимальная сумма пополнения 5000.0 RUB, введите корректную сумму!")
         return
-    if int(message.text) % 5000 != 0:
+    if int(amount) % 5000 != 0:
         await message.answer("Сумма должна быть кратна 5000 RUB!")
         return
     else:
 
         async with state.proxy() as data:
-            data["PAY_AMOUNT"] = int(message.text)
+            data["PAY_AMOUNT"] = int(amount)
+            if 'pay_in_advance' not in data:
+                await bot.send_message(user_id,
+                    f"Произошла техническая ошибка 😢\nПопробуйте немного позже",
+                )
+
         pay = await state.get_data()
 
-        number, amount, order_id = await PayManager.create_order(pay.get("PAY_TYPE"), int(message.text))
+        number, amount, order_id = await PayManager.create_order(pay.get("PAY_TYPE"), int(amount))
 
         global NUMBER_PAY
         NUMBER_PAY += 1
-        await message.answer(
+        await bot.send_message(user_id,
             f"☑️Заявка на пополнение №{int(await dbPay.get_count_credit(loop)) + 1} успешно создана\n\n"
             f"💵 Сумма к оплате: 👉 <b>{amount} RUB 🔥</b>\n\n"
             f"❗️Внимание🔥 перевод нужно совершить точно с комиссией, иначе деньги не зачисляются❗️\n\n"
@@ -1330,8 +1462,9 @@ async def get_amount(message: types.Message, state: FSMContext):
             parse_mode='HTML'
         )
 
-        await message.answer(str(number))
-        mes = await message.answer(
+        await bot.send_message(user_id, str(number))
+        mes = await bot.send_message(
+            user_id,
             "⏳ Заявка действительна: 60 минут.\n\n"
             "Оплата производится через любые платежные системы: QIWI, перевод с карты на "
             "карту, наличные (терминал), Яндекс.Деньги, и другие платежные системы.\n\n"
@@ -1342,10 +1475,11 @@ async def get_amount(message: types.Message, state: FSMContext):
             "💸 Деньги зачислятся в систему в течении 5 минут, ожидайте 😌",
             reply_markup=inline_keybords.cancel_pay()
         )
+        async with state.proxy() as data:
+            await dbPay.create_pay(order_id, pay.get("PAY_TYPE"), pay.get("PAY_AMOUNT"),
+                                   datetime.date.today(), int(user_id), mes["message_id"], "WAIT_PAYMENT",
+                                   loop, in_advance=data['pay_in_advance'])
 
-        await dbPay.create_pay(order_id, pay.get("PAY_TYPE"), pay.get("PAY_AMOUNT"),
-                               datetime.date.today(), int(message.from_user.id), mes["message_id"], "WAIT_PAYMENT",
-                               loop)
         await state.reset_state(with_data=False)
 
 
@@ -1983,6 +2117,22 @@ async def change_type_res(message: types.Message, state: FSMContext):
 @dp.message_handler(content_types=["document", "video", "audio"])
 def handle_files(message: types.Message):
     print(message.text + " " + str(message.from_user.id))
+
+
+@dp.callback_query_handler(text="add_money_advance")
+async def pay_advance(callback: types.CallbackQuery, state):
+    try:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+    except:
+        pass
+    async with state.proxy() as data:
+        data['pay_in_advance'] = True
+    await bot.send_message(
+        callback.from_user.id,
+        "📤 Выберите платежную систему на которую хотите совершить перевод для пополнение средств в бота \n"
+        "▪ Моментальные зачисление, а также автоматическая конверсия.",
+        reply_markup=inline_keybords.get_gift()
+    )
 
 
 if __name__ == '__main__':
