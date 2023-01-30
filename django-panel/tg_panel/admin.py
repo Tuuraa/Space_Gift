@@ -152,8 +152,6 @@ class PayAdmin(admin.ModelAdmin):
                 user.activate_ref_count += count_ref
                 user.count_ref += count_ref
                 user.save()
-        elif obj.status == 'WAIT_PAYMENT':
-            bot.send_message('-1784358645', text=f'Новое пополнение', parse_mode='html')
 
 
 class CryptPayAdmin(admin.ModelAdmin):

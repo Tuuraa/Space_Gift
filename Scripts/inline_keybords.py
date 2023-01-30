@@ -168,7 +168,7 @@ def get_wallet_inline():
 
     if datetime.datetime.now().day >= 25:
         keyboard.add(
-            types.InlineKeyboardButton("➕ Оплатить заранее вход ", callback_data="add_money_advance")
+            types.InlineKeyboardButton("➕ Оплатить вход заранее", callback_data="add_money_advance")
         )
 
     return keyboard

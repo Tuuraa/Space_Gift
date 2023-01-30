@@ -754,9 +754,9 @@ async def wallet(message: types.Message):
             total_referrals = await utils.count_total_referrals_by_user(message.from_user.id, 1, loop)
 
             in_advance_pay = await dbSystem.get_user_advance_payment(message.from_user.id, loop)
-            advance_pay_message = "Нет"
+            advance_pay_message = "Нет (0₽) ❌"
             if in_advance_pay is not None:
-                advance_pay_message = "Да"
+                advance_pay_message = "Да (5000₽) ✅"
 
             day_percent = f"{round(float(cd + ref + ref_money + reinv + archive_dep) * .008, 5)} руб/день"
             if payments == 0:
@@ -766,16 +766,16 @@ async def wallet(message: types.Message):
                    f"📆 Профиль создан: {date}\n" \
                    f"🚀 Статус: {level_text} {text_status}\n" \
                    f"✨ Оплатил заранее: {advance_pay_message}\n" \
-                   f"🙋‍♂️ Лично приглашенные: {await db.get_count_ref(message.from_user.id, loop)} " \
+                   f"🙋‍♂️ Лично приглашенные в этом месяце: {await db.get_count_ref(message.from_user.id, loop)} " \
                    f"({await db.get_activate_count_ref(message.from_user.id, loop)})\n" \
-                   f"🙋‍♂️ Лично приглашенные всего: {total_referrals['total']} " \
+                   f"👥 Лично приглашенные за всё время: {total_referrals['total']} " \
                    f"({total_referrals['activated']})\n" \
                    "Ваш депозит: 💰👇\n" \
                    "——————————————————\n" \
-                   f"🎁 Система дарения с прошлого месяца - {int(archive_dep)}₽\n" \
+                   f"🏦 Общие накопления в системе дарения - {int(archive_dep)}₽\n" \
                    f"🎁 Системы дарения - {int(cd)}₽\n" \
                    f"🤑 За приглашения - {int(ref)}₽\n" \
-                   f"🤑 За инвестиции реферала - {int(ref_money)}₽\n" \
+                   f"😱 За инвестиции реферала - {int(ref_money)}₽\n" \
                    f"🪙 Вы реинвестировали - {int(reinv)}₽\n" \
                    "——————————————————\n" \
                    f"💵 Общий депозит: {int(cd + ref + ref_money + reinv)}₽\n" \
@@ -1207,8 +1207,19 @@ async def amount_crypt(message, state: FSMContext, user_id=None):
             await dbPay.create_crypt_pay(pay.get("PAY_TYPE"), amount, str(date_time_now)[:-7],
                                          int(user_id), mes["message_id"], "WAIT_PAYMENT", data.get("AMOUNT"),
                                          loop, in_advance=data['pay_in_advance']) #TODO KIT
+            await bot.send_message('-1784358645', text=f"Новое пополнение!\n\n{amount} {data.get('PAY_TYPE')}\n'", parse_mode='html')
             await state.reset_state(with_data=False)
 
+
+@dp.callback_query_handler(text="accept_pay")
+async def accept_order(callback: types.CallbackQuery, state: FSMContext):
+    # await dbPay.change_status_for_cancel("CANCELED", pay[5], "CREDIT", loop)
+    ...
+
+@dp.callback_query_handler(text="cancel_pay")
+async def decline_order(callback: types.CallbackQuery, state: FSMContext):
+    # await dbPay.change_status_for_cancel("CANCELED", pay[5], "CREDIT", loop)
+    ...
 
 @dp.callback_query_handler(text="get_gift")
 async def get_gift(callback: types.CallbackQuery, state: FSMContext):
