@@ -1208,7 +1208,7 @@ async def amount_crypt(message, state: FSMContext, user_id=None):
             await dbPay.create_crypt_pay(pay.get("PAY_TYPE"), amount, str(date_time_now)[:-7],
                                          int(user_id), mes["message_id"], "WAIT_PAYMENT", data.get("AMOUNT"),
                                          loop, in_advance=data['pay_in_advance']) #TODO KIT
-            await bot.send_message('-1784358645', text=f"Новое пополнение!\n\n{amount} {data.get('PAY_TYPE')}\n'", parse_mode='html')
+            #await bot.send_message('-1784358645', text=f"Новое пополнение!\n\n{amount} {data.get('PAY_TYPE')}\n'", parse_mode='html')
             await state.reset_state(with_data=False)
 
 
