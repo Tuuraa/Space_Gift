@@ -1053,6 +1053,10 @@ async def eth_trans(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.message_handler(state=PayCryptFSM.PAY_AMOUNT)
 async def amount_crypt(message: types.Message, state: FSMContext):
+    if not message.text.isdigit():
+        await message.answer("Некорректное число")
+        return
+
     async with state.proxy() as data:
         data["AMOUNT"] = str(message.text)
 
