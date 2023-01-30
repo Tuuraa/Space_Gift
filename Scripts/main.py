@@ -1163,11 +1163,12 @@ async def eth_trans(callback: types.CallbackQuery, state: FSMContext):
 async def amount_crypt(message, state: FSMContext, user_id=None):
     if message:
         amount = message.text
+        user_id = message.from_user.id
     else:
         amount = "5000"
+
     async with state.proxy() as data:
         data["AMOUNT"] = str(amount)
-        print('meow second pay type in amount_crypt', data["PAY_TYPE"])
 
     if int(amount) < 5000:
         await message.answer("🚫 Минимальная сумма пополнения 5000.0 RUB, введите корректную сумму!")
@@ -1396,11 +1397,14 @@ async def tinkoff_pay(callback: types.CallbackQuery, state: FSMContext):
         pass
     async with state.proxy() as data:
         data["PAY_TYPE"] = "tinkoff"
+        if data['pay_in_advance']:
+            await get_amount(None, state, user_id=callback.from_user.id)
+        else:
+            await bot.send_message(
+                callback.from_user.id,
+                "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
+            )
 
-    await bot.send_message(
-        callback.from_user.id,
-        "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
-    )
     await PayFSM.next()
 
 
@@ -1410,6 +1414,8 @@ async def get_amount(message, state: FSMContext, user_id=None):
         amount = "5000"
     else:
         amount = message.text
+        user_id = message.from_user.id
+
     if not amount.isdigit():
         global message_handlers_commands
         if amount in message_handlers_commands:

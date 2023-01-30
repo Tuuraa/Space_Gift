@@ -1366,7 +1366,7 @@ class ManagerPayDataBase:
         async with connection.cursor() as cursor:
             await cursor.execute(
                 "INSERT INTO `pay` (`pay_id`, `pay_amount`, `date`,  `pay_type`, `user_id`, "
-                "`cancel_id`, `status`, `in_advance`) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                "`cancel_id`, `status`, `in_advance`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                 (
                     pay_id,
                     pay_amount,
