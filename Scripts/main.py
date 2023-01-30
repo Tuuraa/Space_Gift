@@ -1379,13 +1379,15 @@ async def sberbank_pay(callback: types.CallbackQuery, state: FSMContext):
         pass
     async with state.proxy() as data:
         data["PAY_TYPE"] = "sberbank"
-        if data['pay_in_advance']:
-            await get_amount(None, state, user_id=callback.from_user.id)
-        else:
-            await bot.send_message(
-                callback.from_user.id,
-                "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
-            )
+        pay_in_advance = data['pay_in_advance']
+        
+    if pay_in_advance:
+        await get_amount(None, state, user_id=callback.from_user.id)
+    else:
+        await bot.send_message(
+            callback.from_user.id,
+            "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
+        )
     await PayFSM.next()
 
 
@@ -1397,13 +1399,15 @@ async def tinkoff_pay(callback: types.CallbackQuery, state: FSMContext):
         pass
     async with state.proxy() as data:
         data["PAY_TYPE"] = "tinkoff"
-        if data['pay_in_advance']:
-            await get_amount(None, state, user_id=callback.from_user.id)
-        else:
-            await bot.send_message(
-                callback.from_user.id,
-                "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
-            )
+        pay_in_advance = data['pay_in_advance']
+        
+    if pay_in_advance:
+        await get_amount(None, state, user_id=callback.from_user.id)
+    else:
+        await bot.send_message(
+            callback.from_user.id,
+            "Введите сумму на которую хотите пополнить баланс. Минимальная сумма: 5000.0 RUB"
+        )
 
     await PayFSM.next()
 
