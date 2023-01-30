@@ -1,148 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c6c4ed8-05ef-449c-aeaa-ff3a33411c9e" name="Changes" comment="artur fix">
-      <change beforePath="$PROJECT_DIR$/Scripts/inline_keybords.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/inline_keybords.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/django-panel/tg_panel/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/django-panel/tg_panel/admin.py" afterDir="false" />
-    </list>
-    <list id="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" name="Changes by shellExecute" comment="">
-      <change beforePath="$PROJECT_DIR$/Scripts/FSM.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/FSM.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/inline_keybords.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/inline_keybords.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/logic.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/logic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/main.py" afterDir="false" />
-    </list>
+    <list default="true" id="7dc110d9-bf82-43b4-b0b0-9753cc2da850" name="Changes" comment="add queue" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
-    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
-  </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Python Script" />
-      </list>
-    </option>
-  </component>
-  <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
-    <envs>
-      <env key="FLASK_APP" value="app" />
-    </envs>
-    <option name="myCustomStartScript" value="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))" />
-    <option name="myEnvs">
-      <map>
-        <entry key="FLASK_APP" value="app" />
-      </map>
-    </option>
-  </component>
   <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="master" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
-  <component name="LineStatusTrackerManager">
-    <file path="$PROJECT_DIR$/Scripts/inline_keybords.py">
-      <ranges>
-        <range start1="7" end1="8" start2="7" end2="8" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="12" end1="13" start2="12" end2="13" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="38" end1="42" start2="38" end2="42" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="69" end1="70" start2="69" end2="70" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="74" end1="75" start2="74" end2="76" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="79" end1="81" start2="80" end2="82" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="84" end1="86" start2="85" end2="87" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="90" end1="91" start2="91" end2="92" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="92" end1="95" start2="93" end2="96" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="98" end1="99" start2="99" end2="99" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="109" end1="110" start2="109" end2="110" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="123" end1="124" start2="123" end2="124" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="135" end1="139" start2="135" end2="139" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="153" end1="154" start2="153" end2="154" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="182" end1="184" start2="182" end2="184" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="205" end1="206" start2="205" end2="206" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="220" end1="221" start2="220" end2="221" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="227" end1="227" start2="227" end2="228" changelist="6c6c4ed8-05ef-449c-aeaa-ff3a33411c9e" />
-        <range start1="228" end1="232" start2="229" end2="232" changelist="6c6c4ed8-05ef-449c-aeaa-ff3a33411c9e" />
-        <range start1="235" end1="236" start2="235" end2="236" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-        <range start1="237" end1="238" start2="237" end2="237" changelist="24cb7eee-bcd2-48fc-bc36-31adb29ae5dc" />
-      </ranges>
-    </file>
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectId" id="2KIr9XxGEGvUWmwimAIov3Cufa0" />
+  <component name="ProjectId" id="2KVjpb1JRDxNSuXiHoXMSXJKDRU" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/kit/PycharmProjects/Space_Gift/mysql&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.Mappings&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "C:/Users/Tura/PycharmProjects/Space_Gift",
+    "settings.editor.selected.configurable": "cn.yiiguxing.plugin.translate"
   }
-}</component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/mysql" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/Scripts" />
-      <recent name="$PROJECT_DIR$/Scripts/back_workers" />
-    </key>
-  </component>
-  <component name="RunManager" selected="Python.main">
-    <configuration name="back_work_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="DonationBot" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Scripts" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Scripts/back_work_main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="db" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="DonationBot" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Scripts" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Scripts/db.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+}]]></component>
+  <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="DonationBot" />
+      <module name="Space_Gift" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -153,7 +55,6 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Scripts/main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
@@ -163,222 +64,173 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="reset_system" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="DonationBot" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Scripts" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Scripts/reset_system.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Unnamed" type="Python.DjangoServer" factoryName="Django server" nameIsGenerated="true">
-      <module name="DonationBot" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-        <env name="DJANGO_SETTINGS_MODULE" value="config.settings" />
-      </envs>
-      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="launchJavascriptDebuger" value="false" />
-      <option name="port" value="8000" />
-      <option name="host" value="" />
-      <option name="additionalOptions" value="" />
-      <option name="browserUrl" value="" />
-      <option name="runTestServer" value="false" />
-      <option name="runNoReload" value="false" />
-      <option name="useCustomRunCommand" value="false" />
-      <option name="customRunCommand" value="" />
-      <method v="2" />
-    </configuration>
-    <list>
-      <item itemvalue="Django Server.Unnamed" />
-      <item itemvalue="Python.back_work_main" />
-      <item itemvalue="Python.db" />
-      <item itemvalue="Python.reset_system" />
-      <item itemvalue="Python.main" />
-    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.reset_system" />
-        <item itemvalue="Python.db" />
-        <item itemvalue="Python.back_work_main" />
       </list>
     </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="6c6c4ed8-05ef-449c-aeaa-ff3a33411c9e" name="Changes" comment="" />
-      <created>1673672786347</created>
+      <changelist id="7dc110d9-bf82-43b4-b0b0-9753cc2da850" name="Changes" comment="" />
+      <created>1674066827751</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1673672786347</updated>
-      <workItem from="1673672787549" duration="8802000" />
-      <workItem from="1673863883794" duration="21235000" />
-      <workItem from="1674033952990" duration="3046000" />
-      <workItem from="1674042942166" duration="7841000" />
-      <workItem from="1674118204691" duration="6043000" />
-      <workItem from="1674143374104" duration="1423000" />
-      <workItem from="1674230290009" duration="29114000" />
-      <workItem from="1674837779484" duration="2493000" />
+      <updated>1674066827751</updated>
     </task>
-    <task id="LOCAL-00001" summary="7th level ref">
-      <created>1673691215687</created>
+    <task id="LOCAL-00001" summary="add switch">
+      <created>1674501489838</created>
       <option name="number" value="00001" />
       <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1673691215687</updated>
+      <updated>1674501489838</updated>
     </task>
-    <task id="LOCAL-00002" summary="Fixes">
-      <created>1673885457906</created>
+    <task id="LOCAL-00002" summary="update presentation amd video">
+      <created>1674754878743</created>
       <option name="number" value="00002" />
       <option name="presentableId" value="LOCAL-00002" />
       <option name="project" value="LOCAL" />
-      <updated>1673885457906</updated>
+      <updated>1674754878743</updated>
     </task>
-    <task id="LOCAL-00003" summary="fixes">
-      <created>1673885561375</created>
+    <task id="LOCAL-00003" summary="add queue">
+      <created>1674927500289</created>
       <option name="number" value="00003" />
       <option name="presentableId" value="LOCAL-00003" />
       <option name="project" value="LOCAL" />
-      <updated>1673885561375</updated>
+      <updated>1674927500289</updated>
     </task>
-    <task id="LOCAL-00004" summary="fixes">
-      <created>1673886716779</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1673886716779</updated>
-    </task>
-    <task id="LOCAL-00005" summary="Changes by shellExecute">
-      <created>1673974628535</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1673974628535</updated>
-    </task>
-    <task id="LOCAL-00006" summary="fixes">
-      <created>1674045350706</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1674045350706</updated>
-    </task>
-    <task id="LOCAL-00007" summary="transfer from SM fix">
-      <created>1674050403547</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1674050403547</updated>
-    </task>
-    <task id="LOCAL-00008" summary="fixes">
-      <created>1674119487814</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1674119487814</updated>
-    </task>
-    <task id="LOCAL-00009" summary="fixes">
-      <created>1674129176650</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1674129176650</updated>
-    </task>
-    <task id="LOCAL-00010" summary="fix">
-      <created>1674129951045</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1674129951045</updated>
-    </task>
-    <task id="LOCAL-00011" summary="fixes">
-      <created>1674246128807</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1674246128807</updated>
-    </task>
-    <task id="LOCAL-00012" summary="fix file not found">
-      <created>1674246665053</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1674246665053</updated>
-    </task>
-    <task id="LOCAL-00013" summary="percent">
-      <created>1674320147565</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1674320147565</updated>
-    </task>
-    <task id="LOCAL-00014" summary="artur fix">
-      <created>1674655783662</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1674655783662</updated>
-    </task>
-    <task id="LOCAL-00015" summary="artur fix">
-      <created>1674656857314</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1674656857314</updated>
-    </task>
-    <option name="localTasksCounter" value="16" />
+    <option name="localTasksCounter" value="4" />
     <servers />
-  </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="7th level ref" />
-    <MESSAGE value="Fixes" />
-    <MESSAGE value="Changes by shellExecute" />
-    <MESSAGE value="transfer from SM fix" />
-    <MESSAGE value="fix" />
-    <MESSAGE value="fixes" />
-    <MESSAGE value="fix file not found" />
-    <MESSAGE value="percent" />
-    <MESSAGE value="artur fix" />
-    <option name="LAST_COMMIT_MESSAGE" value="artur fix" />
+    <MESSAGE value="add switch" />
+    <MESSAGE value="update presentation amd video" />
+    <MESSAGE value="add queue" />
+    <option name="LAST_COMMIT_MESSAGE" value="add queue" />
   </component>
-  <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/main_py$reset_system.coverage" NAME="reset_system Coverage Results" MODIFIED="1674755470092" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Scripts" />
-    <SUITE FILE_PATH="coverage/main_py$main.coverage" NAME="main Coverage Results" MODIFIED="1674755873807" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Scripts" />
-    <SUITE FILE_PATH="coverage/main_py$db.coverage" NAME="db Coverage Results" MODIFIED="1674754964147" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Scripts" />
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>82</line>
+          <option name="timeStamp" value="28" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>83</line>
+          <option name="timeStamp" value="29" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>85</line>
+          <option name="timeStamp" value="30" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>94</line>
+          <option name="timeStamp" value="31" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>95</line>
+          <option name="timeStamp" value="32" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>96</line>
+          <option name="timeStamp" value="33" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>97</line>
+          <option name="timeStamp" value="34" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>98</line>
+          <option name="timeStamp" value="35" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>293</line>
+          <option name="timeStamp" value="37" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>294</line>
+          <option name="timeStamp" value="38" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>295</line>
+          <option name="timeStamp" value="39" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>297</line>
+          <option name="timeStamp" value="40" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>298</line>
+          <option name="timeStamp" value="41" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>299</line>
+          <option name="timeStamp" value="42" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>301</line>
+          <option name="timeStamp" value="43" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>302</line>
+          <option name="timeStamp" value="44" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>303</line>
+          <option name="timeStamp" value="45" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>305</line>
+          <option name="timeStamp" value="46" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/logic.py</url>
+          <line>304</line>
+          <option name="timeStamp" value="47" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
