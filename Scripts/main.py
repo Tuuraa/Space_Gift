@@ -710,7 +710,7 @@ async def space_go(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[0])  # Кошелек
 async def wallet(message: types.Message):
-    await worker_jump(message.from_user.id, message.from_user.id, loop)
+    #await worker_jump(message.from_user.id, message.from_user.id, loop)
     if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
         keyboard = types.InlineKeyboardMarkup().add(
             types.InlineKeyboardButton(
