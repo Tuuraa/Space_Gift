@@ -614,14 +614,10 @@ class ManagerUsersDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute(
-                "SELECT `archive_dep` FROM `users` WHERE `user_id` = %s", (user_id,)
-            )
-
-            await cursor.execute(
                 "UPDATE `users` SET `archive_dep` =  `archive_dep` - %s WHERE `user_id` = %s",
                 (
                     money,
-                    gift_id,
+                    user_id,
                 ),
             )
             await connection.commit()

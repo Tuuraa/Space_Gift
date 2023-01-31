@@ -2101,14 +2101,10 @@ async def number_card(message: types.Message, state: FSMContext):
 # ------------------------------------------------ RESET_SYSTEM_MESSAGE -----------------------------------------------
 
 @dp.callback_query_handler(text="reset_system_yes")
-async def reset_system_yes(callback: types.CallbackQuery):
+async def reset_system_yes(callback: types.CallbackQuery, state):
     user_advance = await dbSystem.get_user_advance_payment(callback.from_user.id, loop)
     if user_advance is None:
-        await callback.message.edit_text(
-            text="📤 Выберите платежную систему на которую хотите совершить перевод для пополнение средств в бота \n"
-            "▪ Моментальные зачисление, а также автоматическая конверсия.",
-            reply_markup=inline_keybords.get_gift()
-        )
+        await pay_advance(callback, state)
     else:
         await callback.message.edit_text(
             text='Супер! Первого числа у вас будет возможность воспользоваться '
@@ -2126,13 +2122,14 @@ async def reset_system_no(callback: types.CallbackQuery):
         return
 
     TRANSFER_DEP_USERS.append(callback.from_user.id)
-    user_data = db.get_full_data(callback.from_user.id, loop)
+    user_data = (await db.get_full_data(callback.from_user.id, loop))[0]
+    print(user_data)
     is_joined_SG = (int(user_data[11]) != 0 or int(user_data[14]) != 0)
     if is_joined_SG:
         amount_gift_money = int(user_data[18])
         if amount_gift_money >= 5000:
             await db.remove_amount_gift_money(callback.from_user.id, 5000, loop)
-        elif int(user_data[30]) >= 5000:
+        elif int(user_data[29]) >= 5000:
             await db.remove_archive_dep(callback.from_user.id, 5000, loop)
 
         await db.add_depozit(callback.from_user.id, 5000, loop)

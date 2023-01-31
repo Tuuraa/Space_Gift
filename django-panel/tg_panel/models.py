@@ -41,6 +41,7 @@ class CryptPay(models.Model):
     cancel_id = models.TextField(verbose_name='ID отмены', blank=True, null=True)
     status = models.TextField(verbose_name='Статус', choices=STATUS_CHOICES, default='FALSE')
     amount_rub = models.DecimalField(verbose_name='Сумма в рублях', max_digits=10, decimal_places=2, blank=True, null=True)
+    in_advance = models.BooleanField(verbose_name='Предоплата', default=False)
 
     class Meta:
         verbose_name = 'Крипто-пополнение'
@@ -283,3 +284,14 @@ class Post(models.Model):
         verbose_name_plural = 'рассылки'
         managed = False
         db_table = 'posts'
+
+
+class AdvancePay(models.Model):
+    user_id = models.TextField(verbose_name='ID пользователя')
+    date = models.DateTimeField(verbose_name='Дата')
+
+    class Meta:
+        verbose_name = 'Предоплата'
+        verbose_name_plural = 'Предоплаты'
+        managed = False
+        db_table = 'advance_pay'
