@@ -26,11 +26,11 @@ SUB_GROUP = -1001878641715
 DEBUG = True
 
 if DEBUG:
-    PATH = '/Users/kit/PycharmProjects/Space_Gift'
+    PATH = 'C:/Users/Tura/PycharmProjects/Space_Gift'
 
-    HOST = "127.0.0.1"
+    HOST = "localhost"
     USERS = "root"
-    PASSWORD = "root"
+    PASSWORD = '5377'
     DB_NAME = "yougiftdb"
 else:
     PATH = '/opt/Space_Gift'

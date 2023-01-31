@@ -30,7 +30,8 @@ def get_photo(planet):
              return 4, planets[4]
          case 5:
              return 5, planets[5]
-    return None
+
+     return None
 
 
 async def get_launch(bot, user_id, loop):

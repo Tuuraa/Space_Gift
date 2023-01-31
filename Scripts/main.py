@@ -23,7 +23,7 @@ from User import UserDB
 from back_work import worker
 from Percent import worker_percent
 from back_clones import worker_clones
-from jump import worker_jumps
+from jump import worker_jump
 import inline_keybords
 import logic
 import clones
@@ -710,6 +710,7 @@ async def space_go(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[0])  # Кошелек
 async def wallet(message: types.Message):
+    await worker_jump(message.from_user.id, message.from_user.id, loop)
     if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
         keyboard = types.InlineKeyboardMarkup().add(
             types.InlineKeyboardButton(
@@ -1222,6 +1223,7 @@ async def decline_order(callback: types.CallbackQuery, state: FSMContext):
     # await dbPay.change_status_for_cancel("CANCELED", pay[5], "CREDIT", loop)
     ...
 
+
 @dp.callback_query_handler(text="get_gift")
 async def get_gift(callback: types.CallbackQuery, state: FSMContext):
     async with lock:
@@ -1265,11 +1267,10 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
 
                     ref = await db.get_ref(callback.from_user.id, loop)
                     refgift = await db.get_refgift(callback.from_user.id, loop)
-                    if ref is not None and refgift == 0:
+                    if ref and refgift == 0:
                         await db.add_money_ref(callback.from_user.id, ref, 5000, loop)
-                        # await db.add_amount_gift_money(ref, 5000, loop)
-                        # await db.add_money(ref, 5000, loop)
-                        # await db.reset_refgift(callback.from_user.id, loop)
+
+
                         try:
                             await bot.send_message(
                                 int(ref),
@@ -1306,6 +1307,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                 if ref is not None and refgift == 0:
                     await db.add_money(ref, 5000, loop)
                     await db.reset_refgift(callback.from_user.id, loop)
+                    await worker_jump(int(ref), loop)
                     await bot.send_message(
                         int(ref),
                         "💸 Вам начислено реферальное вознаграждение "

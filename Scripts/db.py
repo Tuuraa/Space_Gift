@@ -179,6 +179,16 @@ class ManagerUsersDataBase:
                 )
                 await connection.commit()
 
+    async def count_referrer_list(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute(
+                "SELECT `user_id` FROM `users` WHERE `referrer_id` = %s "
+                "AND `refgift` = 1", (user_id,)
+            )
+            result = await cursor.fetchall()
+            return result
+
     async def count_referrer(self, user_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
@@ -242,6 +252,21 @@ class ManagerUsersDataBase:
                 "UPDATE `users` SET `activate_date` = %s WHERE user_id = %s",
                 (
                     date,
+                    user_id,
+                ),
+            )
+            await connection.commit()
+
+    async def update_jump_info(self, user_id, amount_gift_money, gift_money, planet, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute(
+                "UPDATE `users` SET planet = %s, amount_gift_money = %s, step = 1, status = '1', gift_money = %s,"
+                " activate_date = NULL WHERE user_id = %s",
+                (
+                    planet,
+                    amount_gift_money,
+                    gift_money,
                     user_id,
                 ),
             )
