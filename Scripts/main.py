@@ -2098,6 +2098,56 @@ async def number_card(message: types.Message, state: FSMContext):
         await state.reset_state()
 
 
+# ------------------------------------------------ RESET_SYSTEM_MESSAGE -----------------------------------------------
+
+@dp.callback_query_handler(text="reset_system_yes")
+async def reset_system_yes(callback: types.CallbackQuery):
+    user_advance = await dbSystem.get_user_advance_payment(callback.from_user.id, loop)
+    if user_advance is None:
+        await callback.message.edit_text(
+            text="📤 Выберите платежную систему на которую хотите совершить перевод для пополнение средств в бота \n"
+            "▪ Моментальные зачисление, а также автоматическая конверсия.",
+            reply_markup=inline_keybords.get_gift()
+        )
+    else:
+        await callback.message.edit_text(
+            text='Супер! Первого числа у вас будет возможность воспользоваться '
+                 'ссылкой на 5 минут раньше от новых участников и получить подарки на свой депозит!\n\n'
+                 'Не упустите возможность зайти в систему дарения Space gift один из первых',
+            reply_markup=None,
+        )
+
+
+TRANSFER_DEP_USERS = []
+
+@dp.callback_query_handler(text="reset_system_no")
+async def reset_system_no(callback: types.CallbackQuery):
+    if callback.from_user.id in TRANSFER_DEP_USERS:
+        return
+
+    TRANSFER_DEP_USERS.append(callback.from_user.id)
+    user_data = db.get_full_data(callback.from_user.id, loop)
+    is_joined_SG = (int(user_data[11]) != 0 or int(user_data[14]) != 0)
+    if is_joined_SG:
+        amount_gift_money = int(user_data[18])
+        if amount_gift_money >= 5000:
+            await db.remove_amount_gift_money(callback.from_user.id, 5000, loop)
+        elif int(user_data[30]) >= 5000:
+            await db.remove_archive_dep(callback.from_user.id, 5000, loop)
+
+        await db.add_depozit(callback.from_user.id, 5000, loop)
+        await callback.message.edit_text(
+            text='Отлично, Вы перенесли депозит',
+            reply_markup=None,
+        )
+
+
+    else:
+        try:
+            await callback.message.delete()
+        except:
+            pass
+
 # ------------------------------------------------Admin------------------------------------------------------------------------------
 
 
