@@ -610,6 +610,18 @@ class ManagerUsersDataBase:
             result = (await cursor.fetchall())[0][0]
             return result
 
+    async def remove_archive_dep(self, user_id, money, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute(
+                "UPDATE `users` SET `archive_dep` =  `archive_dep` - %s WHERE `user_id` = %s",
+                (
+                    money,
+                    user_id,
+                ),
+            )
+            await connection.commit()
+
     async def get_count_gift(self, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
@@ -1786,7 +1798,7 @@ class ManagerResetSystem:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("""
-            UPDATE `users` SET `is_include_ref` = '0', `reinvest` = '0', `percent_ref_money` = '0',
+            UPDATE `users` SET `is_include_ref` = '0',
             `archive_dep` = `archive_dep` + `amount_gift_money`, `planet` = '0', `status` = '0',
             `step` = '0', `activate_date` = NULL, `count_ref` = '0', `activate_ref_count` = '0'
             """)

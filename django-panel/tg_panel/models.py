@@ -42,7 +42,8 @@ class CryptPay(models.Model):
     status = models.TextField(verbose_name='Статус', choices=STATUS_CHOICES, default='FALSE')
     amount_rub = models.DecimalField(verbose_name='Сумма в рублях', max_digits=10, decimal_places=2, blank=True, null=True)
     in_advance = models.BooleanField(verbose_name='Предоплата', default=False)
-    
+
+
     class Meta:
         verbose_name = 'Крипто-пополнение'
         verbose_name_plural = 'Крипто-пополнения'
