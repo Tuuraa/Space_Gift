@@ -219,6 +219,8 @@ async def cancel_capcha(callback: types.CallbackQuery):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[1])  # Взлет
 async def launch(message: types.Message):
+    #TODO
+    return
     if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
         keyboard = types.InlineKeyboardMarkup().add(
             types.InlineKeyboardButton(
@@ -1226,6 +1228,8 @@ async def decline_order(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(text="get_gift")
 async def get_gift(callback: types.CallbackQuery, state: FSMContext):
+    #TODO
+    return
     async with lock:
         status = await db.get_status(callback.from_user.id, loop)
 

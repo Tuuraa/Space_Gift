@@ -23,6 +23,7 @@ async def main(loop):
         except Exception as e:
             print(e)
             pass
+    print(3)
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
