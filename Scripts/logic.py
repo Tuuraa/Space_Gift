@@ -17,19 +17,19 @@ count_ref = [0, 2, 4, 8, 16, 32]
 
 
 def get_photo(planet):
-     match int(planet):
-         case 0:
-             return 0, planets[0]
-         case 1:
-             return 1, planets[1]
-         case 2:
-             return 2, planets[2]
-         case 3:
-             return 3, planets[3]
-         case 4:
-             return 4, planets[4]
-         case 5:
-             return 5, planets[5]
+    match int(planet):
+        case 0:
+            return 0, planets[0]
+        case 1:
+            return 1, planets[1]
+        case 2:
+            return 2, planets[2]
+        case 3:
+            return 3, planets[3]
+        case 4:
+            return 4, planets[4]
+        case 5:
+            return 5, planets[5]
     return None
 
 
@@ -293,6 +293,7 @@ async def get_queue(planet, user_id, loop):
     users = await dbUser.get_users_on_planet(planet, loop)
     users_on_planet = await helper.get_users(users, loop)
     active_users = helper.get_active_status_users(users_on_planet, int((await dbUser.get_planet(user_id, loop))[0]))
+    active_users = [x for x in active_users if x.activate_date is not None]
 
     if len(active_users) > 0:
         active_users.sort(key=lambda sort: sort.activate_date)
