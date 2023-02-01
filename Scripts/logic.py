@@ -17,20 +17,22 @@ count_ref = [0, 2, 4, 8, 16, 32]
 
 
 def get_photo(planet):
-    match int(planet):
-        case 0:
-            return 0, planets[0]
-        case 1:
-            return 1, planets[1]
-        case 2:
-            return 2, planets[2]
-        case 3:
-            return 3, planets[3]
-        case 4:
-            return 4, planets[4]
-        case 5:
-            return 5, planets[5]
-    return None
+     match int(planet):
+         case 0:
+             return 0, planets[0]
+         case 1:
+             return 1, planets[1]
+         case 2:
+             return 2, planets[2]
+         case 3:
+             return 3, planets[3]
+         case 4:
+             return 4, planets[4]
+         case 5:
+             return 5, planets[5]
+
+     return None
+
 
 
 async def get_launch(bot, user_id, loop):
