@@ -781,7 +781,7 @@ async def wallet(message: types.Message):
                    f"😱 За инвестиции реферала - {int(ref_money)}₽\n" \
                    f"🪙 Вы реинвестировали - {int(reinv)}₽\n" \
                    "——————————————————\n" \
-                   f"💵 Общий депозит: {int(cd + ref + ref_money + reinv)}₽\n" \
+                   f"💵 Общий депозит: {int(cd + ref + ref_money + reinv + archive_dep)}₽\n" \
                    f"💵 Пассив: {day_percent}!\n" \
                    f"💵 На вывод: {await db.get_gift_money(message.from_user.id, loop)}₽ \n" \
                    "( минимальная сумма вывода 1000₽ )"
