@@ -34,6 +34,7 @@ def get_photo(planet):
      return None
 
 
+
 async def get_launch(bot, user_id, loop):
     planet = await dbUser.get_planet(user_id, loop)
 
@@ -294,6 +295,7 @@ async def get_queue(planet, user_id, loop):
     users = await dbUser.get_users_on_planet(planet, loop)
     users_on_planet = await helper.get_users(users, loop)
     active_users = helper.get_active_status_users(users_on_planet, int((await dbUser.get_planet(user_id, loop))[0]))
+    active_users = [x for x in active_users if x.activate_date is not None]
 
     if len(active_users) > 0:
         active_users.sort(key=lambda sort: sort.activate_date)
