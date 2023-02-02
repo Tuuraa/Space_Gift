@@ -111,6 +111,13 @@ class ManagerUsersDataBase:
             result = await cursor.fetchall()
             return bool(len(result))
 
+    async def get_user(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
+            result = (await cursor.fetchall())[0]
+            return result
+
     async def get_users(self, loop, extended: bool = False):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:

@@ -219,23 +219,23 @@ async def cancel_capcha(callback: types.CallbackQuery):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[1])  # Взлет
 async def launch(message: types.Message):
-    user_advance_pay = await dbSystem.get_user_advance_payment(message.from_user.id, loop)
-    if user_advance_pay is None:
-        return
+    # user_advance_pay = await dbSystem.get_user_advance_payment(message.from_user.id, loop)
+    # if user_advance_pay is None:
+    #     return
     #TODO
-    if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
-        keyboard = types.InlineKeyboardMarkup().add(
-            types.InlineKeyboardButton(
-                text="😇 Подписаться",
-                url='https://t.me/spacegiftbot',
-            )
-        )
-        return await message.answer(
-            text=f"<b>Чтобы пользововаться ботом, вам нужно подписаться "
-                 f"на нашу официальную группу</b> https://t.me/spacegiftbot\n\n",
-            parse_mode='html',
-            reply_markup=keyboard,
-        )
+    # if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
+    #     keyboard = types.InlineKeyboardMarkup().add(
+    #         types.InlineKeyboardButton(
+    #             text="😇 Подписаться",
+    #             url='https://t.me/spacegiftbot',
+    #         )
+    #     )
+    #     return await message.answer(
+    #         text=f"<b>Чтобы пользововаться ботом, вам нужно подписаться "
+    #              f"на нашу официальную группу</b> https://t.me/spacegiftbot\n\n",
+    #         parse_mode='html',
+    #         reply_markup=keyboard,
+    #     )
 
     dep = await db.get_deposit(message.from_user.id, loop)
     status = await db.get_status(message.from_user.id, loop)
@@ -1231,9 +1231,9 @@ async def decline_order(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(text="get_gift")
 async def get_gift(callback: types.CallbackQuery, state: FSMContext):
     #TODO
-    user_advance_pay = await dbSystem.get_user_advance_payment(callback.from_user.id, loop)
-    if user_advance_pay is None:
-        return
+    # user_advance_pay = await dbSystem.get_user_advance_payment(callback.from_user.id, loop)
+    # if user_advance_pay is None:
+    #     return
     async with lock:
         status = await db.get_status(callback.from_user.id, loop)
 
@@ -1315,7 +1315,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                 if ref is not None and refgift == 0:
                     await db.add_money(ref, 5000, loop)
                     await db.reset_refgift(callback.from_user.id, loop)
-                    await worker_jump(int(ref), loop)
+                    await worker_jump(int(ref), bot, loop)
                     await bot.send_message(
                         int(ref),
                         "💸 Вам начислено реферальное вознаграждение "
