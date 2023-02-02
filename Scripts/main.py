@@ -754,16 +754,15 @@ async def wallet(message: types.Message):
             elif active == 0 and status[0] == 1:
                 level_text = "В очереди"
 
+            total_referrals = await utils.count_total_referrals_by_user(message.from_user.id, 1, loop)
             cd = await db.get_amount_gift_money(message.from_user.id, loop)
-            ref = await db.get_activate_count_ref(message.from_user.id, loop) * 5000
+            ref = total_referrals['activated'] * 5000
             ref_money = await db.get_percent_ref_money(message.from_user.id, loop)
             reinv = await db.get_reinvest(message.from_user.id, loop)
             date = await db.get_date(message.chat.id, loop)
             archive_dep = await db.get_archive_dep(message.chat.id, loop)
 
             payments = await dbPay.get_user_topups(message.from_user.id, loop)
-
-            total_referrals = await utils.count_total_referrals_by_user(message.from_user.id, 1, loop)
 
             in_advance_pay = await dbSystem.get_user_advance_payment(message.from_user.id, loop)
             advance_pay_message = "Нет (0₽) ❌"
@@ -778,10 +777,10 @@ async def wallet(message: types.Message):
                    f"📆 Профиль создан: {date}\n" \
                    f"🚀 Статус: {level_text} {text_status}\n" \
                    f"✨ Оплатил заранее: {advance_pay_message}\n" \
-                   f"🙋‍♂️ Лично приглашенные в этом месяце: {await db.get_count_ref(message.from_user.id, loop)} " \
-                   f"({await db.get_activate_count_ref(message.from_user.id, loop)})\n" \
                    f"👥 Лично приглашенные за всё время: {total_referrals['total']} " \
                    f"({total_referrals['activated']})\n" \
+                   f"🙋‍♂️ Лично приглашенные в этом месяце: {await db.get_count_ref(message.from_user.id, loop)} " \
+                   f"({await db.get_activate_count_ref(message.from_user.id, loop)})\n" \
                    "Ваш депозит: 💰👇\n" \
                    "——————————————————\n" \
                    f"🏦 Общие накопления в системе дарения - {int(archive_dep)}₽\n" \
