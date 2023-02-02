@@ -222,7 +222,7 @@ async def launch(message: types.Message):
     # user_advance_pay = await dbSystem.get_user_advance_payment(message.from_user.id, loop)
     # if user_advance_pay is None:
     #     return
-    #TODO
+    # TODO
     # if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
     #     keyboard = types.InlineKeyboardMarkup().add(
     #         types.InlineKeyboardButton(
@@ -237,19 +237,25 @@ async def launch(message: types.Message):
     #         reply_markup=keyboard,
     #     )
 
-    dep = await db.get_deposit(message.from_user.id, loop)
-    status = await db.get_status(message.from_user.id, loop)
-    planet = await db.get_planet(message.from_user.id, loop)
-    step = await db.get_step(message.from_user.id, loop)
+    userDB = await db.get_user(message.from_user.id, loop)
 
-    user_topups = await dbPay.get_user_topups(message.from_user.id, loop)
+    dep = userDB[8]
+    status = userDB[14]
+    planet = userDB[11]
+    step = userDB[12]
+    # dep = await db.get_deposit(message.from_user.id, loop)
+    # status = await db.get_status(message.from_user.id, loop)
+    # planet = await db.get_planet(message.from_user.id, loop)
+    # step = await db.get_step(message.from_user.id, loop)
 
-    if int(planet[0]) == 5 and int(step) == 5:
+    #user_topups = await dbPay.get_user_topups(message.from_user.id, loop)
+
+    if int(planet) == 5 and int(step) == 5:
         await message.answer("Поздравляю, ты красавчик!")
         return
 
-    elif (status[0] == 1 or int(planet[0]) > 0 or dep >= 5000) and user_topups > 0:
-        await logic.get_launch(bot, message.from_user.id, loop)
+    elif status == 1 or int(planet) > 0 or dep >= 5000: #TODO and user_topups > 0
+        await logic.get_launch(bot, message.from_user.id, loop, userDB=userDB)
         return
 
     else:
@@ -714,7 +720,7 @@ async def space_go(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[0])  # Кошелек
 async def wallet(message: types.Message):
-    #await worker_jump(message.from_user.id, message.from_user.id, loop)
+    # await worker_jump(message.from_user.id, message.from_user.id, loop)
     if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
         keyboard = types.InlineKeyboardMarkup().add(
             types.InlineKeyboardButton(
@@ -1190,10 +1196,10 @@ async def amount_crypt(message, state: FSMContext, user_id=None):
             print(f"{data.get('PAY_TYPE')}")
             amount = round(int(amount) / await coinbase_data.get_kurs(data.get('PAY_TYPE')), 8)
             await bot.send_message(user_id,
-                f"☑️Заявка на пополнение №{int(await dbPay.get_count_crypt(loop)) + 1} успешно создана\n\n"
-                f"Сумма к оплате: <b>{amount} {data.get('PAY_TYPE')}</b>",
-                parse_mode="html",
-            )
+                                   f"☑️Заявка на пополнение №{int(await dbPay.get_count_crypt(loop)) + 1} успешно создана\n\n"
+                                   f"Сумма к оплате: <b>{amount} {data.get('PAY_TYPE')}</b>",
+                                   parse_mode="html",
+                                   )
             if pay.get("PAY_TYPE") == "USDT":
                 number = configCl.USDT_WALLET + '\n\ntrc 20'
             else:
@@ -1201,19 +1207,19 @@ async def amount_crypt(message, state: FSMContext, user_id=None):
 
             await bot.send_message(user_id, str(number))
             mes = await bot.send_message(user_id,
-                f"⏳ Заявка №{int(await dbPay.get_count_crypt(loop)) + 1} и {data.get('PAY_TYPE')}-адрес действительны: 60 минут.\n\n"
-                f"После успешной отправки {amount} {data.get('PAY_TYPE')} на указанный {data.get('PAY_TYPE')}-адрес выше, "
-                f"отправьте скриншот об оплате @smfadmin и администратор подтвердит зачисление.\n\n"
-                "Или же Вы можете отменить данную заявку нажав на кнопку «❌ Отменить заявку»\n\n"
-                "💸 Криптовалюта зачислится в систему в течении 20 минут, ожидайте 😌",
-                reply_markup=inline_keybords.cancel_pay()
-            )
+                                         f"⏳ Заявка №{int(await dbPay.get_count_crypt(loop)) + 1} и {data.get('PAY_TYPE')}-адрес действительны: 60 минут.\n\n"
+                                         f"После успешной отправки {amount} {data.get('PAY_TYPE')} на указанный {data.get('PAY_TYPE')}-адрес выше, "
+                                         f"отправьте скриншот об оплате @smfadmin и администратор подтвердит зачисление.\n\n"
+                                         "Или же Вы можете отменить данную заявку нажав на кнопку «❌ Отменить заявку»\n\n"
+                                         "💸 Криптовалюта зачислится в систему в течении 20 минут, ожидайте 😌",
+                                         reply_markup=inline_keybords.cancel_pay()
+                                         )
             utc_now = pytz.utc.localize(datetime.datetime.utcnow())
             date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
             await dbPay.create_crypt_pay(pay.get("PAY_TYPE"), amount, str(date_time_now)[:-7],
                                          int(user_id), mes["message_id"], "WAIT_PAYMENT", data.get("AMOUNT"),
-                                         loop, in_advance=data['pay_in_advance']) #TODO KIT
-            #await bot.send_message('-1784358645', text=f"Новое пополнение!\n\n{amount} {data.get('PAY_TYPE')}\n'", parse_mode='html')
+                                         loop, in_advance=data['pay_in_advance'])  # TODO KIT
+            # await bot.send_message('-1784358645', text=f"Новое пополнение!\n\n{amount} {data.get('PAY_TYPE')}\n'", parse_mode='html')
             await state.reset_state(with_data=False)
 
 
@@ -1221,6 +1227,7 @@ async def amount_crypt(message, state: FSMContext, user_id=None):
 async def accept_order(callback: types.CallbackQuery, state: FSMContext):
     # await dbPay.change_status_for_cancel("CANCELED", pay[5], "CREDIT", loop)
     ...
+
 
 @dp.callback_query_handler(text="cancel_pay")
 async def decline_order(callback: types.CallbackQuery, state: FSMContext):
@@ -1230,7 +1237,7 @@ async def decline_order(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(text="get_gift")
 async def get_gift(callback: types.CallbackQuery, state: FSMContext):
-    #TODO
+    # TODO
     # user_advance_pay = await dbSystem.get_user_advance_payment(callback.from_user.id, loop)
     # if user_advance_pay is None:
     #     return
@@ -1278,7 +1285,6 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                     refgift = this_user[25]
                     if ref and refgift == 0:
                         await db.add_money_ref(callback.from_user.id, ref, 5000, loop)
-
 
                         try:
                             await bot.send_message(
@@ -1391,7 +1397,7 @@ async def sberbank_pay(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["PAY_TYPE"] = "sberbank"
         pay_in_advance = data['pay_in_advance']
-        
+
     if pay_in_advance:
         await get_amount(None, state, user_id=callback.from_user.id)
     else:
@@ -1411,7 +1417,7 @@ async def tinkoff_pay(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["PAY_TYPE"] = "tinkoff"
         pay_in_advance = data['pay_in_advance']
-        
+
     if pay_in_advance:
         await get_amount(None, state, user_id=callback.from_user.id)
     else:
@@ -1466,8 +1472,8 @@ async def get_amount(message, state: FSMContext, user_id=None):
             data["PAY_AMOUNT"] = int(amount)
             if 'pay_in_advance' not in data:
                 await bot.send_message(user_id,
-                    f"Произошла техническая ошибка 😢\nПопробуйте немного позже",
-                )
+                                       f"Произошла техническая ошибка 😢\nПопробуйте немного позже",
+                                       )
 
         pay = await state.get_data()
 
@@ -1476,12 +1482,12 @@ async def get_amount(message, state: FSMContext, user_id=None):
         global NUMBER_PAY
         NUMBER_PAY += 1
         await bot.send_message(user_id,
-            f"☑️Заявка на пополнение №{int(await dbPay.get_count_credit(loop)) + 1} успешно создана\n\n"
-            f"💵 Сумма к оплате: 👉 <b>{amount} RUB 🔥</b>\n\n"
-            f"❗️Внимание🔥 перевод нужно совершить точно с комиссией, иначе деньги не зачисляются❗️\n\n"
-            f"💳 Реквизиты для оплаты:",
-            parse_mode='HTML'
-        )
+                               f"☑️Заявка на пополнение №{int(await dbPay.get_count_credit(loop)) + 1} успешно создана\n\n"
+                               f"💵 Сумма к оплате: 👉 <b>{amount} RUB 🔥</b>\n\n"
+                               f"❗️Внимание🔥 перевод нужно совершить точно с комиссией, иначе деньги не зачисляются❗️\n\n"
+                               f"💳 Реквизиты для оплаты:",
+                               parse_mode='HTML'
+                               )
 
         await bot.send_message(user_id, str(number))
         mes = await bot.send_message(
@@ -2127,6 +2133,7 @@ async def reset_system_yes(callback: types.CallbackQuery, state):
 
 TRANSFER_DEP_USERS = []
 
+
 @dp.callback_query_handler(text="reset_system_no")
 async def reset_system_no(callback: types.CallbackQuery):
     if callback.from_user.id in TRANSFER_DEP_USERS:
@@ -2155,6 +2162,7 @@ async def reset_system_no(callback: types.CallbackQuery):
             await callback.message.delete()
         except:
             pass
+
 
 # ------------------------------------------------Admin------------------------------------------------------------------------------
 
