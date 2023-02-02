@@ -1825,7 +1825,7 @@ class ManagerResetSystem:
             await cursor.execute("""
             UPDATE `users` SET `is_include_ref` = '0',
             `archive_dep` = `archive_dep` + `amount_gift_money`, `planet` = '0', `status` = '0',
-            `step` = '0', `activate_date` = NULL, `count_ref` = '0', `activate_ref_count` = '0'
+            `step` = '1', `activate_date` = NULL, `count_ref` = '0', `activate_ref_count` = '0'
             """)
 
             await cursor.execute("""

@@ -223,6 +223,7 @@ async def launch(message: types.Message):
     if user_advance_pay is None:
         return
     #TODO
+    #return
     if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
         keyboard = types.InlineKeyboardMarkup().add(
             types.InlineKeyboardButton(
@@ -1234,6 +1235,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
     user_advance_pay = await dbSystem.get_user_advance_payment(callback.from_user.id, loop)
     if user_advance_pay is None:
         return
+    #return
     async with lock:
         status = await db.get_status(callback.from_user.id, loop)
 
