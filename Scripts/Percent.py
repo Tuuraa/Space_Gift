@@ -8,6 +8,7 @@ import sys
 from db import ManagerPayDataBase, ConfigDBManager
 import coinbase_data
 from helper import clear_none
+import utils
 
 import db
 from db import ManagerUsersDataBase
@@ -57,7 +58,8 @@ async def worker_percent(loop):
                             cd = float(await dbUser.get_amount_gift_money(user[0], loop))
                             dep = float(await dbUser.get_deposit(user[0], loop))
                             archive_dep = float(await dbUser.get_archive_dep(user[0], loop))
-                            ref = await dbUser.get_activate_count_ref(user[0], loop) * 5000
+                            total_referrals = await utils.count_total_referrals_by_user(message.from_user.id, 1, loop)
+                            ref = total_referrals['activated'] * 5000
                             ref_money = float(await dbUser.get_percent_ref_money(user[0], loop))
                             reinv = float(await dbUser.get_reinvest(user[0], loop))
 
