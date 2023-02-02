@@ -29,11 +29,11 @@ async def get_launch(bot, user_id, loop, userDB: UserDB = None):
     if userDB is None:
         userDB = await dbUser.get_user(user_id, loop)
 
-    planet = userDB[11]
-    level = userDB[12]
-    status = userDB[14]
+    planet = int(userDB[11])
+    level = int(userDB[12])
+    status = int(userDB[14])
 
-    c_ref = count_ref[int(planet[0])] - int(userDB[28])
+    c_ref = count_ref[int(planet)] - int(userDB[28])
     c_ref_op = int(userDB[28])
     user_count_ref = int(userDB[15])
 
@@ -68,15 +68,15 @@ async def get_launch(bot, user_id, loop, userDB: UserDB = None):
     path = ""
     more_text = ""
     active_text = ""
-    text_planet = get_photo(planet[0])
+    text_planet = get_photo(planet)
 
     sum_gift = sums[text_planet[0]]
 
     text_status = " ❌"
-    if status[0] == 1:
+    if status == 1:
         text_status = " ✅"
 
-    if c_ref_op < count_ref[int(planet[0])]:
+    if c_ref_op < count_ref[int(planet)]:
         if c_ref_op == 0:
             active_text = f"\n❗️ Чтобы попасть в очередь на планету {text_planet[1]} вам нужно пригласить " \
                           f"{c_ref} активных чел." \
@@ -86,11 +86,11 @@ async def get_launch(bot, user_id, loop, userDB: UserDB = None):
                           f"{c_ref} активных чел." \
                           f" или пополнить депозит на {c_ref * 10_000} RUB ❗️\n"
 
-    if level == 1 and status[0] == 0:
+    if level == 1 and status == 0:
         path = first_path + f"{text_planet[1]}/В ожидании ({text_planet[1].lower()}).png"
         level_text = "В ожидании"
-    elif status[0] == 1 and user_count_ref >= count_ref[
-        int(planet[0])] and gift_id != user_id:
+    elif status == 1 and user_count_ref >= count_ref[
+        int(planet)] and gift_id != user_id:
         path = first_path + f"{text_planet[1]}/В очереди ({text_planet[1].lower()}).png"
         level_text = "В очереди"
         # number = await get_queue(planet, user_id, loop) #TODO вернуть
@@ -105,8 +105,8 @@ async def get_launch(bot, user_id, loop, userDB: UserDB = None):
                      f"3️⃣ Space gift начислит на депозит 10% от инвестиций реферала.\n\n" \
                      f"НЕ ЖДИ. ДЕЙСТВУЙ 💪 ✅"
 
-    elif status[0] == 1 and user_count_ref < count_ref[
-        int(planet[0])] and gift_id != user_id:
+    elif status == 1 and user_count_ref < count_ref[
+        int(planet)] and gift_id != user_id:
         path = first_path + f"{text_planet[1]}/В очереди ({text_planet[1].lower()}).png"
         level_text = "В очереди"
         #number = await get_queue(planet, user_id, loop) #TODO вернуть
@@ -137,20 +137,26 @@ async def get_launch(bot, user_id, loop, userDB: UserDB = None):
            f"👥 Лично приглашенных: {user_count_ref} чел. ({c_ref_op}).\n" \
            f"🚀 Статус: {level_text} {text_status} {more_text}\n {active_text}"
 
-    if status[0] == 0:
+    if status == 0:
         text += "\n✅ Для того что бы активироваться в системе, и встать в «очередь» на " \
                 f"подарки, Вам нужно сделать 🎁 подарок " \
                 f"в размере {sums[text_planet[0]]} RUB астронавту @{link}."
 
     try:
-        with open(path, "rb") as file:
-            await bot.send_photo(
-                chat_id=user_id,
-                photo=file,
-                caption=text,
-                reply_markup=await inline_keybords.laucnh_inline(dbUser, user_id, loop)
-            )
-    except:
+        await bot.send_message(
+            chat_id=user_id,
+            text=text,
+            reply_markup=await inline_keybords.laucnh_inline(dbUser, user_id, loop)
+        )
+        # with open(path, "rb") as file:
+        #     await bot.send_photo(
+        #         chat_id=user_id,
+        #         photo=file,
+        #         caption=text,
+        #         reply_markup=await inline_keybords.laucnh_inline(dbUser, user_id, loop)
+        #     )
+    except Exception as e:
+        print(e)
         await bot.send_message(
             chat_id=user_id,
             text=text,
