@@ -17,7 +17,7 @@ import config
 import utils
 from FSM import PayFSM, CalculatorFSM, WithdrawMoneyFSM, ChangeCryptTypeFSN, AnswerAfterGiftFSM, \
     SendGiftFSM, PayCryptFSM, UserCodeFSM, WithdrawMoneyPercentFSM, ReinvestFSM, ReinvestInvestFSM
-from Scripts.middlewares import ThrottlingMiddleware
+from middlewares import ThrottlingMiddleware
 from db import ManagerUsersDataBase, ManagerPayDataBase, ManagerWithDrawDataBase, ConfigDBManager, ManagerResetSystem
 import coinbase_data
 from User import UserDB
@@ -220,10 +220,12 @@ async def cancel_capcha(callback: types.CallbackQuery):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[1])  # Взлет
 async def launch(message: types.Message):
-    # user_advance_pay = await dbSystem.get_user_advance_payment(message.from_user.id, loop)
-    # if user_advance_pay is None:
-    #     return
+    print('launch -', message.from_user.id)
+    user_advance_pay = await dbSystem.get_user_advance_payment(message.from_user.id, loop)
+    if user_advance_pay is None:
+        return
     # TODO
+    return
     # if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
     #     keyboard = types.InlineKeyboardMarkup().add(
     #         types.InlineKeyboardButton(
@@ -1243,9 +1245,11 @@ async def decline_order(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(text="get_gift")
 async def get_gift(callback: types.CallbackQuery, state: FSMContext):
     # TODO
-    # user_advance_pay = await dbSystem.get_user_advance_payment(callback.from_user.id, loop)
-    # if user_advance_pay is None:
-    #     return
+    print('get_gift -', callback.from_user.id)
+    user_advance_pay = await dbSystem.get_user_advance_payment(callback.from_user.id, loop)
+    if user_advance_pay is None:
+        return
+    return
     async with lock:
         this_user = await db.get_user(callback.from_user.id, loop)
         status = int(this_user[14])
