@@ -111,8 +111,9 @@ class ManagerUsersDataBase:
             result = await cursor.fetchall()
             return bool(len(result))
 
-    async def get_user(self, user_id, loop):
-        connection, cursor = await async_connect_to_mysql(loop)
+    async def get_user(self, user_id, loop, connection=None, cursor=None):
+        if connection is None and cursor is None:
+            connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
             result = (await cursor.fetchall())[0]
@@ -677,8 +678,9 @@ class ManagerUsersDataBase:
             result = (await cursor.fetchall())[0][0]
             return result
 
-    async def get_gift(self, gift_id, user_id, money, loop):
-        connection, cursor = await async_connect_to_mysql(loop)
+    async def get_gift(self, gift_id, user_id, money, loop, connection=None, cursor=None):
+        if connection is None or cursor is None:
+            connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute(
                 "UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` + %s WHERE `user_id` = %s",
@@ -734,8 +736,9 @@ class ManagerUsersDataBase:
             )
             await connection.commit()
 
-    async def add_now_dep(self, user_id, money, loop):
-        connection, cursor = await async_connect_to_mysql(loop)
+    async def add_now_dep(self, user_id, money, loop, connection=None, cursor=None):
+        if connection is None or cursor is None:
+            connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute(
                 "UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` + %s WHERE `user_id` = %s",
@@ -1030,8 +1033,9 @@ class ManagerUsersDataBase:
             )
             await connection.commit()
 
-    async def remove_amount_gift_money(self, user_id, money, loop):
-        connection, cursor = await async_connect_to_mysql(loop)
+    async def remove_amount_gift_money(self, user_id, money, loop, connection=None, cursor=None):
+        if connection is None or cursor is None:
+            connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute(
                 "UPDATE `users` SET `amount_gift_money` =  `amount_gift_money` - %s WHERE `user_id` = %s",
@@ -1251,8 +1255,9 @@ class ManagerUsersDataBase:
             )
             await connection.commit()
 
-    async def remove_depozit(self, money, user_id, loop):
-        connection, cursor = await async_connect_to_mysql(loop)
+    async def remove_depozit(self, money, user_id, loop, connection=None, cursor=None):
+        if connection is None or cursor is None:
+            connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute(
                 "UPDATE `users` SET `depozit` = `depozit` - %s WHERE `user_id` = %s",

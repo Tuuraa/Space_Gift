@@ -3,6 +3,8 @@ import inline_keybords
 import helper
 from User import UserDB
 from config import PATH
+from db import async_connect_to_mysql
+
 
 dbUser = db.ManagerUsersDataBase()
 dbPay = db.ManagerPayDataBase()
@@ -17,28 +19,28 @@ count_ref = [0, 2, 4, 8, 16, 32]
 
 
 def get_photo(planet):
-     match int(planet):
-         case 0:
-             return 0, planets[0]
-         case 1:
-             return 1, planets[1]
-         case 2:
-             return 2, planets[2]
-         case 3:
-             return 3, planets[3]
-         case 4:
-             return 4, planets[4]
-         case 5:
-             return 5, planets[5]
+    match int(planet):
+        case 0:
+            return 0, planets[0]
+        case 1:
+            return 1, planets[1]
+        case 2:
+            return 2, planets[2]
+        case 3:
+            return 3, planets[3]
+        case 4:
+            return 4, planets[4]
+        case 5:
+            return 5, planets[5]
 
-     return None
-
+    return None
 
 
 async def get_launch(bot, user_id, loop):
     planet = await dbUser.get_planet(user_id, loop)
 
     user = (await get_user_on_planet(planet, user_id, loop))
+
 
     if user is None:
         link = 'space_gift_bot'
@@ -47,7 +49,11 @@ async def get_launch(bot, user_id, loop):
         link = user.link
         gift_id = int(user.user_id)
 
+    curr_user = await dbUser.get_user(user_id, loop)
+
+    level = curr_user[12]
     level = int((await dbUser.get_step(user_id, loop))[0])
+
     level_text = f"Уровень {level}"
     path = ""
     more_text = ""
@@ -56,15 +62,17 @@ async def get_launch(bot, user_id, loop):
 
     sum_gift = sums[text_planet[0]]
     text_planet = get_photo(planet[0])
+
+    status = curr_user[14]
     status = await dbUser.get_status(user_id, loop)
 
     text_status = " ❌"
     if status[0] == 1:
         text_status = " ✅"
 
-    c_ref = count_ref[int(planet[0])] - int(await dbUser.get_activate_count_ref(user_id, loop))
-    c_ref_op = await dbUser.get_activate_count_ref(user_id, loop)
-    if await dbUser.get_activate_count_ref(user_id, loop) < count_ref[int(planet[0])]:
+    c_ref = count_ref[int(planet[0])] - int(curr_user[28])
+    c_ref_op = curr_user[28]
+    if curr_user[28] < count_ref[int(planet[0])]:
         if c_ref_op == 0:
             active_text = f"\n❗️ Чтобы попасть в очередь на планету {text_planet[1]} вам нужно пригласить " \
                          f"{c_ref} активных чел." \
@@ -77,7 +85,7 @@ async def get_launch(bot, user_id, loop):
     if level == 1 and status[0] == 0:
         path = first_path + f"{text_planet[1]}/В ожидании ({text_planet[1].lower()}).png"
         level_text = "В ожидании"
-    elif status[0] == 1 and await dbUser.get_count_ref(user_id, loop) >= count_ref[int(planet[0])] and gift_id != user_id:
+    elif status[0] == 1 and curr_user[15] >= count_ref[int(planet[0])] and gift_id != user_id:
         path = first_path + f"{text_planet[1]}/В очереди ({text_planet[1].lower()}).png"
         level_text = "В очереди"
         ud = (await dbUser.get_planet(user_id, loop))[0]
@@ -93,7 +101,7 @@ async def get_launch(bot, user_id, loop):
             f"3️⃣ Space gift начислит на депозит 10% от инвестиций реферала.\n\n" \
             f"НЕ ЖДИ. ДЕЙСТВУЙ 💪 ✅"
 
-    elif status[0] == 1 and await dbUser.get_count_ref(user_id, loop) < count_ref[int(planet[0])] and gift_id != user_id:
+    elif status[0] == 1 and curr_user[15] < count_ref[int(planet[0])] and gift_id != user_id:
         path = first_path + f"{text_planet[1]}/В очереди ({text_planet[1].lower()}).png"
         level_text = "В очереди"
         ud = (await dbUser.get_planet(user_id, loop))[0]
@@ -119,12 +127,12 @@ async def get_launch(bot, user_id, loop):
 
     cd = await dbUser.get_amount_gift_money(user_id, loop)
 
-    text = f"📆 Профиль создан: {await dbUser.get_date(user_id, loop)}\n" \
+    text = f"📆 Профиль создан: {curr_user[4]}\n" \
         f"🤖 Ваш ID: {user_id}\n\n"\
-        f"👩‍🚀 Астронавт: {await dbUser.get_name(user_id, loop)}\n"\
+        f"👩‍🚀 Астронавт: {curr_user[3]}\n"\
         f"🎁 Системы дарения: {int(cd)} RUB\n"\
         f"{text_plan}\n"\
-        f"👥 Лично приглашенных: {await dbUser.get_count_ref(user_id, loop)} чел. ({await dbUser.get_activate_count_ref(user_id, loop)}).\n"\
+        f"👥 Лично приглашенных: {curr_user[15]} чел. ({curr_user[28]}).\n"\
         f"🚀 Статус: {level_text} {text_status} {more_text}\n {active_text}"
 
     if status[0] == 0:
@@ -208,32 +216,36 @@ async def get_gift(user_id, gift_user: UserDB, loop):
     if user_id == gift_user.user_id:
         return False, "Нельзя дарить самому себе ❌"
 
-    planet = await dbUser.get_planet(user_id, loop)
+    connection, cursor = await async_connect_to_mysql(loop)
+
+    this_user = await dbUser.get_user(user_id, loop, connection, cursor)
+
+    planet = this_user[11]
     text_planet = get_photo(planet[0])
 
     sum_gift = sums[text_planet[0]]
     #system_gift = await dbUser.get_amount_gift_money(user_id, loop)
 
-    await dbUser.get_gift(gift_user.user_id, user_id, sum_gift, loop)
+    await dbUser.get_gift(gift_user.user_id, user_id, sum_gift, loop, connection, cursor)
     #await dbUser.add_amount_gift_money(gift_user.user_id, sum_gift, loop)
     #await dbUser.add_money(gift_user.user_id, sum_gift, loop)
     #await dbUser.set_now_depozit(user_id, sum_gift, loop)
     #await dbUser.remove_money(user_id, sum_gift, loop)
-    now_dep = await dbUser.get_now_depozit(gift_user.user_id, loop)
+    now_dep = this_user[10]
 
     if now_dep > 0:
-        await dbUser.add_now_dep(gift_user.user_id, now_dep, loop)
+        await dbUser.add_now_dep(gift_user.user_id, now_dep, loop, connection, cursor)
         #await dbUser.add_amount_gift_money(gift_user.user_id, now_dep, loop)
         #await dbUser.set_now_depozit(gift_user.user_id, 0, loop)
 
     if int(planet[0]) > 0:
-        amount = await dbUser.get_amount_gift_money(user_id, loop)
+        amount = this_user[18]
         if amount >= sum_gift:
-            await dbUser.remove_amount_gift_money(user_id, sum_gift, loop)
+            await dbUser.remove_amount_gift_money(user_id, sum_gift, loop, connection, cursor)
         else:
             return False, "Недостаточно денег"
     else:
-        await dbUser.remove_depozit(sum_gift, user_id, loop)
+        await dbUser.remove_depozit(sum_gift, user_id, loop, connection, cursor)
 
     return True, f"Вы успешно подарили @{gift_user.link} {sum_gift} RUB", sum_gift
 

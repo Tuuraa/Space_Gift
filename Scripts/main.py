@@ -1235,13 +1235,14 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
     # if user_advance_pay is None:
     #     return
     async with lock:
-        status = await db.get_status(callback.from_user.id, loop)
+        this_user = await db.get_user(callback.from_user.id, loop)
+        status = this_user[14]
 
         # count_gift, counter = await db.get_count_gift(loop)
 
         if status[0] == 0:
 
-            user: UserDB = (await logic.get_user_on_planet((await db.get_planet(callback.from_user.id, loop))[0],
+            user: UserDB = (await logic.get_user_on_planet((this_user[11])[0],
                                                            callback.from_user.id, loop))
 
             if user is not None:
@@ -1273,8 +1274,8 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                         "Пользователю было отправлено сообщение о подарке ✅."
                     )
 
-                    ref = await db.get_ref(callback.from_user.id, loop)
-                    refgift = await db.get_refgift(callback.from_user.id, loop)
+                    ref = this_user[2]
+                    refgift = this_user[25]
                     if ref and refgift == 0:
                         await db.add_money_ref(callback.from_user.id, ref, 5000, loop)
 
@@ -1302,15 +1303,15 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                         answer[1]
                     )
             else:
-                planet = await db.get_planet(callback.from_user.id, loop)
+                planet = this_user[25]
                 text_planet = logic.get_photo(planet[0])
                 sum_gift = logic.sums[text_planet[0]]
 
                 await db.set_now_depozit(callback.from_user.id, sum_gift, loop)
                 await db.remove_money(callback.from_user.id, sum_gift, loop)
 
-                ref = await db.get_ref(callback.from_user.id, loop)
-                refgift = await db.get_refgift(callback.from_user.id, loop)
+                ref = this_user[2]
+                refgift = this_user[25]
 
                 if ref is not None and refgift == 0:
                     await db.add_money(ref, 5000, loop)
@@ -1325,7 +1326,7 @@ async def get_gift(callback: types.CallbackQuery, state: FSMContext):
                 # await bot.delete_message(callback.from_user.id, callback.message.message_id)
 
                 if int(planet[0]) > 0:
-                    amount = await db.get_amount_gift_money(callback.from_user.id, loop)
+                    amount = this_user[18]
                     if amount >= sum_gift:
                         await db.remove_amount_gift_money(callback.from_user.id, sum_gift, loop)
                     else:
