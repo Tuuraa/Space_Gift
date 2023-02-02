@@ -446,11 +446,11 @@ class ManagerUsersDataBase:
             )
             await connection.commit()
 
-    async def set_depozit(self, user_id, money, loop):
+    async def set_amount_gift_money(self, user_id, money, loop): #TODO
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute(
-                "UPDATE `users` SET depozit = %s WHERE user_id = %s",
+                "UPDATE `users` SET amount_gift_money = %s WHERE user_id = %s",
                 (
                     money,
                     user_id,
