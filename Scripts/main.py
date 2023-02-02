@@ -17,6 +17,7 @@ import config
 import utils
 from FSM import PayFSM, CalculatorFSM, WithdrawMoneyFSM, ChangeCryptTypeFSN, AnswerAfterGiftFSM, \
     SendGiftFSM, PayCryptFSM, UserCodeFSM, WithdrawMoneyPercentFSM, ReinvestFSM, ReinvestInvestFSM
+from Scripts.middlewares import ThrottlingMiddleware
 from db import ManagerUsersDataBase, ManagerPayDataBase, ManagerWithDrawDataBase, ConfigDBManager, ManagerResetSystem
 import coinbase_data
 from User import UserDB
@@ -2216,4 +2217,5 @@ async def pay_advance(callback: types.CallbackQuery, state):
 
 
 if __name__ == '__main__':
+    dp.middleware.setup(ThrottlingMiddleware())
     executor.start_polling(dp, skip_updates=True)
