@@ -34,7 +34,6 @@ def get_photo(planet):
      return None
 
 
-
 async def get_launch(bot, user_id, loop):
     planet = await dbUser.get_planet(user_id, loop)
 

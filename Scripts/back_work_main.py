@@ -2,8 +2,9 @@ import asyncio
 from back_work import worker
 from Percent import worker_percent
 from back_clones import worker_clones
-from jump import worker_jumps
+from jump import worker_jump
 from back_verify_balance import worker_verify_balance
+from db import ConfigDBManager
 import threading
 
 
@@ -14,8 +15,8 @@ async def main():
         worker(loop),
         worker_percent(loop),
         worker_clones(loop),
-        worker_jumps(loop),
-        #worker_verify_balance(loop),
+        #worker_jump(loop),
+        worker_verify_balance(loop),
     )
     print('end')
 

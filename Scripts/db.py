@@ -1181,6 +1181,15 @@ class ManagerUsersDataBase:
             result = await cursor.fetchall()
             return result
 
+    async def get_ref_users_by_date(self, ref_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute(
+                "SELECT * FROM `users` WHERE `referrer_id` = %s and date >= '2023-02-02' ", (ref_id,)
+            )
+            result = await cursor.fetchall()
+            return result
+
     async def get_ref_users_in(self, ref_users, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:

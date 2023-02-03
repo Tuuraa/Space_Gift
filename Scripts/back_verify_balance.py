@@ -62,8 +62,8 @@ async def worker_verify_balance(loop):
 
 
                 # Проверка рефералов
-                user_ref = (await dbUser.get_ref_users(user[0], loop))
-                activate_ref_count = user_data[27]
+                user_ref = (await dbUser.get_ref_users_by_date(user[0], loop))
+                activate_ref_count = user_data[28]
 
                 user_active_ref_count = 0
                 for ref in user_ref:
