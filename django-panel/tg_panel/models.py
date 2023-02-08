@@ -115,7 +115,19 @@ class TgUser(models.Model):
     last_withd = models.DateTimeField(blank=True, null=True, auto_now=False, auto_now_add=False)
     activate_ref_count = models.IntegerField(verbose_name='Активные рефералы', blank=True, null=True)
     remove_dep = models.IntegerField(verbose_name='Депозит доступный для вывода', blank=True, null=True, editable=False)
-    percent_ref_money = models.FloatField(blank=True, null=True, editable=False)
+    percent_ref_money = models.FloatField(verbose_name='Заработок с рефералов', blank=True, null=True, editable=False)
+    gift_money_invest = models.FloatField(verbose_name='Деньги на вывод с инвестиций', blank=True, null=True, editable=False)
+    reinvest = models.FloatField(verbose_name='Реинвестирование с системы дарения', blank=True, null=True, editable=False)
+    archive_dep = models.FloatField(verbose_name='Архив с системы дарения', black=True, null=True)
+    last_month_refs = models.FloatField(blank=True, null=True)
+
+    @property
+    def day_income_gift(self):
+        pass
+
+    @property
+    def day_income_invest(self):
+        pass
 
     def __str__(self):
         return self.name

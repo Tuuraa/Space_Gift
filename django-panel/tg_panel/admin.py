@@ -43,14 +43,41 @@ class TgUserAdmin(admin.ModelAdmin):
     search_fields = ('user_id', 'name')
     list_filter = ('name', 'user_id', 'referrer_id')
     list_display = ('name', 'depozit', 'get_widhdraws', 'get_referrer', 'stats_link', 'count_ref')
-    readonly_fields = ('user_id', 'name', 'date', 'money', 'date_now', 'link_name', 'gift_value', 'now_depozit', 'first_dep')
-    exclude = ('last_withd', 'jump', 'gift_value', 'now_depozit')
+    readonly_fields = ('user_id', 'name', 'date', 'money', 'total_depozit', 'percent_ref_money', 'gift_money_invest',
+                       'reinvest', 'get_daily_income_gift', 'get_daily_income_invest', 'date_now',
+                       'link_name', 'now_depozit', 'first_dep')
+
+    exclude = ('last_withd', 'jump', 'gift_value', 'now_depozit', 'archive_dep', 'last_month_refs')
     
     def get_widhdraws(self, obj):
         count = Withdraw.objects.filter(user_id=obj.user_id).count()
         return format_html('<a href="/admin/tg_panel/withdraw/?user_id={}">{} Withdraws</a>', obj.user_id, count)
     
     get_widhdraws.short_description = "Вывод"
+
+    def get_daily_income_gift(self, obj):
+        money = obj.amount_gift_money + obj.archive_dep + obj.activate_ref_count * 5000 + last_month_refs * 500
+        money += obj.ref_money + obj.reinvest
+        money *= 0.008
+
+        return f"{money} Руб."
+
+    get_daily_income_gift.short_description = "Пассив"
+
+    def get_daily_income_invest(self, obj):
+        money = obj.depozit * 0.008
+        return f"{money} Руб."
+
+    get_daily_income_invest.short_description = "Пассив с инвестиций"
+
+    def total_depozit(self, obj):
+        money = obj.amount_gift_money + obj.archive_dep + obj.activate_ref_count * 5000 + last_month_refs * 500
+        money += obj.ref_money + obj.reinvest
+
+        return f"{money} Руб."
+
+    total_depozit.short_description = 'Общий депозит'
+
 
     def get_referrer(self, obj):
         referrer = TgUser.objects.filter(user_id=obj.referrer_id)
