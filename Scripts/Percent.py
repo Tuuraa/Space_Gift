@@ -59,10 +59,12 @@ async def worker_percent(loop):
                             archive_dep = float(await dbUser.get_archive_dep(user[0], loop))
                             ref = await dbUser.get_activate_count_ref(user[0], loop) * 5000
                             last_month_passive = await dbUser.last_month_refs(user[0], loop) * 500
+                            last_month_ref_passive = await dbUser.get_last_month_ref_count(user[0], loop) * 5000
+
                             ref_money = float(await dbUser.get_percent_ref_money(user[0], loop))
                             reinv = float(await dbUser.get_reinvest(user[0], loop))
 
-                            full_money = cd + ref + ref_money + last_month_passive + reinv + archive_dep
+                            full_money = cd + ref + ref_money + last_month_passive + last_month_ref_passive + reinv + archive_dep
                             money = round(float(full_money) * .008)
                             invest_money = round(float(dep) * .008)
 
