@@ -559,6 +559,7 @@ async def deleteacc(message: types.Message):
 
 @dp.callback_query_handler(text='reinvest')
 async def reinvest(callback: types.CallbackQuery):
+    return await callback.answer("🚫 Реинвестирование временно недоступно", show_alert=True)
     async with lock:
         gift_money = await db.get_gift_money(callback.from_user.id, loop)
         if gift_money <= 0:
@@ -625,6 +626,7 @@ async def reinv_amount(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(text='reinvest_invest')
 async def reinvest_invest_money(callback: types.CallbackQuery):
+    return await callback.answer("🚫 Реинвестирование временно недоступно", show_alert=True)
     async with lock:
         gift_money_invest = await db.get_gift_money_invest(callback.from_user.id, loop)
         if gift_money_invest <= 0:
@@ -833,10 +835,10 @@ async def get_gift_from_space_gift(callback: types.CallbackQuery):
                 )
             except:
                 ...
-                await bot.send_message(
-                    callback.from_user.id,
-                    f"Поздравляем! 🎉 Space Gift подарил вам {now_dep} RUB 🙌"
-                )
+            await bot.send_message(
+                callback.from_user.id,
+                f"Поздравляем! 🎉 Space Gift подарил вам {now_dep} RUB 🙌"
+            )
             try:
                 await bot.delete_message(callback.from_user.id, callback.message.message_id)
             except:

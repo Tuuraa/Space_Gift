@@ -29,7 +29,7 @@ async def count_total_referrals_by_user(user_id, to_level, loop) -> dict:
         count += len(curr_referrals)
 
         for user in db_answer:
-            if int(user[1]) != 0 or int(user[2]) != 0 or int(user[3]) != 0:
+            if int(user[2]) != 0 or int(user[3]) != 0:
                 activated_count += 1
 
     return {
