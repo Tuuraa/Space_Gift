@@ -116,6 +116,8 @@ class TgUser(models.Model):
     activate_ref_count = models.IntegerField(verbose_name='Активные рефералы', blank=True, null=True)
     remove_dep = models.IntegerField(verbose_name='Депозит доступный для вывода', blank=True, null=True, editable=False)
     percent_ref_money = models.FloatField(blank=True, null=True, editable=False)
+    gift_money_invest = models.FloatField(blank=True, null=True)
+    last_month_ref_count = models.IntegerField(verbose_name='Рефералы с прошлого месяца', blank=True, null=True)
 
     def __str__(self):
         return self.name
