@@ -85,6 +85,15 @@ class ConfigDBManager:
 
 
 class ManagerUsersDataBase:
+    async def last_month_refs(self, user_id, loop):
+        connection, cursor = await async_connect_to_mysql(loop)
+        async with connection.cursor() as cursor:
+            await cursor.execute(
+                "SELECT last_month_active FROM users where user_id = %s", (user_id,)
+            )
+            result = (await cursor.fetchone())[0]
+            return result
+
     async def invested_users_count(self, loop):
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:

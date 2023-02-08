@@ -750,6 +750,8 @@ async def wallet(message: types.Message):
 
             cd = await db.get_amount_gift_money(message.from_user.id, loop)
             ref = await db.get_activate_count_ref(message.from_user.id, loop) * 5000
+            last_month_active_count = await db.last_month_refs(message.from_user.id, loop)
+            last_month_passive = last_month_active_count * 500
             ref_money = await db.get_percent_ref_money(message.from_user.id, loop)
             reinv = await db.get_reinvest(message.from_user.id, loop)
             date = await db.get_date(message.chat.id, loop)
@@ -764,7 +766,7 @@ async def wallet(message: types.Message):
             if in_advance_pay is not None:
                 advance_pay_message = "Да (5000₽) ✅"
 
-            day_percent = f"{round(float(cd + ref + ref_money + reinv + archive_dep) * .008, 5)} руб/день"
+            day_percent = f"{round(float(cd + ref + last_month_passive + ref_money + reinv + archive_dep) * .008, 5)} руб/день"
             if payments == 0:
                 day_percent = f"0 руб/день\n<u>Чтобы получать дивиденды, пополните баланс</u>"
 
@@ -772,19 +774,20 @@ async def wallet(message: types.Message):
                    f"📆 Профиль создан: {date}\n" \
                    f"🚀 Статус: {level_text} {text_status}\n" \
                    f"✨ Оплатил заранее: {advance_pay_message}\n" \
-                   f"🙋‍♂️ Лично приглашенные в этом месяце: {await db.get_count_ref(message.from_user.id, loop)} " \
-                   f"({await db.get_activate_count_ref(message.from_user.id, loop)})\n" \
                    f"👥 Лично приглашенные за всё время: {total_referrals['total']} " \
                    f"({total_referrals['activated']})\n" \
+                   f"🙋‍♂️ Лично приглашенные в этом месяце: {await db.get_count_ref(message.from_user.id, loop)} " \
+                   f"({await db.get_activate_count_ref(message.from_user.id, loop)})\n" \
+                   f"♻️ Повторно зашедшие рефералы: {last_month_active_count}\n" \
                    "Ваш депозит: 💰👇\n" \
                    "——————————————————\n" \
                    f"🏦 Общие накопления в системе дарения - {int(archive_dep)}₽\n" \
                    f"🎁 Системы дарения - {int(cd)}₽\n" \
-                   f"🤑 За приглашения - {int(ref)}₽\n" \
+                   f"🤑 За приглашения - {int(ref) + int(last_month_passive)}₽\n" \
                    f"😱 За инвестиции реферала - {int(ref_money)}₽\n" \
                    f"🪙 Вы реинвестировали - {int(reinv)}₽\n" \
                    "——————————————————\n" \
-                   f"💵 Общий депозит: {int(cd + ref + ref_money + reinv + archive_dep)}₽\n" \
+                   f"💵 Общий депозит: {int(cd + ref + last_month_passive + ref_money + reinv + archive_dep)}₽\n" \
                    f"💵 Пассив: {day_percent}!\n" \
                    f"💵 На вывод: {await db.get_gift_money(message.from_user.id, loop)}₽ \n" \
                    "( минимальная сумма вывода 1000₽ )"
