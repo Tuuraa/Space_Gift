@@ -1970,6 +1970,7 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=WithdrawMoneyFSM.CRYPT_CARD)
 async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
+    return
     async with state.proxy() as data:
         data["CRYPT_CARD"] = message.text
 
@@ -2050,6 +2051,7 @@ async def number_card(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=WithdrawMoneyFSM.DATA_USER)
 async def number_card(message: types.Message, state: FSMContext):
+    return
     async with lock:
         if message.text == "Отменить":
             await state.reset_state()
