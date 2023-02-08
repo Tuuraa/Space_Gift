@@ -219,10 +219,6 @@ async def cancel_capcha(callback: types.CallbackQuery):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[1])  # Взлет
 async def launch(message: types.Message):
-    user_advance_pay = await dbSystem.get_user_advance_payment(message.from_user.id, loop)
-    if user_advance_pay is None:
-        return
-    #TODO
     #return
     if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
         keyboard = types.InlineKeyboardMarkup().add(
@@ -778,8 +774,7 @@ async def wallet(message: types.Message):
                    f"📆 Профиль создан: {date}\n" \
                    f"🚀 Статус: {level_text} {text_status}\n" \
                    f"✨ Оплатил заранее: {advance_pay_message}\n" \
-                   f"👥 Лично приглашенные за всё время: {total_referrals['total']} " \
-                   f"({total_referrals['activated']})\n" \
+                   f"👥 Лично приглашенные за всё время: {total_referrals['total']}\n" \
                    f"🙋‍♂️ Лично приглашенные в этом месяце: {await db.get_count_ref(message.from_user.id, loop)} " \
                    f"({await db.get_activate_count_ref(message.from_user.id, loop)})\n" \
                    f"♻️ Повторно зашедшие рефералы: {last_month_active_count}\n" \
