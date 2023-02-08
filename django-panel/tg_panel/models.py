@@ -118,8 +118,8 @@ class TgUser(models.Model):
     percent_ref_money = models.FloatField(verbose_name='Заработок с рефералов', blank=True, null=True, editable=False)
     gift_money_invest = models.FloatField(verbose_name='Деньги на вывод с инвестиций', blank=True, null=True, editable=False)
     reinvest = models.FloatField(verbose_name='Реинвестирование с системы дарения', blank=True, null=True, editable=False)
-    archive_dep = models.FloatField(verbose_name='Архив с системы дарения', black=True, null=True)
-    last_month_refs = models.FloatField(blank=True, null=True)
+    archive_dep = models.FloatField(verbose_name='Архив с системы дарения', blank=True, null=True)
+    last_month_active = models.IntegerField(blank=True, null=True)
     last_month_ref_count = models.IntegerField(verbose_name='Рефералы с прошлого месяца', blank=True, null=True)
 
     def __str__(self):

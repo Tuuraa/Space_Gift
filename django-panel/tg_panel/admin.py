@@ -56,22 +56,22 @@ class TgUserAdmin(admin.ModelAdmin):
     get_widhdraws.short_description = "Вывод"
 
     def get_daily_income_gift(self, obj):
-        money = obj.amount_gift_money + obj.archive_dep + obj.activate_ref_count * 5000 + last_month_refs * 500
+        money = obj.amount_gift_money + obj.archive_dep + obj.activate_ref_count * 5000 + obj.last_month_active * 500
         money += obj.ref_money + obj.reinvest
         money *= 0.008
 
-        return f"{money} Руб."
+        return f"{money} руб/день"
 
     get_daily_income_gift.short_description = "Пассив"
 
     def get_daily_income_invest(self, obj):
         money = obj.depozit * 0.008
-        return f"{money} Руб."
+        return f"{money} руб/день"
 
     get_daily_income_invest.short_description = "Пассив с инвестиций"
 
     def total_depozit(self, obj):
-        money = obj.amount_gift_money + obj.archive_dep + obj.activate_ref_count * 5000 + last_month_refs * 500
+        money = obj.amount_gift_money + obj.archive_dep + obj.activate_ref_count * 5000 + obj.last_month_active * 500
         money += obj.ref_money + obj.reinvest
 
         return f"{money} Руб."
