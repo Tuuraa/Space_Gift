@@ -1601,6 +1601,9 @@ async def delete(message: types.Message):
 
 @dp.callback_query_handler(text="remove_money_invest")
 async def remove_money_invest(callback: types.CallbackQuery):
+    return await callback.answer(
+            "🚫 Вывод через бота временно ограничен",
+            show_alert=True)
     date = str(await db.get_last_withd(callback.from_user.id, loop))
     dt_to_datetime = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
     utc_now = pytz.utc.localize(datetime.datetime.utcnow())
@@ -1862,6 +1865,10 @@ async def remove_money_0_05(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(text="remove_money")
 async def remove_money(callback: types.CallbackQuery, state: FSMContext):
+    return await callback.answer(
+            "🚫 Вывод через бота временно ограничен",
+            show_alert=True)
+            
     async with state.proxy() as data:
         if data.get('IS_INVEST') is True:
             money = int(await db.get_gift_money_invest(callback.from_user.id, loop))
