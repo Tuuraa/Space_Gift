@@ -1601,6 +1601,7 @@ async def delete(message: types.Message):
 
 @dp.callback_query_handler(text="remove_money_invest")
 async def remove_money_invest(callback: types.CallbackQuery):
+    return
     return await callback.answer(
             "🚫 Вывод через бота временно ограничен",
             show_alert=True)
@@ -1856,6 +1857,7 @@ async def number_card(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(text="remove_money_0_05")
 async def remove_money_0_05(callback: types.CallbackQuery, state: FSMContext):
+    return
     async with state.proxy() as data:
         data["WITHDRAW_COMMISSION"] = config.COMMISSION_INVEST
         data['IS_INVEST'] = True
@@ -1865,10 +1867,6 @@ async def remove_money_0_05(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(text="remove_money")
 async def remove_money(callback: types.CallbackQuery, state: FSMContext):
-    return await callback.answer(
-            "🚫 Вывод через бота временно ограничен",
-            show_alert=True)
-            
     async with state.proxy() as data:
         if data.get('IS_INVEST') is True:
             money = int(await db.get_gift_money_invest(callback.from_user.id, loop))
@@ -1976,7 +1974,6 @@ async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=WithdrawMoneyFSM.CRYPT_CARD)
 async def withdraw_payrement_crypt(message: types.Message, state: FSMContext):
-    return
     async with state.proxy() as data:
         data["CRYPT_CARD"] = message.text
 
@@ -2057,7 +2054,6 @@ async def number_card(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=WithdrawMoneyFSM.DATA_USER)
 async def number_card(message: types.Message, state: FSMContext):
-    return
     async with lock:
         if message.text == "Отменить":
             await state.reset_state()
