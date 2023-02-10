@@ -1231,9 +1231,9 @@ async def decline_order(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(text="get_gift")
 async def get_gift(callback: types.CallbackQuery, state: FSMContext):
     #TODO
-    user_advance_pay = await dbSystem.get_user_advance_payment(callback.from_user.id, loop)
-    if user_advance_pay is None:
-        return
+    #user_advance_pay = await dbSystem.get_user_advance_payment(callback.from_user.id, loop)
+    #if user_advance_pay is None:
+    #    return
     #return
     async with lock:
         status = await db.get_status(callback.from_user.id, loop)
