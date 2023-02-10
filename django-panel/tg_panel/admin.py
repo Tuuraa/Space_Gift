@@ -42,11 +42,11 @@ class TgUserAdmin(admin.ModelAdmin):
     search_fields = ('user_id', 'name')
     list_filter = ('name', 'user_id', 'referrer_id')
     list_display = ('name', 'depozit', 'get_widhdraws', 'get_referrer', 'stats_link', 'count_ref')
-    readonly_fields = ('user_id', 'name', 'date', 'money', 'total_depozit', 'percent_ref_money', 'gift_money_invest',
+    readonly_fields = ('user_id', 'name', 'date', 'money', 'total_depozit', 'percent_ref_money',
                        'reinvest', 'get_daily_income_gift', 'get_daily_income_invest', 'date_now',
                        'link_name', 'now_depozit', 'first_dep')
 
-    exclude = ('last_withd', 'jump', 'gift_value', 'now_depozit', 'archive_dep', 'last_month_refs')
+    exclude = ('last_withd', 'jump', 'gift_value', 'now_depozit', 'last_month_refs')
 
     def get_widhdraws(self, obj):
         count = Withdraw.objects.filter(user_id=obj.user_id).count()
