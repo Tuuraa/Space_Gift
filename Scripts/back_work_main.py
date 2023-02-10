@@ -13,10 +13,10 @@ async def main():
     print('start')
     await asyncio.gather(
         worker(loop),
-        worker_percent(loop),
+        #worker_percent(loop),
         worker_clones(loop),
         #worker_jump(loop),
-        worker_verify_balance(loop),
+        #worker_verify_balance(loop),
     )
     print('end')
 
