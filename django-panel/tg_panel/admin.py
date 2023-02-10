@@ -2,7 +2,7 @@ import pytz
 import telebot
 from decimal import Decimal
 from django.contrib import admin
-from  django.contrib.auth.models  import  Group
+from django.contrib.auth.models import Group
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.db.models import Sum
@@ -14,7 +14,6 @@ from .forms import PeriodDateTimePicker
 from . import utils
 
 from datetime import datetime, date, timedelta, timezone
-
 
 HTML_TAGS = '''
 </br>
@@ -48,15 +47,15 @@ class TgUserAdmin(admin.ModelAdmin):
                        'link_name', 'now_depozit', 'first_dep')
 
     exclude = ('last_withd', 'jump', 'gift_value', 'now_depozit', 'archive_dep', 'last_month_refs')
-    
+
     def get_widhdraws(self, obj):
         count = Withdraw.objects.filter(user_id=obj.user_id).count()
         return format_html('<a href="/admin/tg_panel/withdraw/?user_id={}">{} Withdraws</a>', obj.user_id, count)
-    
+
     get_widhdraws.short_description = "Вывод"
 
     def get_daily_income_gift(self, obj):
-        money = obj.amount_gift_money + obj.archive_dep + obj.activate_ref_count * 5000 + obj.last_month_active * 500
+        money = obj.amount_gift_money + obj.archive_dep + obj.activate_ref_count * 5000 + obj.last_month_ref_count * 5000 + obj.last_month_active * 500
         money += obj.ref_money + obj.reinvest
         money *= 0.008
 
@@ -71,28 +70,31 @@ class TgUserAdmin(admin.ModelAdmin):
     get_daily_income_invest.short_description = "Пассив с инвестиций"
 
     def total_depozit(self, obj):
-        money = obj.amount_gift_money + obj.archive_dep + obj.activate_ref_count * 5000 + obj.last_month_active * 500
-        money += obj.ref_money + obj.reinvest
-
+        money = obj.amount_gift_money + \
+                obj.activate_ref_count * 5000 +\
+                obj.last_month_active * 500 +\
+                obj.last_month_ref_count * 5000 +\
+                obj.ref_money +\
+                obj.reinvest +\
+                obj.archive_dep
         return f"{money} Руб."
 
     total_depozit.short_description = 'Общий депозит'
 
-
     def get_referrer(self, obj):
         referrer = TgUser.objects.filter(user_id=obj.referrer_id)
-        
+
         if referrer.count() == 0:
             return format_html('-')
-        
+
         referrer = referrer[0]
         text_to_out = referrer.name or referrer.user_id
-        
+
         return format_html('<a href="/admin/tg_panel/tguser/{}/change/">Пригласивший: {}</a>', referrer.pk, text_to_out)
-    
+
     def stats_link(self, obj):
         return format_html(f'<a href="/admin/tg_panel/statistic/{obj.pk}/change/">Статистика</a>')
-    
+
     stats_link.short_description = "Статистика"
     get_referrer.short_description = "Пригласивший"
 
@@ -105,15 +107,17 @@ class PayAdmin(admin.ModelAdmin):
                 return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
             else:
                 return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
+
     user_link.short_description = 'Пользователь'
 
     search_fields = ('pay_id', 'user_id', 'pay_amount')
     list_display = ('pay_id', user_link, 'get_pay_amount', 'date', 'status')
     readonly_fields = ('pay_id', 'get_pay_amount', 'date', 'pay_type', 'user_id', 'cancel_id')
-    exclude = ('pay_amount', )
+    exclude = ('pay_amount',)
 
     def get_pay_amount(self, obj):
         return format_html(f'{obj.pay_amount} Руб.')
+
     get_pay_amount.short_description = 'Сумма'
 
     def has_add_permission(self, request):
@@ -134,7 +138,9 @@ class PayAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
         if obj.status == 'CANCELED':
-            bot.send_message(user.user_id, text=f'⛔️ Ваша заявка на пополнение №{obj.pay_id} была отменена администратором', parse_mode='html')
+            bot.send_message(user.user_id,
+                             text=f'⛔️ Ваша заявка на пополнение №{obj.pay_id} была отменена администратором',
+                             parse_mode='html')
             return
         elif obj.status == 'OPERATION_COMPLETED':
             if user.referrer_id is not None:
@@ -144,7 +150,8 @@ class PayAdmin(admin.ModelAdmin):
                     utc_now = pytz.utc.localize(datetime.utcnow())
                     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
-                    RefMoney.objects.create(user_id=user.user_id, ref_id=ref_user.user_id, money=ref_income, date=date_time_now)
+                    RefMoney.objects.create(user_id=user.user_id, ref_id=ref_user.user_id, money=ref_income,
+                                            date=date_time_now)
 
                     ref_user.money += Decimal(ref_income)
                     ref_user.percent_ref_money += ref_income
@@ -156,7 +163,9 @@ class PayAdmin(admin.ModelAdmin):
                         else:
                             user_name = f'{user.name} ({user.user_id})'
 
-                        bot.send_message(ref_user.user_id, text=f'Ваш реферал {user_name} пополнил баланс и вам подарили {int(ref_income)} RUB', parse_mode='html')
+                        bot.send_message(ref_user.user_id,
+                                         text=f'Ваш реферал {user_name} пополнил баланс и вам подарили {int(ref_income)} RUB',
+                                         parse_mode='html')
                     except Exception:
                         pass
             user.depozit += obj.pay_amount
@@ -165,16 +174,18 @@ class PayAdmin(admin.ModelAdmin):
             user.save()
 
             try:
-                bot.send_message(user.user_id, text=f"Платеж №{obj.pay_id} успешно выполнен. Ваш счет пополнен на {obj.pay_amount} руб.", parse_mode='html')
+                bot.send_message(user.user_id,
+                                 text=f"Платеж №{obj.pay_id} успешно выполнен. Ваш счет пополнен на {obj.pay_amount} руб.",
+                                 parse_mode='html')
             except Exception:
                 pass
 
             if user.status == 1 or int(user.planet) > 0:
-                #clones_count = int(obj.pay_amount / 5000)
-                #for clone in range(0, clones_count):
+                # clones_count = int(obj.pay_amount / 5000)
+                # for clone in range(0, clones_count):
                 #    Clones.objects.create(active=True)
 
-                count_ref = int(obj.pay_amount/10_000)
+                count_ref = int(obj.pay_amount / 10_000)
 
                 user.activate_ref_count += count_ref
                 user.count_ref += count_ref
@@ -189,6 +200,7 @@ class CryptPayAdmin(admin.ModelAdmin):
                 return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
             else:
                 return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
+
     user_link.short_description = 'Пользователь'
 
     search_fields = ('id', 'user_id', 'amount_rub')
@@ -198,10 +210,12 @@ class CryptPayAdmin(admin.ModelAdmin):
 
     def get_amount_rub(self, obj):
         return format_html(f'{int(obj.amount_rub)} руб')
+
     get_amount_rub.short_description = 'Сумма'
 
     def get_amount(self, obj):
         return format_html(f'{obj.amount} {obj.pay_type}')
+
     get_amount.short_description = 'Сумма в криптовалюте'
 
     def has_delete_permission(self, request, obj=None):
@@ -222,7 +236,8 @@ class CryptPayAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
         if obj.status == 'CANCELED':
-            bot.send_message(user.user_id, text=f'⛔️ Ваша заявка на пополнение №{obj.id} была отменена администратором', parse_mode='html')
+            bot.send_message(user.user_id, text=f'⛔️ Ваша заявка на пополнение №{obj.id} была отменена администратором',
+                             parse_mode='html')
             return
         elif obj.status == 'OPERATION_COMPLETED':
             if user.referrer_id is not None:
@@ -232,7 +247,8 @@ class CryptPayAdmin(admin.ModelAdmin):
                     utc_now = pytz.utc.localize(datetime.utcnow())
                     date_time_now = utc_now.astimezone(pytz.timezone("UTC"))
 
-                    RefMoney.objects.create(user_id=user.user_id, ref_id=ref_user.user_id, money=ref_income, date=date_time_now)
+                    RefMoney.objects.create(user_id=user.user_id, ref_id=ref_user.user_id, money=ref_income,
+                                            date=date_time_now)
 
                     ref_user.money += Decimal(ref_income)
                     ref_user.percent_ref_money += ref_income
@@ -244,23 +260,27 @@ class CryptPayAdmin(admin.ModelAdmin):
                         else:
                             user_name = f'{user.name} ({user.user_id})'
 
-                        bot.send_message(ref_user.user_id, text=f'Ваш реферал {user_name} пополнил баланс и вам подарили {int(ref_income)} RUB', parse_mode='html')
+                        bot.send_message(ref_user.user_id,
+                                         text=f'Ваш реферал {user_name} пополнил баланс и вам подарили {int(ref_income)} RUB',
+                                         parse_mode='html')
                     except Exception:
                         pass
             user.depozit += float(obj.amount_rub)
             user.money += obj.amount_rub
             user.save()
             try:
-                bot.send_message(user.user_id, text=f"Платеж №{obj.id} успешно выполнен. Ваш счет пополнен на {int(obj.amount_rub)} руб.", parse_mode='html')
+                bot.send_message(user.user_id,
+                                 text=f"Платеж №{obj.id} успешно выполнен. Ваш счет пополнен на {int(obj.amount_rub)} руб.",
+                                 parse_mode='html')
             except Exception:
                 pass
 
             if user.status == 1 or int(user.planet) > 0:
-                #clones_count = int(obj.amount_rub / 5000)
-                #for clone in range(0, clones_count):
+                # clones_count = int(obj.amount_rub / 5000)
+                # for clone in range(0, clones_count):
                 #    Clones.objects.create(active=True)
 
-                count_ref = int(obj.amount_rub/10_000)
+                count_ref = int(obj.amount_rub / 10_000)
 
                 user.activate_ref_count += count_ref
                 user.count_ref += count_ref
@@ -276,6 +296,7 @@ class WithdrawAdmin(admin.ModelAdmin):
                 return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">@{user.link_name}</a>')
             else:
                 return mark_safe(f'<a href="/admin/tg_panel/tguser/{user.id}/change/">{user.name} ({user.user_id})</a>')
+
     user_link.short_description = 'Пользователь'
 
     def has_change_permission(self, request, obj=None):
@@ -301,10 +322,11 @@ class WithdrawAdmin(admin.ModelAdmin):
             return f'{self.amount_crypt} {self.type_crypt}'
         elif self.type == 'bank':
             return f'{int(self.amount_commission)} RUB'
+
     sum.short_description = 'Сумма с комиссией'
 
     search_fields = ('user_id',)
-    readonly_fields = ('card', 'type', 'data', 'user_id', 'date', 'amount_commission', 'amount_crypt','type_crypt')
+    readonly_fields = ('card', 'type', 'data', 'user_id', 'date', 'amount_commission', 'amount_crypt', 'type_crypt')
     list_display = ('id', user_link, sum, 'card', 'type', 'data', 'status')
     list_filter = ('user_id', 'amount', 'card', 'type', 'data', ('date', DateRangeFilter),)
     exclude = ('amount',)
@@ -326,8 +348,10 @@ class StatAdmin(admin.ModelAdmin):
             end_date = datetime.strptime(request.GET['end_date'], "%Y-%m-%d")
             end_time = datetime.strptime(request.GET['end_time'], "%H:%M")
 
-            start_date_filter = datetime(year=start_date.year, month=start_date.month, day=start_date.day, hour=start_time.hour, minute=start_time.minute)
-            end_date_filter = datetime(year=end_date.year, month=end_date.month, day=end_date.day, hour=end_time.hour, minute=end_time.minute)
+            start_date_filter = datetime(year=start_date.year, month=start_date.month, day=start_date.day,
+                                         hour=start_time.hour, minute=start_time.minute)
+            end_date_filter = datetime(year=end_date.year, month=end_date.month, day=end_date.day, hour=end_time.hour,
+                                       minute=end_time.minute)
 
         if request.GET.get('standart_period'):
             end_date_filter = datetime.now(timezone.utc)
@@ -337,15 +361,15 @@ class StatAdmin(admin.ModelAdmin):
 
         if start_date_filter is None:
             start_date_filter = datetime.now(timezone.utc)
-        
+
         if end_date_filter is None:
             end_date_filter = datetime.now(timezone.utc)
 
         period_picker_data = {
-            'end_date': end_date_filter.strftime("%Y-%m-%d"),'end_time': end_date_filter.strftime("%H:%M"),
-            'start_date': start_date_filter.strftime("%Y-%m-%d"),'start_time': start_date_filter.strftime("%H:%M"),
+            'end_date': end_date_filter.strftime("%Y-%m-%d"), 'end_time': end_date_filter.strftime("%H:%M"),
+            'start_date': start_date_filter.strftime("%Y-%m-%d"), 'start_time': start_date_filter.strftime("%H:%M"),
         }
-        
+
         context['period_picker'] = PeriodDateTimePicker(period_picker_data)
 
         return super().change_view(request, object_id, form_url, extra_context=context)
@@ -364,26 +388,28 @@ class AllStatsAdmin(admin.ModelAdmin):
             end_date = datetime.strptime(request.POST['end_date'], "%Y-%m-%d")
             end_time = datetime.strptime(request.POST['end_time'], "%H:%M")
 
-            start_date_filter = datetime(year=start_date.year, month=start_date.month, day=start_date.day, hour=start_time.hour, minute=start_time.minute)
-            end_date_filter = datetime(year=end_date.year, month=end_date.month, day=end_date.day, hour=end_time.hour, minute=end_time.minute)
+            start_date_filter = datetime(year=start_date.year, month=start_date.month, day=start_date.day,
+                                         hour=start_time.hour, minute=start_time.minute)
+            end_date_filter = datetime(year=end_date.year, month=end_date.month, day=end_date.day, hour=end_time.hour,
+                                       minute=end_time.minute)
 
         if request.POST.get('standart_period'):
             end_date_filter = datetime.now(timezone.utc)
             start_date_filter = STANDART_DATE_PICKER[request.POST['standart_period']]()
 
         context = utils.get_all_stats(start_date_filter, end_date_filter)
-        
+
         if start_date_filter is None:
             start_date_filter = datetime.now(timezone.utc)
-        
+
         if end_date_filter is None:
             end_date_filter = datetime.now(timezone.utc)
 
         period_picker_data = {
-            'end_date': end_date_filter.strftime("%Y-%m-%d"),'end_time': end_date_filter.strftime("%H:%M"),
-            'start_date': start_date_filter.strftime("%Y-%m-%d"),'start_time': start_date_filter.strftime("%H:%M"),
+            'end_date': end_date_filter.strftime("%Y-%m-%d"), 'end_time': end_date_filter.strftime("%H:%M"),
+            'start_date': start_date_filter.strftime("%Y-%m-%d"), 'start_time': start_date_filter.strftime("%H:%M"),
         }
-        
+
         context['period_picker'] = PeriodDateTimePicker(period_picker_data)
         return super().changelist_view(request, extra_context=context)
 
@@ -402,6 +428,7 @@ class PostAdmin(admin.ModelAdmin):
             return format_html(f'<a href="{obj.button_url}" target="_blank">{obj.button_text}</a>')
         else:
             return ''
+
     html_button.short_description = 'Кнопка'
 
     def get_fieldsets(self, request, obj=None):
@@ -433,18 +460,18 @@ class PostAdmin(admin.ModelAdmin):
             return base_fieldsets
         else:
             return [
-                (
-                    'Общая информация',
-                    {
-                        'fields': [
-                            'created',
-                            'status'
-                        ] + (
-                            ['amount_of_receivers'] if obj.status == 'done' else []
-                        )
-                    }
-                ),
-            ] + base_fieldsets
+                       (
+                           'Общая информация',
+                           {
+                               'fields': [
+                                             'created',
+                                             'status'
+                                         ] + (
+                                             ['amount_of_receivers'] if obj.status == 'done' else []
+                                         )
+                           }
+                       ),
+                   ] + base_fieldsets
 
     def get_readonly_fields(self, request, obj=None):
         return ['created', 'status', 'amount_of_receivers']
