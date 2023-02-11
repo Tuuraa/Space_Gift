@@ -30,8 +30,8 @@ async def worker_jump(ref_id, bot, loop):
         refs = await dbUser.count_referrer_list(ref_id, loop)
         is_normal_count = True
 
-        if len(refs) < 4:
-            return
+        # if len(refs) < 4:
+        #     return
 
         total_tree_ref_count_info = await count_total_referrals_by_user(ref_id, 7, loop)
         total_tree_ref_count_activated = total_tree_ref_count_info['activated']

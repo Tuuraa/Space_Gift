@@ -118,7 +118,7 @@ class ManagerUsersDataBase:
             await cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
             result = await cursor.fetchall()
             user = result[0]
-            return not (int(user[8]) != 0 or int(user[11]) != 0 or int(user[14]) != 0)
+            return int(user[8]) != 0 or int(user[11]) != 0 or int(user[14]) != 0
 
     async def exists_user(self, user_id, loop):
         connection, cursor = await async_connect_to_mysql(loop)
@@ -964,9 +964,13 @@ class ManagerUsersDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute(
-                "SELECT `activate_ref_count` FROM `users` WHERE `user_id` = %s",
+                "SELECT count(*) FROM `users` WHERE `referrer_id` = %s and (planet != '0' or status = 1)",
                 (user_id,),
             )
+            # await cursor.execute(
+            #     "SELECT `activate_ref_count` FROM `users` WHERE `user_id` = %s",
+            #     (user_id,),
+            # )
             result = (await cursor.fetchall())[0][0]
             return result
 
@@ -1202,7 +1206,7 @@ class ManagerUsersDataBase:
         connection, cursor = await async_connect_to_mysql(loop)
         async with connection.cursor() as cursor:
             await cursor.execute(
-                "SELECT * FROM `users` WHERE `referrer_id` = %s and date >= '2023-02-02' ", (ref_id,)
+                "SELECT user_id FROM `users` WHERE `referrer_id` = %s and date >= '2023-02-02'", (ref_id,)
             )
             result = await cursor.fetchall()
             return result

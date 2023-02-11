@@ -36,6 +36,7 @@ async def worker_verify_balance(loop):
             users = await dbUser.get_users(loop)
             config = db.ConfigDBManager().get()
 
+            count = 0
             for user in users:
                 if user[0] is None:
                     continue
@@ -67,11 +68,11 @@ async def worker_verify_balance(loop):
 
                 user_active_ref_count = 0
                 for ref in user_ref:
-                    is_active = await dbUser.is_first_user_topup(ref[1], loop)
+                    is_active = await dbUser.is_first_user_topup(ref, loop)
                     if is_active:
                         user_active_ref_count += 1
 
-                if user_active_ref_count > activate_ref_count:
+                if user_active_ref_count != activate_ref_count:
                     #await bot.send_message(
                     #    config.errors_group_id,
                     #    f'У пользователя {user_name} {activate_ref_count} активированных рефералов. Правильное количество {user_active_ref_count}',
@@ -80,6 +81,9 @@ async def worker_verify_balance(loop):
                         f'У пользователя {user_name} {activate_ref_count} активированных рефералов.'
                         f' Правильное количество {user_active_ref_count}'
                     )
+                    count += 1
+
+            print(count)
 
             end_program_time = time.time()
             print(f'BACKGROUND LAP VERIFY TIME: {end_program_time - start_program_time}')
@@ -88,6 +92,8 @@ async def worker_verify_balance(loop):
             print(f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Verify Balance')
             #config = db.ConfigDBManager().get()
             #await bot.send_message(config.errors_group_id, f'{exc_type}, {exc_obj}, {exc_tb}, {exc_tb.tb_lineno} from Verify Baance')
+
+        print('finish')
 
         await asyncio.sleep(60 * 60)
 

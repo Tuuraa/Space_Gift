@@ -11,6 +11,8 @@ from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 # from arrow import utcnow
 
+from back_verify_balance import worker_verify_balance
+
 import datetime
 import PayManager
 import config
@@ -245,7 +247,7 @@ async def launch(message: types.Message):
         await message.answer("Поздравляю, ты красавчик!")
         return
 
-    elif (status[0] == 1 or int(planet[0]) > 0 or dep >= 5000) and user_topups > 0:
+    elif (status[0] == 1 or int(planet[0]) > 0 or dep >= 5000): #and user_topups > 0:
         await logic.get_launch(bot, message.from_user.id, loop)
         return
 
@@ -713,7 +715,7 @@ async def space_go(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.text == message_handlers_commands[0])  # Кошелек
 async def wallet(message: types.Message):
-    #await worker_jump(message.from_user.id, message.from_user.id, loop)
+    #await worker_verify_balance(loop)
     if not (await is_user_subbed(bot, config.SUB_GROUP, message.from_user.id)):
         keyboard = types.InlineKeyboardMarkup().add(
             types.InlineKeyboardButton(
@@ -1221,6 +1223,7 @@ async def amount_crypt(message, state: FSMContext, user_id=None):
 async def accept_order(callback: types.CallbackQuery, state: FSMContext):
     # await dbPay.change_status_for_cancel("CANCELED", pay[5], "CREDIT", loop)
     ...
+
 
 @dp.callback_query_handler(text="cancel_pay")
 async def decline_order(callback: types.CallbackQuery, state: FSMContext):

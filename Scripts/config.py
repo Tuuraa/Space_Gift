@@ -23,7 +23,7 @@ ADMINS = [855151774]
 
 SUB_GROUP = -1001878641715
 
-DEBUG = False
+DEBUG = True
 
 if DEBUG:
     PATH = 'C:/Users/Tura/PycharmProjects/Space_Gift'
